@@ -1,0 +1,50 @@
+import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
+const links = [
+  { to: '/', label: 'Özet' },
+  { to: '/yemek', label: 'Yemek' },
+  { to: '/antrenman', label: 'Antrenman' },
+  { to: '/supplement', label: 'Supplement' },
+  { to: '/kilo', label: 'Kilo' },
+  { to: '/ilerleme', label: 'İlerleme' },
+  { to: '/profil', label: 'Profil' },
+]
+
+export default function Layout() {
+  const { profile, signOut, demo } = useAuth()
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand">Fit<span>App</span></div>
+        {links.map((l) => (
+          <NavLink key={l.to} to={l.to} end={l.to === '/'} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+            {l.label}
+          </NavLink>
+        ))}
+        <div style={{ marginTop: 'auto' }}>
+          {demo && <div className="chip" style={{ marginBottom: 10 }}>Demo mod (local)</div>}
+          <div className="sub" style={{ marginBottom: 8 }}>{profile?.display_name}</div>
+          <button className="btn ghost" onClick={signOut}>Çıkış</button>
+        </div>
+      </aside>
+      <main className="main">
+        <div className="mobile-top">
+          <div className="brand">Fit<span>App</span></div>
+          <div className="row">
+            <NavLink className="chip" to="/profil">Profil</NavLink>
+            <button className="btn ghost" onClick={signOut}>Çıkış</button>
+          </div>
+        </div>
+        <Outlet />
+      </main>
+      <nav className="bottom-nav">
+        {links.slice(0, 5).map((l) => (
+          <NavLink key={l.to} to={l.to} end={l.to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}>
+            {l.label}
+          </NavLink>
+        ))}
+      </nav>
+    </div>
+  )
+}
