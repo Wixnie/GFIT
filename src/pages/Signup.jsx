@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import Footer from '../components/Footer'
 
 export default function Signup() {
   const { session, signUp, demo } = useAuth()
@@ -29,9 +30,9 @@ export default function Signup() {
   }
 
   return (
-    <div className="auth-wrap">
-      <form className="card auth-card" onSubmit={submit}>
-        <div className="brand">Fit<span>App</span></div>
+    <div className="auth-wrap" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <form className="card auth-card" onSubmit={submit} style={{ marginTop: 'auto', marginBottom: 'auto' }}>
+        <div className="brand">GFIT</div>
         <h1>Hesap oluştur</h1>
         <p className="sub">Hedefler varsayılan olarak 2600 kcal / 170g protein.</p>
         <div className="field">
@@ -53,6 +54,7 @@ export default function Signup() {
           Zaten hesabın var mı? <Link to="/giris">Giriş yap</Link>
         </p>
       </form>
+      <Footer />
     </div>
   )
 }
