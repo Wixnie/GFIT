@@ -21,6 +21,8 @@ import MesafeliSatisSozlesmesi from './pages/MesafeliSatisSozlesmesi'
 import IadePolitikasi from './pages/IadePolitikasi'
 import Landing from './pages/Landing'
 import Paywall from './pages/Paywall'
+import Onboarding from './pages/Onboarding'
+import Social from './pages/Social'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
@@ -46,6 +48,7 @@ export default function App() {
           <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
           <Route path="/kayit" element={<PublicOnly><Signup /></PublicOnly>} />
           <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
+          <Route path="/onboarding" element={<Onboarding />} />
 
           {/* Tanıtım & Yasal Sayfalar */}
           <Route path="/" element={<Landing />} />
@@ -67,6 +70,7 @@ export default function App() {
             <Route path="/ai-koc" element={<AICoach />} />
             <Route path="/etiket-okuyucu" element={<FoodScanner />} />
             <Route path="/pazar" element={<Market />} />
+            <Route path="/sosyal" element={<Social />} />
             <Route path="/profil" element={<Profile />} />
             <Route path="/premium" element={<Paywall />} />
           </Route>

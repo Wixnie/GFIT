@@ -62,7 +62,7 @@ export default function Landing() {
           Kalori ve makro sayımı, akordiyon set takipli antrenmanlar ve performans grafikleri tek bir yerde.
         </p>
 
-        <Link to="/kayit" className="btn" style={{ padding: '14px 32px', fontSize: '16px', display: 'inline-block' }}>
+        <Link to="/onboarding" className="btn" style={{ padding: '14px 32px', fontSize: '16px', display: 'inline-block' }}>
           Ücretsiz Başla
         </Link>
 

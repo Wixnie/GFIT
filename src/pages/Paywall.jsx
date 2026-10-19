@@ -4,19 +4,41 @@ import { Link } from 'react-router-dom'
 export default function Paywall() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState(null)
+  const [paymentStep, setPaymentStep] = useState('card') // 'card', 'verify', 'success'
+  const [cardData, setCardData] = useState({
+    holderName: '',
+    cardNumber: '',
+    expiry: '',
+    cvv: ''
+  })
+  const [smsCode, setSmsCode] = useState('')
 
   async function handleRestorePurchases() {
     setLoading(true)
     setMessage(null)
     try {
       await new Promise((resolve) => setTimeout(resolve, 1200))
-      setMessage('Satın alımlarınız kontrol edildi. Aktif abonelikleriniz yenilendi.')
+      const isPro = localStorage.getItem('gfit_is_pro')
+      if (isPro === 'true') {
+        setMessage('Satın alımlarınız kontrol edildi. Aktif PRO aboneliğiniz bulundu.')
+      } else {
+        setMessage('Aktif abonelik bulunamadı.')
+      }
     } catch (err) {
       console.error('Hata:', err)
       setMessage('Satın alımlar kontrol edilirken bir hata oluştu.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const getPlanPrice = (plan) => {
+    if (plan === 'yearly') return '₺500'
+    if (plan === 'monthly') return '₺149'
+    if (plan === 'duo') return '₺750'
+    return ''
   }
 
   return (
@@ -71,7 +93,7 @@ export default function Paywall() {
               <li>1 Hafta Ücretsiz Deneme</li>
             </ul>
           </div>
-          <button className="btn" style={{ width: '100%' }}>Yıllık Avantajı Seç</button>
+          <button className="btn" style={{ width: '100%' }} onClick={() => { setSelectedPlan('yearly'); setShowPaymentModal(true) }}>Yıllık Avantajı Seç</button>
         </div>
       </div>
 
@@ -139,6 +161,163 @@ export default function Paywall() {
           </p>
         )}
       </div>
+
+      {/* 3D Secure Payment Modal */}
+      {showPaymentModal && (
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 400, width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0 }}>Güvenli Ödeme</h3>
+                <button className="btn ghost" onClick={() => { setShowPaymentModal(false); setPaymentStep('card') }}>✕</button>
+              </div>
+
+              {paymentStep === 'card' && (
+                <>
+                  <div style={{ marginBottom: 16 }}>
+                    <p className="sub" style={{ marginBottom: 8 }}>
+                      {selectedPlan === 'yearly' ? 'Yıllık PRO - ₺500' : 'Aylık PRO - ₺149'}
+                    </p>
+                  </div>
+
+                  <div className="field">
+                    <label>Kart Sahibi</label>
+                    <input
+                      className="input"
+                      value={cardData.holderName}
+                      onChange={(e) => setCardData({ ...cardData, holderName: e.target.value })}
+                      placeholder="Ad Soyad"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>Kart Numarası</label>
+                    <input
+                      className="input"
+                      value={cardData.cardNumber}
+                      onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value })}
+                      placeholder="1234 5678 9012 3456"
+                      maxLength={19}
+                    />
+                  </div>
+
+                  <div className="row">
+                    <div className="field" style={{ flex: 1 }}>
+                      <label>SKT (AA/YY)</label>
+                      <input
+                        className="input"
+                        value={cardData.expiry}
+                        onChange={(e) => setCardData({ ...cardData, expiry: e.target.value })}
+                        placeholder="12/25"
+                        maxLength={5}
+                      />
+                    </div>
+                    <div className="field" style={{ flex: 1 }}>
+                      <label>CVV</label>
+                      <input
+                        className="input"
+                        value={cardData.cvv}
+                        onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
+                        placeholder="123"
+                        maxLength={3}
+                        type="password"
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    className="btn" 
+                    style={{ width: '100%' }}
+                    onClick={() => setPaymentStep('verify')}
+                    disabled={loading}
+                  >
+                    {loading ? 'İşleniyor...' : 'Ödemeyi Tamamla'}
+                  </button>
+
+                  <div style={{ marginTop: 16, textAlign: 'center' }}>
+                    <p className="sub" style={{ fontSize: '11px' }}>
+                      🔒 3D Secure ile güvendesiniz
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {paymentStep === 'verify' && (
+                <>
+                  <div style={{ textAlign: 'center', padding: '24px', background: '#0B101B', borderRadius: '12px', marginBottom: 16 }}>
+                    <div style={{ fontSize: '48px', marginBottom: 16 }}>📱</div>
+                    <h4 style={{ margin: '0 0 8px' }}>SMS Doğrulama</h4>
+                    <p className="sub">
+                      Bankanızın gönderdiği doğrulama kodunu girin
+                    </p>
+                  </div>
+
+                  <div className="field">
+                    <label>Doğrulama Kodu</label>
+                    <input
+                      className="input"
+                      value={smsCode}
+                      onChange={(e) => setSmsCode(e.target.value)}
+                      placeholder="6 haneli kod"
+                      maxLength={6}
+                      style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '8px' }}
+                    />
+                  </div>
+
+                  <button 
+                    className="btn" 
+                    style={{ width: '100%' }}
+                    onClick={() => {
+                      setLoading(true)
+                      setTimeout(() => {
+                        setLoading(false)
+                        setPaymentStep('success')
+                        localStorage.setItem('gfit_is_pro', 'true')
+                      }, 1500)
+                    }}
+                    disabled={loading || smsCode.length !== 6}
+                  >
+                    {loading ? 'Doğrulanıyor...' : 'Doğrula'}
+                  </button>
+                </>
+              )}
+
+              {paymentStep === 'success' && (
+                <>
+                  <div style={{ textAlign: 'center', padding: '32px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', marginBottom: 16 }}>
+                    <div style={{ fontSize: '64px', marginBottom: 16 }}>🎉</div>
+                    <h3 style={{ margin: '0 0 8px', color: '#10B981' }}>Ödeme Başarılı!</h3>
+                    <p className="sub">
+                      GFIT PRO özellikleri aktif edildi
+                    </p>
+                  </div>
+
+                  <button 
+                    className="btn" 
+                    style={{ width: '100%' }}
+                    onClick={() => {
+                      setShowPaymentModal(false)
+                      setPaymentStep('card')
+                      window.location.href = '/dashboard'
+                    }}
+                  >
+                    Devam Et
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

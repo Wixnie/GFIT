@@ -6,12 +6,16 @@ import { todayISO } from '../lib/dates'
 import DayNav from '../components/DayNav'
 
 const POPULAR_BRANDS = [
-  { id: 'hiq-whey', name: 'HIQ Whey Protein', type: 'protein', dose: '30g', timing: 'Antrenman sonrası', hint: 'Kas gelişimi için' },
-  { id: 'bigjoy-creatine', name: 'Bigjoy Creatine', type: 'creatine', dose: '5g', timing: 'Antrenman öncesi/sonrası', hint: 'Güç ve performans' },
-  { id: 'ocean-magnesium', name: 'Ocean Magnesium', type: 'magnesium', dose: '400mg', timing: 'Yatmadan önce', hint: 'Kas gevşemesi ve uyku' },
-  { id: 'hiq-bcaa', name: 'HIQ BCAA', type: 'bcaa', dose: '10g', timing: 'Antrenman sırasında', hint: 'Kas koruması' },
-  { id: 'omega-3', name: 'Omega-3', type: 'omega', dose: '1000mg', timing: 'Yemeklerle', hint: 'Kalp ve beyin sağlığı' },
-  { id: 'vitamin-d', name: 'Vitamin D3', type: 'vitamin', dose: '2000IU', timing: 'Sabah', hint: 'Bağışıklık ve kemik' },
+  { id: 'hiq-whey', name: 'HIQ High Pro+ Whey', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Kas gelisimi icin', brand: 'HIQ' },
+  { id: 'proteinocean-whey', name: 'Proteinocean Whey Protein', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Gunluk protein ihtiyaci', brand: 'Proteinocean' },
+  { id: 'proteinocean-creatine', name: 'Proteinocean Creatine', type: 'creatine', dose: '5g (1 silme)', timing: 'Antrenman oncesi/sonrasi', hint: 'Guc ve performans', brand: 'Proteinocean' },
+  { id: 'bigjoy-whey', name: 'Bigjoy Bigwhey Classic', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Klasik whey', brand: 'Bigjoy' },
+  { id: 'bigjoy-creatine', name: 'Bigjoy Creatine Monohydrate', type: 'creatine', dose: '5g (1 silme)', timing: 'Antrenman oncesi/sonrasi', hint: 'Guc ve performans', brand: 'Bigjoy' },
+  { id: 'ocean-magnesium', name: 'Ocean Extramag Uclu Magnezyum', type: 'magnesium', dose: '2 tablet', timing: 'Yatmadan 1 saat once', hint: 'Kas gevsemesi ve uyku', brand: 'Ocean' },
+  { id: 'ocean-d3k2', name: 'Ocean Vitamin D3K2', type: 'vitamin', dose: '3 damla', timing: 'Yagli ogunle', hint: 'Bagisiklik ve kemik', brand: 'Ocean' },
+  { id: 'hardline-zma', name: 'Hardline ZMA', type: 'recovery', dose: '3 kapsul', timing: 'Yatmadan once', hint: 'Iyilesme ve uyku', brand: 'Hardline' },
+  { id: 'solgar-whey', name: 'Solgar Whey Protein', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Kalite whey', brand: 'Solgar' },
+  { id: 'natures-omega', name: 'Nature Supreme Omega-3', type: 'omega', dose: '2 kapsul', timing: 'Yemeklerle', hint: 'Kalp ve beyin sagligi', brand: 'Nature Supreme' },
 ]
 
 export default function Supplements() {
@@ -23,6 +27,8 @@ export default function Supplements() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [newSupplement, setNewSupplement] = useState({ name: '', dose: '', timing: '' })
   const [customSupplements, setCustomSupplements] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeTab, setActiveTab] = useState('brands') // 'brands', 'scanner', 'manual'
 
   async function refresh() {
     setLoading(true)
@@ -77,6 +83,11 @@ export default function Supplements() {
   const done = taken.length
   const total = allSupplements.length
 
+  const filteredBrands = POPULAR_BRANDS.filter(s => 
+    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    s.brand.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
     <div className="app-container">
       <div className="page-head">
@@ -102,15 +113,81 @@ export default function Supplements() {
       )}
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ margin: 0 }}>Popüler Markalar</h3>
-          <button className="btn ghost" onClick={() => setShowAddForm(!showAddForm)} style={{ fontSize: '13px' }}>
-            {showAddForm ? 'İptal' : '+ Manuel Ekle'}
+        {/* Tabs */}
+        <div className="row" style={{ marginBottom: 16 }}>
+          <button
+            className={`btn ${activeTab === 'brands' ? '' : 'ghost'}`}
+            onClick={() => setActiveTab('brands')}
+            style={{ flex: 1 }}
+          >
+            🔍 Popüler Markalar
+          </button>
+          <button
+            className={`btn ${activeTab === 'scanner' ? '' : 'ghost'}`}
+            onClick={() => setActiveTab('scanner')}
+            style={{ flex: 1 }}
+          >
+            📸 Kutuyu AI ile Tara
+          </button>
+          <button
+            className={`btn ${activeTab === 'manual' ? '' : 'ghost'}`}
+            onClick={() => setActiveTab('manual')}
+            style={{ flex: 1 }}
+          >
+            ✍️ Elle Ekle
           </button>
         </div>
 
-        {showAddForm && (
-          <div style={{ marginBottom: 16, padding: '16px', background: '#0B101B', borderRadius: '12px' }}>
+        {activeTab === 'brands' && (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <input
+                className="input"
+                placeholder="Ara: oce, hiq, big, har, sol, kre, mag, omeg..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {filteredBrands.map((s) => {
+              const on = taken.includes(s.id)
+              return (
+                <button
+                  key={s.id}
+                  className={`check-item ${on ? 'done' : ''}`}
+                  onClick={() => onToggle(s.id)}
+                  disabled={loading}
+                  style={{ width: '100%', background: 'transparent', border: 0, cursor: loading ? 'not-allowed' : 'pointer', textAlign: 'left' }}
+                >
+                  <div>
+                    <strong>{s.name}</strong>
+                    <div className="sub">{s.brand} · {s.hint}</div>
+                    <div className="sub" style={{ fontSize: '12px', marginTop: 4 }}>
+                      Doz: {s.dose} · {s.timing}
+                    </div>
+                  </div>
+                  <span className={`check ${on ? 'on' : ''}`}>{on ? '✓' : ''}</span>
+                </button>
+              )
+            })}
+          </>
+        )}
+
+        {activeTab === 'scanner' && (
+          <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
+            <div style={{ fontSize: '48px', marginBottom: 16 }}>📸</div>
+            <h3 style={{ margin: '0 0 8px' }}>Supplement Kutusunu Tara</h3>
+            <p className="sub" style={{ marginBottom: 16 }}>
+              AI ile supplement kutusunun fotoğrafını çek ve otomatik bilgileri al
+            </p>
+            <p className="sub" style={{ color: '#F59E0B' }}>
+              PRO özellik - Yakında
+            </p>
+          </div>
+        )}
+
+        {activeTab === 'manual' && (
+          <div style={{ padding: '16px', background: '#0B101B', borderRadius: '12px' }}>
             <div className="field">
               <label>Supplement Adı</label>
               <input
@@ -143,28 +220,6 @@ export default function Supplements() {
             </button>
           </div>
         )}
-
-        {allSupplements.map((s) => {
-          const on = taken.includes(s.id)
-          return (
-            <button
-              key={s.id}
-              className={`check-item ${on ? 'done' : ''}`}
-              onClick={() => onToggle(s.id)}
-              disabled={loading}
-              style={{ width: '100%', background: 'transparent', border: 0, cursor: loading ? 'not-allowed' : 'pointer', textAlign: 'left' }}
-            >
-              <div>
-                <strong>{s.name}</strong>
-                <div className="sub">{s.hint}</div>
-                <div className="sub" style={{ fontSize: '12px', marginTop: 4 }}>
-                  Doz: {s.dose} · {s.timing}
-                </div>
-              </div>
-              <span className={`check ${on ? 'on' : ''}`}>{on ? '✓' : ''}</span>
-            </button>
-          )
-        })}
       </div>
 
       {/* Bilgi Kartı */}

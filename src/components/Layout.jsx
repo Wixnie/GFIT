@@ -12,6 +12,7 @@ const links = [
   { to: '/ai-koc', label: 'AI Koç' },
   { to: '/etiket-okuyucu', label: 'Etiket' },
   { to: '/pazar', label: 'Pazar' },
+  { to: '/sosyal', label: 'Sosyal' },
   { to: '/premium', label: 'Premium' },
   { to: '/profil', label: 'Profil' },
 ]
@@ -49,8 +50,8 @@ export default function Layout() {
             {l.label}
           </NavLink>
         ))}
-        <NavLink to="/premium" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Premium
+        <NavLink to="/sosyal" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Sosyal
         </NavLink>
       </nav>
     </div>

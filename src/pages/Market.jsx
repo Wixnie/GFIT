@@ -3,81 +3,101 @@ import { useState } from 'react'
 const affiliateProducts = [
   {
     id: 'hiq-whey-2kg',
-    name: 'HIQ Whey Protein 2kg',
+    name: 'HIQ High Pro+ 2 Kg (Whey Protein)',
     brand: 'HIQ Nutrition',
-    price: 899,
-    originalPrice: 1200,
+    price: 5499,
+    originalPrice: 6100,
     image: '🥛',
     rating: 4.8,
     reviews: 234,
     discountCode: 'GFIT10',
     category: 'protein',
-    description: 'Yüksek kaliteli whey protein izolat ve konsantre karışımı. Hızlı emilim ve sindirim.'
+    description: 'Yüksek kaliteli whey protein izolat ve konsantre karışımı. Hızlı emilim ve sindirim.',
+    link: 'https://takehiq.com'
   },
   {
-    id: 'bigjoy-creatine',
-    name: 'Bigjoy Creatine Monohydrate 500g',
-    brand: 'Bigjoy',
-    price: 299,
-    originalPrice: 350,
+    id: 'proteinocean-whey-1.6kg',
+    name: 'Proteinocean Whey Protein 1.6 Kg',
+    brand: 'Proteinocean',
+    price: 2199,
+    originalPrice: 2800,
+    image: '🥛',
+    rating: 4.7,
+    reviews: 189,
+    discountCode: 'GFIT10',
+    category: 'protein',
+    description: 'Yüksek kaliteli whey protein. Günlük protein ihtiyacınız için ideal.',
+    link: 'https://proteinocean.com'
+  },
+  {
+    id: 'proteinocean-creatine-300g',
+    name: 'Proteinocean Creatine 300g',
+    brand: 'Proteinocean',
+    price: 649,
+    originalPrice: 800,
     image: '💪',
     rating: 4.9,
+    reviews: 156,
+    discountCode: 'GFIT10',
+    category: 'creatine',
+    description: 'Saf kreatin monohidrat. Güç ve performans artışı için ideal.',
+    link: 'https://proteinocean.com'
+  },
+  {
+    id: 'bigjoy-whey-2.3kg',
+    name: 'Bigjoy Bigwhey Classic 2.3 Kg',
+    brand: 'Bigjoy',
+    price: 3299,
+    originalPrice: 4000,
+    image: '🥛',
+    rating: 4.6,
+    reviews: 423,
+    discountCode: 'GFIT10',
+    category: 'protein',
+    description: 'Klasik whey protein konsantre. Mükemmel tat ve çözünürlük.',
+    link: 'https://www.bigjoy.com.tr'
+  },
+  {
+    id: 'bigjoy-creatine-500g',
+    name: 'Bigjoy Creatine Monohydrate 500g',
+    brand: 'Bigjoy',
+    price: 899,
+    originalPrice: 1200,
+    image: '�',
+    rating: 4.8,
     reviews: 567,
     discountCode: 'GFIT10',
     category: 'creatine',
-    description: 'Saf kreatin monohidrat. Güç ve performans artışı için ideal.'
+    description: 'Saf kreatin monohidrat. Güç ve performans artışı için ideal.',
+    link: 'https://www.bigjoy.com.tr'
   },
   {
-    id: 'ocean-magnesium',
-    name: 'Ocean Magnesium Bisglycinate 120 kapsül',
+    id: 'ocean-magnesium-60',
+    name: 'Ocean Extramag Üçlü Magnezyum 60 Tablet',
     brand: 'Ocean',
-    price: 199,
-    originalPrice: 250,
+    price: 690,
+    originalPrice: 850,
     image: '💊',
     rating: 4.7,
     reviews: 189,
     discountCode: 'GFIT10',
     category: 'minerals',
-    description: 'Yüksek biyoyararlanım oranlı magnezyum. Kas gevşemesi ve uyku kalitesi için.'
+    description: 'Üçlü magnezyum formülü. Kas gevşemesi ve uyku kalitesi için.',
+    link: 'https://www.orzax.com.tr'
   },
   {
-    id: 'omega-3-1000',
-    name: 'Omega-3 Fish Oil 1000mg 180 kapsül',
-    brand: 'Various',
-    price: 249,
-    originalPrice: 300,
-    image: '🐟',
-    rating: 4.6,
-    reviews: 423,
-    discountCode: 'GFIT10',
-    category: 'omega',
-    description: 'Yüksek EPA/DHA içeriği. Kalp ve beyin sağlığı için essansiyel yağ asitleri.'
-  },
-  {
-    id: 'vitamin-d3',
-    name: 'Vitamin D3 5000IU 120 kapsül',
-    brand: 'Various',
-    price: 149,
-    originalPrice: 180,
+    id: 'ocean-d3k2',
+    name: 'Ocean Vitamin D3K2 Damla',
+    brand: 'Ocean',
+    price: 390,
+    originalPrice: 500,
     image: '☀️',
     rating: 4.8,
     reviews: 312,
     discountCode: 'GFIT10',
     category: 'vitamins',
-    description: 'Yüksek doz D3 vitamini. Bağışıklık sistemi ve kemik sağlığı için.'
-  },
-  {
-    id: 'zma-complex',
-    name: 'ZMA Complex 90 kapsül',
-    brand: 'Various',
-    price: 179,
-    originalPrice: 220,
-    image: '🌙',
-    rating: 4.5,
-    reviews: 156,
-    discountCode: 'GFIT10',
-    category: 'recovery',
-    description: 'Çinko, magnezyum ve B6 vitamini kompleksi. İyileşme ve uyku kalitesi için.'
+    description: 'D3 ve K2 vitamini kombinasyonu. Kemik ve bağışıklık sağlığı için.',
+    link: 'https://www.orzax.com.tr'
   }
 ]
 
@@ -198,7 +218,15 @@ export default function Market() {
               </p>
             </div>
 
-            <button className="btn" style={{ width: '100%' }}>
+            <button 
+              className="btn" 
+              style={{ width: '100%' }}
+              onClick={() => {
+                navigator.clipboard.writeText(product.discountCode)
+                alert(`${product.discountCode} kodu kopyalandı!`)
+                window.open(product.link, '_blank', 'noopener,noreferrer')
+              }}
+            >
               Satın Al
             </button>
           </div>
@@ -207,48 +235,71 @@ export default function Market() {
 
       {/* Recipe Book Modal */}
       {showRecipeBook && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div className="card" style={{ maxWidth: 500, maxHeight: '80vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0 }}>Fit Tarifler Kitabı</h3>
-              <button className="btn ghost" onClick={() => setShowRecipeBook(false)}>✕</button>
-            </div>
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 600, maxHeight: '80vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0 }}>Fit Tarifler Kitabı</h3>
+                <button className="btn ghost" onClick={() => setShowRecipeBook(false)}>✕</button>
+              </div>
 
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ fontSize: '64px', marginBottom: 16 }}>📖</div>
-              <h2 style={{ color: '#F59E0B', marginBottom: 8 }}>₺99</h2>
-              <p className="sub">Tek seferlik ödeme</p>
-            </div>
+              <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <div style={{ fontSize: '64px', marginBottom: 16 }}>📖</div>
+                <h2 style={{ color: '#F59E0B', marginBottom: 8 }}>₺99</h2>
+                <p className="sub">Tek seferlik ödeme</p>
+              </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <h4 style={{ marginBottom: 12 }}>İçerik:</h4>
-              <ul style={{ color: '#94A3B8', lineHeight: 2, paddingLeft: '18px' }}>
-                <li>50+ sağlıklı tarif</li>
-                <li>Makro hesaplamaları</li>
-                <li>Alışveriş listeleri</li>
-                <li>Adım adım tarifler</li>
-                <li>Fotoğraflı anlatım</li>
-                <li>Vegan ve gluten-free seçenekler</li>
-              </ul>
-            </div>
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ marginBottom: 12 }}>İçerik:</h4>
+                <ul style={{ color: '#94A3B8', lineHeight: 2, paddingLeft: '18px' }}>
+                  <li>15+ yüksek proteinli fit tarif</li>
+                  <li>Gramaj ve makro hesaplamaları</li>
+                  <li>Adım adım hazırlanış talimatları</li>
+                  <li>Fotoğraflı anlatım</li>
+                  <li>Kolay ulaşılan malzemeler</li>
+                </ul>
+              </div>
 
-            <button className="btn" style={{ width: '100%', marginBottom: 12 }}>
-              Satın Al
-            </button>
-            <button className="btn ghost" onClick={() => setShowRecipeBook(false)} style={{ width: '100%' }}>
-              İptal
-            </button>
+              <div style={{ marginBottom: 24, padding: '16px', background: '#0B101B', borderRadius: '8px' }}>
+                <h4 style={{ marginBottom: 12, color: '#F59E0B' }}>Örnek Tarifler:</h4>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                  <div style={{ padding: '8px', background: '#141C2E', borderRadius: '4px' }}>
+                    <strong>Yulaflı Omlet</strong>
+                    <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>350 kcal · 25g protein</p>
+                  </div>
+                  <div style={{ padding: '8px', background: '#141C2E', borderRadius: '4px' }}>
+                    <strong>Fit Tavuk Tantuni</strong>
+                    <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>420 kcal · 40g protein</p>
+                  </div>
+                  <div style={{ padding: '8px', background: '#141C2E', borderRadius: '4px' }}>
+                    <strong>Protein Pankek</strong>
+                    <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>280 kcal · 22g protein</p>
+                  </div>
+                  <div style={{ padding: '8px', background: '#141C2E', borderRadius: '4px' }}>
+                    <strong>Fit Brownie</strong>
+                    <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>180 kcal · 12g protein</p>
+                  </div>
+                </div>
+              </div>
+
+              <button className="btn" style={{ width: '100%', marginBottom: 12 }}>
+                Satın Al (₺99)
+              </button>
+              <button className="btn ghost" onClick={() => setShowRecipeBook(false)} style={{ width: '100%' }}>
+                İptal
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

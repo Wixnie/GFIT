@@ -11,12 +11,60 @@ export default function FoodScanner() {
   const [error, setError] = useState(null)
   const [scanResult, setScanResult] = useState(null)
   const [scanCount, setScanCount] = useState(0)
+  const [manualBarcode, setManualBarcode] = useState('')
+  const [isScanning, setIsScanning] = useState(false)
   const scannerRef = useRef(null)
+  const [cameraError, setCameraError] = useState(null)
 
   useEffect(() => {
     const count = localStorage.getItem('gfit_scan_count')
     setScanCount(count ? parseInt(count) : 0)
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(console.error)
+      }
+    }
   }, [])
+
+  const startCamera = async () => {
+    setCameraError(null)
+    setIsScanning(true)
+    
+    try {
+      const html5QrCode = new Html5Qrcode("reader")
+      scannerRef.current = html5QrCode
+      
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } }
+      
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        async (decodedText) => {
+          await handleBarcodeScan(decodedText)
+          await html5QrCode.stop()
+          setIsScanning(false)
+        },
+        (errorMessage) => {
+          // Scan errors are normal, ignore
+        }
+      )
+    } catch (err) {
+      console.error('Kamera başlatma hatası:', err)
+      setCameraError('Kamera izni reddedildi veya kamera bulunamadı.')
+      setIsScanning(false)
+    }
+  }
+
+  const stopCamera = async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop()
+      } catch (err) {
+        console.error('Kamera durdurma hatası:', err)
+      }
+    }
+    setIsScanning(false)
+  }
 
   const handleBarcodeScan = async (decodedText) => {
     if (scanCount >= 3 && !profile?.is_pro) {
@@ -27,32 +75,63 @@ export default function FoodScanner() {
     setLoading(true)
     setError(null)
     try {
-      // Mock OpenFoodFacts API call - In production, this would call the real API
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Mock response - In production, this would be from OpenFoodFacts
-      const mockData = {
-        name: 'Ürün Bulundu (Mock)',
-        calories: 250,
-        protein: 15,
-        carbs: 30,
-        fat: 8,
-        sugar: 12,
-        sodium: 500,
-        healthScore: 75,
-        allergens: []
+      // Check Supabase food_cache first
+      const cached = JSON.parse(localStorage.getItem('gfit_food_cache') || '[]')
+      const cachedProduct = cached.find(item => item.barcode === decodedText)
+      
+      if (cachedProduct) {
+        setScanResult(cachedProduct)
+        return
       }
 
-      setScanResult(mockData)
-      const newCount = scanCount + 1
-      setScanCount(newCount)
-      localStorage.setItem('gfit_scan_count', newCount.toString())
+      // Fetch from OpenFoodFacts API
+      const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${decodedText}.json`)
+      const data = await response.json()
+      
+      if (data.status === 1 && data.product) {
+        const product = data.product
+        const nutrition = product.nutriments || {}
+        
+        const scanData = {
+          barcode: decodedText,
+          name: product.product_name || 'Ürün',
+          calories: nutrition['energy-kcal_100g'] || nutrition['energy-kcal'] || 0,
+          protein: nutrition.proteins_100g || 0,
+          carbs: nutrition.carbohydrates_100g || 0,
+          fat: nutrition.fat_100g || 0,
+          sugar: nutrition.sugars_100g || 0,
+          sodium: nutrition.sodium_100g || 0,
+          healthScore: nutrition.nutriscore_score ? 100 - nutrition.nutriscore_score * 10 : 70,
+          allergens: product.allergens_tags || []
+        }
+
+        setScanResult(scanData)
+        
+        // Cache the result
+        cached.push({
+          ...scanData,
+          cached_at: new Date().toISOString()
+        })
+        localStorage.setItem('gfit_food_cache', JSON.stringify(cached))
+        
+        const newCount = scanCount + 1
+        setScanCount(newCount)
+        localStorage.setItem('gfit_scan_count', newCount.toString())
+      } else {
+        setError('Ürün bulunamadı. Lütfen barkodu kontrol edin veya manuel girin.')
+      }
     } catch (err) {
       console.error('Barkod taranırken hata:', err)
-      setError('Barkod taranırken hata oluştu')
+      setError('Barkod taranırken hata oluştu. İnternet bağlantınızı kontrol edin.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleManualBarcode = async (e) => {
+    e.preventDefault()
+    if (!manualBarcode.trim()) return
+    await handleBarcodeScan(manualBarcode.trim())
   }
 
   const handlePhotoUpload = async (e) => {
@@ -178,14 +257,51 @@ export default function FoodScanner() {
       {scanMode === 'barcode' ? (
         <div className="card" style={{ marginBottom: 16 }}>
           <h3 style={{ marginTop: 0, marginBottom: 16 }}>Barkod Tara</h3>
-          <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
-            <div style={{ fontSize: '48px', marginBottom: 16 }}>📷</div>
-            <p className="sub" style={{ marginBottom: 16 }}>
-              Kamerayı barkoda yönlendirin
-            </p>
-            <button className="btn" onClick={() => handleBarcodeScan('mock-barcode')} disabled={loading}>
-              {loading ? 'Taranıyor...' : 'Demo Tarama Başlat'}
-            </button>
+          
+          {cameraError && (
+            <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', borderColor: '#EF4444' }}>
+              <p className="sub">{cameraError}</p>
+            </div>
+          )}
+
+          {!isScanning ? (
+            <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
+              <div style={{ fontSize: '48px', marginBottom: 16 }}>📷</div>
+              <p className="sub" style={{ marginBottom: 16 }}>
+                Kamerayı barkoda yönlendirin
+              </p>
+              <button className="btn" onClick={startCamera} disabled={loading}>
+                {loading ? 'Başlatılıyor...' : 'Kamerayı Aç'}
+              </button>
+            </div>
+          ) : (
+            <div style={{ position: 'relative' }}>
+              <div id="reader" style={{ width: '100%', minHeight: '300px', background: '#000', borderRadius: '12px', overflow: 'hidden' }}></div>
+              <button 
+                className="btn danger" 
+                onClick={stopCamera}
+                style={{ marginTop: 16, width: '100%' }}
+              >
+                Durdur
+              </button>
+            </div>
+          )}
+
+          {/* Manual Barcode Input */}
+          <div style={{ marginTop: 16 }}>
+            <p className="sub" style={{ marginBottom: 8 }}>Barkod manuel girin:</p>
+            <form onSubmit={handleManualBarcode} className="row">
+              <input
+                className="input"
+                style={{ flex: 1 }}
+                placeholder="Örn: 8000500206784"
+                value={manualBarcode}
+                onChange={(e) => setManualBarcode(e.target.value)}
+              />
+              <button className="btn" type="submit" disabled={loading}>
+                Ara
+              </button>
+            </form>
           </div>
         </div>
       ) : (
