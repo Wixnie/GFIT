@@ -10,7 +10,7 @@ import { sumLogs } from '../lib/suggestions'
 
 export default function Food() {
   const { session, profile } = useAuth()
-  const p = {  ...PERSONAL_DEFAULTS, ...profile }
+  const p = { ...PERSONAL_DEFAULTS, ...profile }
   const [date, setDate] = useState(todayISO())
   const [logs, setLogs] = useState([])
   const [q, setQ] = useState('')
@@ -84,7 +84,7 @@ export default function Food() {
   }
 
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">Türk yemek veritabanı</p>

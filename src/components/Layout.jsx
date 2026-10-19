@@ -2,12 +2,13 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const links = [
-  { to: '/', label: 'Özet' },
+  { to: '/dashboard', label: 'Özet' },
   { to: '/yemek', label: 'Yemek' },
   { to: '/antrenman', label: 'Antrenman' },
   { to: '/supplement', label: 'Supplement' },
   { to: '/kilo', label: 'Kilo' },
   { to: '/ilerleme', label: 'İlerleme' },
+  { to: '/premium', label: 'Premium' },
   { to: '/profil', label: 'Profil' },
 ]
 
@@ -16,9 +17,9 @@ export default function Layout() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand">Fit<span>App</span></div>
+        <div className="brand">GFIT</div>
         {links.map((l) => (
-          <NavLink key={l.to} to={l.to} end={l.to === '/'} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+          <NavLink key={l.to} to={l.to} end={l.to === '/dashboard'} className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             {l.label}
           </NavLink>
         ))}
@@ -30,7 +31,7 @@ export default function Layout() {
       </aside>
       <main className="main">
         <div className="mobile-top">
-          <div className="brand">Fit<span>App</span></div>
+          <div className="brand">GFIT</div>
           <div className="row">
             <NavLink className="chip" to="/profil">Profil</NavLink>
             <button className="btn ghost" onClick={signOut}>Çıkış</button>
@@ -40,10 +41,13 @@ export default function Layout() {
       </main>
       <nav className="bottom-nav">
         {links.slice(0, 5).map((l) => (
-          <NavLink key={l.to} to={l.to} end={l.to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}>
+          <NavLink key={l.to} to={l.to} end={l.to === '/dashboard'} className={({ isActive }) => (isActive ? 'active' : '')}>
             {l.label}
           </NavLink>
         ))}
+        <NavLink to="/premium" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Premium
+        </NavLink>
       </nav>
     </div>
   )

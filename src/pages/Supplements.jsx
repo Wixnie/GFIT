@@ -49,7 +49,7 @@ export default function Supplements() {
   const total = SUPPLEMENTS.length
 
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">{done}/{total} tamamlandı</p>

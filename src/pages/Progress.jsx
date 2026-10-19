@@ -24,7 +24,7 @@ export default function Progress() {
   }, [foods])
 
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">Son 3 hafta</p>
@@ -42,7 +42,7 @@ export default function Progress() {
                 <XAxis dataKey="day" tick={{ fill: '#8b9788', fontSize: 11 }} />
                 <YAxis tick={{ fill: '#8b9788', fontSize: 11 }} />
                 <Tooltip />
-                <Bar dataKey="calories" fill="#c8f542" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="calories" fill="#F59E0B" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : <p className="sub">Henüz yemek kaydı yok.</p>}
@@ -55,7 +55,7 @@ export default function Progress() {
                 <XAxis dataKey="day" hide />
                 <YAxis tick={{ fill: '#8b9788', fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="protein" stroke="#7ee0b0" strokeWidth={3} />
+                <Line type="monotone" dataKey="protein" stroke="#F59E0B" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           ) : <p className="sub">Protein grafiği için kayıt ekle.</p>}
@@ -68,7 +68,7 @@ export default function Progress() {
                 <XAxis dataKey="logged_on" hide />
                 <YAxis domain={['dataMin - 1', 'dataMax + 1']} tick={{ fill: '#8b9788', fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="weight_kg" stroke="#7ec8ff" strokeWidth={3} />
+                <Line type="monotone" dataKey="weight_kg" stroke="#F59E0B" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           ) : <p className="sub">Kilo sayfasından en az iki tartı ekle.</p>}

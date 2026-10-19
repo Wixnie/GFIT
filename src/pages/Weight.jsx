@@ -46,7 +46,7 @@ export default function Weight() {
   }
 
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">Günlük tartı</p>

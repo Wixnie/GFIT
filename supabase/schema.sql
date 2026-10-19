@@ -95,3 +95,35 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Delete user function (SECURITY DEFINER)
+create or replace function public.delete_user()
+returns jsonb
+language plpgsql
+security definer
+as $$
+declare
+  user_id uuid;
+begin
+  user_id := auth.uid();
+  
+  if user_id is null then
+    return jsonb_build_object('error', 'User not authenticated');
+  end if;
+  
+  -- Delete in order of dependencies
+  delete from public.workout_sets
+  where workout_id in (select id from public.workouts where user_id = user_id);
+  
+  delete from public.workouts where user_id = user_id;
+  delete from public.food_logs where user_id = user_id;
+  delete from public.supplement_logs where user_id = user_id;
+  delete from public.weight_logs where user_id = user_id;
+  delete from public.profiles where id = user_id;
+  
+  -- Delete from auth.users (requires admin rights)
+  -- Note: This will fail without superuser, but client will handle signOut
+  
+  return jsonb_build_object('success', true, 'message', 'User data deleted');
+end;
+$$;

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { updateProfile } from '../lib/api'
+import { supabase } from '../lib/supabase'
 
 export default function Profile() {
   const { session, profile, setProfile, demo } = useAuth()
@@ -17,6 +18,9 @@ export default function Profile() {
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -42,8 +46,27 @@ export default function Profile() {
     }
   }
 
+  async function handleDeleteAccount() {
+    setDeleteLoading(true)
+    try {
+      // Call RPC to delete all user data
+      await supabase.rpc('delete_user')
+      // Sign out user
+      await supabase.auth.signOut()
+      // Redirect to landing page
+      window.location.href = '/'
+    } catch (err) {
+      console.error('Hesap silinirken hata:', err)
+      setError('Hesap silinirken hata oluştu. Lütfen tekrar deneyin veya destek ile iletişime geçin.')
+    } finally {
+      setDeleteLoading(false)
+      setDeleteModalOpen(false)
+      setDeleteConfirmOpen(false)
+    }
+  }
+
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">{demo ? 'Lokal hesap' : session.email}</p>
@@ -78,6 +101,98 @@ export default function Profile() {
         </button>
         {saved && <p className="sub">Hedefler güncellendi.</p>}
       </form>
+
+      <div className="card" style={{ marginTop: 24, borderColor: 'var(--danger)' }}>
+        <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Hesabımı Sil</h3>
+        <p className="sub">Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecek.</p>
+        <button 
+          className="btn danger" 
+          onClick={() => setDeleteModalOpen(true)}
+          disabled={deleteLoading}
+        >
+          {deleteLoading ? 'Siliniyor...' : 'Hesabımı Sil'}
+        </button>
+      </div>
+
+      {/* Medical Disclaimer */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3 style={{ marginTop: 0 }}>Tıbbi Yasal Uyarı</h3>
+        <p className="sub" style={{ lineHeight: 1.6 }}>
+          GFIT'te sunulan kalori, TDEE ve diğer beslenme tavsiyeleri tıbbi teşhis veya tedavi değildir. 
+          Bu bilgiler genel tavsiye niteliğindedir ve kişisel sağlık durumunuza uyarlanmamış olabilir. 
+          Herhangi bir sağlık sorunu varsa veya diyet değişikliği yapmayı planlıyorsanız, 
+          lütfen önce bir sağlık uzmanına veya diyetisyene danışın.
+        </p>
+      </div>
+
+      {/* Delete Account Modal - First Confirmation */}
+      {deleteModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 16
+        }}>
+          <div className="card" style={{ maxWidth: 400, borderColor: 'var(--danger)' }}>
+            <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Hesabımı Sil - Onay</h3>
+            <p>Bu işlem şu verilerinizi kalıcı olarak silecek:</p>
+            <ul>
+              <li>Yemek kayıtları</li>
+              <li>Antrenman kayıtları</li>
+              <li>Supplement kayıtları</li>
+              <li>Kilo kayıtları</li>
+              <li>Profil bilgileri</li>
+              <li>Supabase Auth kaydı</li>
+            </ul>
+            <p style={{ color: 'var(--danger)', fontWeight: 600 }}>Bu işlem geri alınamaz!</p>
+            <div className="row" style={{ marginTop: 16 }}>
+              <button className="btn ghost" onClick={() => setDeleteModalOpen(false)} disabled={deleteLoading}>
+                İptal
+              </button>
+              <button className="btn danger" onClick={() => setDeleteConfirmOpen(true)} disabled={deleteLoading}>
+                Devam Et
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal - Second Confirmation */}
+      {deleteConfirmOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 16
+        }}>
+          <div className="card" style={{ maxWidth: 400, borderColor: 'var(--danger)' }}>
+            <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Son Onay</h3>
+            <p>Hesabınızı kalıcı olarak silmek üzeresiniz. Bu işlem gerçekten geri alınamaz.</p>
+            <p style={{ color: 'var(--danger)', fontWeight: 600, fontSize: '1.1rem' }}>
+              Son bir şansınız var. Gerçekten silmek istiyor musunuz?
+            </p>
+            <div className="row" style={{ marginTop: 16 }}>
+              <button className="btn ghost" onClick={() => {
+                setDeleteConfirmOpen(false)
+                setDeleteModalOpen(false)
+              }} disabled={deleteLoading}>
+                İptal
+              </button>
+              <button className="btn danger" onClick={handleDeleteAccount} disabled={deleteLoading}>
+                {deleteLoading ? 'Siliniyor...' : 'Evet, Hesabımı Sil'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

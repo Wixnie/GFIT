@@ -113,7 +113,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">Merhaba {p.display_name}</p>

@@ -80,7 +80,7 @@ export default function Workout() {
   const templates = PROGRAMS.filter((p) => p.split === filter)
 
   return (
-    <div>
+    <div className="app-container">
       <div className="page-head">
         <div>
           <p className="sub">Hazır şablonlar + kişisel Upper/Lower</p>
