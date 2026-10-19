@@ -1,0 +1,28 @@
+{
+  "appId": "com.gfit.app",
+  "appName": "GFIT",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#0B101B",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "androidSpinnerStyle": "large",
+      "iosSpinnerStyle": "large",
+      "spinnerColor": "#F59E0B"
+    },
+    "StatusBar": {
+      "style": "DARK"
+    },
+    "SafeArea": {
+      "config": {
+        "background": "#0B101B"
+      }
+    }
+  }
+}

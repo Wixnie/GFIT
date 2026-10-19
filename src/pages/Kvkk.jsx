@@ -43,7 +43,7 @@ export default function Kvkk() {
           </ul>
           
           <h3>6. İletişim</h3>
-          <p>Haklarınızı kullanmak veya KVKK ile ilgili sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer" target="_blank">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
+          <p>Haklarınızı kullanmak veya KVKK ile ilgili sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
         </div>
       </div>
     </div>

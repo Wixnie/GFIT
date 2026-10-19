@@ -34,6 +34,8 @@ export default function Dashboard() {
   const [active, setActive] = useState(null)
   const [draft, setDraft] = useState([])
   const [busy, setBusy] = useState(false)
+  const [xp, setXp] = useState(0)
+  const [streak, setStreak] = useState(0)
 
   async function refresh() {
     const [food, wo, supps, wt] = await Promise.all([
@@ -48,6 +50,12 @@ export default function Dashboard() {
     setWeights(wt)
     const todayW = wt.find((row) => row.logged_on === date)
     if (todayW) setKg(todayW.weight_kg)
+
+    // Load gamification data
+    const savedXp = localStorage.getItem('gfit_xp')
+    const savedStreak = localStorage.getItem('gfit_streak')
+    setXp(savedXp ? parseInt(savedXp) : 0)
+    setStreak(savedStreak ? parseInt(savedStreak) : 0)
   }
 
   useEffect(() => {
@@ -62,6 +70,16 @@ export default function Dashboard() {
     return FOODS.filter((f) => f.name.toLocaleLowerCase('tr').includes(s)).slice(0, 6)
   }, [q])
   const latestWeight = weights.length ? weights[weights.length - 1] : null
+
+  // Calculate rank based on XP
+  const getRank = (xp) => {
+    if (xp >= 1000) return { name: 'GOLD', color: '#FFD700', next: 1000 }
+    if (xp >= 500) return { name: 'SILVER', color: '#C0C0C0', next: 500 }
+    return { name: 'BRONZE', color: '#CD7F32', next: 0 }
+  }
+
+  const rank = getRank(xp)
+  const xpProgress = rank.next > 0 ? (xp % rank.next) / rank.next * 100 : 100
 
   async function saveFood(food) {
     const macros = macrosForGrams(food, Number(grams) || 100)
@@ -106,6 +124,10 @@ export default function Dashboard() {
         })),
       })
       setActive(null)
+      // Add XP for workout
+      const newXp = xp + 100
+      setXp(newXp)
+      localStorage.setItem('gfit_xp', newXp.toString())
       await refresh()
     } finally {
       setBusy(false)
@@ -116,10 +138,40 @@ export default function Dashboard() {
     <div className="app-container">
       <div className="page-head">
         <div>
-          <p className="sub">Merhaba {p.display_name}</p>
-          <h1>Bugünün özeti</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <p className="sub">Merhaba {p.display_name}</p>
+            <span className="chip" style={{ background: rank.color, color: '#111', border: 'none' }}>
+              {rank.name}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h1>Bugünün özeti</h1>
+            <span style={{ fontSize: '20px' }}>🔥 {streak}</span>
+          </div>
         </div>
         <DayNav date={date} onChange={setDate} />
+      </div>
+
+      {/* XP Progress Bar */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <span className="sub">XP Seviyesi</span>
+          <span style={{ fontWeight: 600, color: '#F59E0B' }}>{xp} XP</span>
+        </div>
+        <div style={{ background: '#0B101B', borderRadius: '12px', padding: '8px' }}>
+          <div
+            style={{
+              height: '24px',
+              background: '#F59E0B',
+              borderRadius: '8px',
+              width: `${xpProgress}%`,
+              transition: 'width 0.5s ease'
+            }}
+          />
+        </div>
+        <p className="sub" style={{ marginTop: 8, fontSize: '12px' }}>
+          Sonraki seviye: {rank.next > 0 ? rank.next - (xp % rank.next) : 'Maksimum'} XP
+        </p>
       </div>
 
       <div className="grid grid-4" style={{ marginBottom: 16 }}>

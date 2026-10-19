@@ -52,7 +52,7 @@ export default function GizlilikPolitikasi() {
           </ul>
           
           <h3>8. İletişim</h3>
-          <p>Sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer" target="_blank">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
+          <p>Sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
         </div>
       </div>
     </div>

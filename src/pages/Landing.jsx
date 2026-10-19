@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 
 export default function Landing() {
   const [openFaq, setOpenFaq] = useState(null)
@@ -7,146 +7,101 @@ export default function Landing() {
   const faqs = [
     {
       q: 'GFIT ücretsiz mi?',
-      a: 'Evet, GFIT temel özellikleri ücretsiz olarak sunar. Premium özellikler için ücretli planlar mevcuttur.'
+      a: 'Temel kalori takibi, yemek günlüğü ve antrenman şablonlarını tamamen ücretsiz kullanabilirsiniz.',
     },
     {
       q: 'Verilerim güvende mi?',
-      a: 'Evet, tüm verileriniz Supabase ile şifreli olarak saklanır ve KVKK gerekliliklerine uygun şekilde korunur.'
+      a: 'Tüm verileriniz Supabase altyapısında şifrelenir ve KVKK standartlarına uygun olarak saklanır.',
     },
     {
-      q: 'Hangi özellikler ücretsiz?',
-      a: 'Kalori/makro takibi, antrenman kaydı, supplement takibi, kilo takibi ve temel özellikler ücretsizdir.'
+      q: 'Hangi antrenman programları var?',
+      a: 'Upper/Lower ve PPL gibi kanıtlanmış hipertrofi şablonları hazır olarak sunulur.',
+    },
+    {
+      q: 'Barkod tarama nasıl çalışır?',
+      a: 'Ücretsiz kullanıcılar günde 3 barkod tarama hakkına sahiptir. PRO kullanıcılar sınırsız tarama yapabilir.',
+    },
+    {
+      q: 'AI etiket analizi nedir?',
+      a: 'Yemek fotoğraflarını yükleyerek yapay zeka ile besin değerlerini analiz edebilirsiniz. Ücretsiz kullanıcılar günde 3 hak alır.',
+    },
+    {
+      q: 'PRO\'ya geçmek zorunda mıyım?',
+      a: 'Hayır. Temel özellikler her zaman ücretsiz kalır. PRO, sınırsız özellikler ve AI analizleri için opsiyoneldir.',
+    },
+    {
+      q: 'İade politikası nedir?',
+      a: 'İlk 7 gün içinde memnun kalmazsanız, tam para iadesi talep edebilirsiniz.',
     },
     {
       q: 'Mobil uygulama var mı?',
-      a: 'Evet, GFIT mobil-first tasarım sunar ve PWA olarak mobil cihazlarda natif uygulama gibi çalışır.'
+      a: 'Evet, GFIT PWA olarak çalışır ve herhangi bir indirme gerektirmeden mobil cihazlarda kullabilirsiniz.',
     },
-    {
-      q: 'Offline çalışır mı?',
-      a: 'Evet, PWA desteği sayesinde internet olmadan da verilerinizi görüntüleyebilir ve kaydedebilirsiniz.'
-    },
-    {
-      q: 'Hesabımı nasıl silebilirim?',
-      a: 'Profil sayfasından "Hesabımı Sil" butonunu kullanarak tüm verilerinizi kalıcı olarak silebilirsiniz.'
-    }
   ]
 
-  const toggleFaq = (index) => {
-    setOpenFaq(openFaq === index ? null : index)
-  }
-
   return (
-    <div className="app-container" style={{ padding: 0 }}>
-      {/* Hero Section */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0B101B 0%, #1a1f35 100%)',
-        padding: '60px 24px',
-        textAlign: 'center',
-        minHeight: '60vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <h1 style={{
-          fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-          margin: '0 0 16px',
-          background: 'linear-gradient(135deg, #F59E0B 0%, #d97706 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          fontFamily: 'Syne, sans-serif',
-          letterSpacing: '-0.04em'
-        }}>
+    <div style={{ backgroundColor: '#0B101B', color: '#EEF3EA', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <header style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '26px', fontWeight: 800, color: '#F59E0B' }}>
           GFIT
+        </div>
+        <Link to="/giris" className="btn ghost" style={{ padding: '8px 18px', fontSize: '14px' }}>
+          Giriş Yap
+        </Link>
+      </header>
+
+      <main style={{ flex: 1, maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '60px 20px', textAlign: 'center' }}>
+        <div className="chip" style={{ color: '#F59E0B', borderColor: '#F59E0B', display: 'inline-block', marginBottom: '16px' }}>
+          AKILLI FITNESS & BESLENME
+        </div>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: 'clamp(34px, 5vw, 52px)', fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.03em' }}>
+          Hedeflerine Ulaşmanın <br />
+          <span style={{ color: '#F59E0B' }}>En Sade ve Hızlı Yolu</span>
         </h1>
-        <p style={{
-          fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-          color: 'var(--muted)',
-          marginBottom: 32,
-          maxWidth: '500px'
-        }}>
-          Fitness hedeflerinizi takip edin, gelişiminizi görün. Türk yemek veritabanı, antrenman programları ve daha fazlası.
+        <p style={{ color: '#8B9788', fontSize: '16px', maxWidth: '600px', margin: '0 auto 32px' }}>
+          Kalori ve makro sayımı, akordiyon set takipli antrenmanlar ve performans grafikleri tek bir yerde.
         </p>
-        <Link to="/kayit" className="btn" style={{
-          padding: '16px 32px',
-          fontSize: '1.1rem',
-          borderRadius: '12px',
-          display: 'inline-block'
-        }}>
+
+        <Link to="/kayit" className="btn" style={{ padding: '14px 32px', fontSize: '16px', display: 'inline-block' }}>
           Ücretsiz Başla
         </Link>
-      </div>
 
-      {/* FAQ Section */}
-      <div className="card" style={{ margin: '32px 16px', maxWidth: '640px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <h2 style={{ marginTop: 0, marginBottom: 24 }}>Sıkça Sorulan Sorular</h2>
-        {faqs.map((faq, index) => (
-          <div key={index} style={{ marginBottom: 16 }}>
-            <button
-              onClick={() => toggleFaq(index)}
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                background: 'transparent',
-                border: '1px solid var(--line)',
-                borderRadius: '12px',
-                padding: '16px',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <span style={{ fontWeight: 600 }}>{faq.q}</span>
-              <span style={{ fontSize: '20px', color: 'var(--lime)' }}>
-                {openFaq === index ? '−' : '+'}
-              </span>
-            </button>
-            {openFaq === index && (
-              <div style={{
-                padding: '16px',
-                background: 'var(--card-2)',
-                borderRadius: '0 0 12px 12px',
-                borderTop: '1px solid var(--line)',
-                marginTop: '-1px',
-                color: 'var(--muted)',
-                lineHeight: 1.6
-              }}>
-                {faq.a}
+        <div style={{ marginTop: '70px', textAlign: 'left', maxWidth: '700px', margin: '70px auto 0' }}>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: '22px', textAlign: 'center', marginBottom: '20px' }}>
+            Sıkça Sorulan Sorular
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {faqs.map((f, i) => (
+              <div
+                key={i}
+                className="card"
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={{ cursor: 'pointer', padding: '14px 18px' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <strong style={{ fontSize: '14px' }}>{f.q}</strong>
+                  <span style={{ color: '#F59E0B' }}>{openFaq === i ? '−' : '+'}</span>
+                </div>
+                {openFaq === i && (
+                  <p style={{ color: '#8B9788', fontSize: '13px', margin: '8px 0 0', lineHeight: 1.5 }}>
+                    {f.a}
+                  </p>
+                )}
               </div>
-            )}
+            ))}
           </div>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <footer style={{
-        padding: '32px 24px',
-        borderTop: '1px solid var(--line)',
-        marginTop: 48,
-        textAlign: 'center'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap', marginBottom: 16 }}>
-          <Link to="/gizlilik-politikasi" style={{ color: 'var(--muted)', textDecoration: 'none', transition: 'color 0.2s' }}>
-            Gizlilik Politikası
-          </Link>
-          <Link to="/kullanim-kosullari" style={{ color: 'var(--muted)', textDecoration: 'none', transition: 'color 0.2s' }}>
-            Kullanım Koşulları
-          </Link>
-          <Link to="/mesafeli-satis-sozlesmesi" style={{ color: 'var(--muted)', textDecoration: 'none', transition: 'color 0.2s' }}>
-            Mesafeli Satış Sözleşmesi
-          </Link>
-          <Link to="/iade-politikasi" style={{ color: 'var(--muted)', textDecoration: 'none', transition: 'color 0.2s' }}>
-            İade Politikası
-          </Link>
-          <Link to="/kvkk" style={{ color: 'var(--muted)', textDecoration: 'none', transition: 'color 0.2s' }}>
-            KVKK
-          </Link>
         </div>
-        <p style={{ color: 'var(--muted)', fontSize: '14px', margin: 0 }}>
-          © 2026 GFIT. Tüm hakları saklıdır.
-        </p>
+      </main>
+
+      <footer style={{ borderTop: '1px solid #1E293B', padding: '24px 20px', textAlign: 'center', color: '#8B9788', fontSize: '13px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          <Link to="/kvkk" rel="noopener noreferrer" style={{ color: '#8B9788' }}>KVKK</Link>
+          <Link to="/gizlilik-politikasi" rel="noopener noreferrer" style={{ color: '#8B9788' }}>Gizlilik Politikası</Link>
+          <Link to="/kullanim-kosullari" rel="noopener noreferrer" style={{ color: '#8B9788' }}>Kullanım Koşulları</Link>
+          <Link to="/iade-politikasi" rel="noopener noreferrer" style={{ color: '#8B9788' }}>İade Politikası</Link>
+          <Link to="/mesafeli-satis-sozlesmesi" rel="noopener noreferrer" style={{ color: '#8B9788' }}>Mesafeli Satış</Link>
+        </div>
+        <p style={{ margin: 0 }}>© 2026 GFIT. Tüm hakları saklıdır.</p>
       </footer>
     </div>
   )

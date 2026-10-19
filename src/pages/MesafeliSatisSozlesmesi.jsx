@@ -44,7 +44,7 @@ export default function MesafeliSatisSozlesmesi() {
           <p>Ödeme bilgileri, SSL şifreleme ile korunmaktadır. Satıcı, kredi kartı bilgilerini saklamaz. Tüm ödeme işlemleri güvenli ödeme sağlayıcıları aracılığıyla yapılır.</p>
           
           <h3>10. İletişim</h3>
-          <p>Sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer" target="_blank">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
+          <p>Sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
         </div>
       </div>
     </div>

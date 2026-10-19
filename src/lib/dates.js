@@ -4,6 +4,13 @@ export function todayISO() {
   return new Date(d.getTime() - tz).toISOString().slice(0, 10)
 }
 
+export function yesterdayISO() {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  const tz = d.getTimezoneOffset() * 60000
+  return new Date(d.getTime() - tz).toISOString().slice(0, 10)
+}
+
 export function formatDay(iso) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('tr-TR', {
     weekday: 'long',

@@ -49,7 +49,7 @@ export default function KullanimKosullari() {
           <p>Bu koşulları her zaman değiştirme hakkını saklı tutarız. Değişiklikler, Hizmet üzerinde yayınlandığında yürürlüğe girer.</p>
           
           <h3>9. İletişim</h3>
-          <p>Sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer" target="_blank">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
+          <p>Sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
         </div>
       </div>
     </div>

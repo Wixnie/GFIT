@@ -8,6 +8,10 @@ const links = [
   { to: '/supplement', label: 'Supplement' },
   { to: '/kilo', label: 'Kilo' },
   { to: '/ilerleme', label: 'İlerleme' },
+  { to: '/aliskanliklar', label: 'Alışkanlıklar' },
+  { to: '/ai-koc', label: 'AI Koç' },
+  { to: '/etiket-okuyucu', label: 'Etiket' },
+  { to: '/pazar', label: 'Pazar' },
   { to: '/premium', label: 'Premium' },
   { to: '/profil', label: 'Profil' },
 ]

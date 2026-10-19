@@ -29,7 +29,7 @@ export default function IadePolitikasi() {
           <h3>4. İade Süreci</h3>
           <p>İade talepleri şu şekilde işlenir:</p>
           <ol>
-            <li><a href="mailto:destek@g-fitt.app" rel="noopener noreferrer" target="_blank">destek@g-fitt.app</a> adresine iade talebi gönderilir</li>
+            <li><a href="mailto:destek@g-fitt.app" rel="noopener noreferrer">destek@g-fitt.app</a> adresine iade talebi gönderilir</li>
             <li>Talep, müşteri hizmetleri tarafından incelenir</li>
             <li>Onaylanan iadeler, 5-10 iş günü içinde ödeme yöntemine iade edilir</li>
             <li>Reddedilen iadeler hakkında bilgilendirme yapılır</li>
@@ -51,7 +51,7 @@ export default function IadePolitikasi() {
           <p>Ödeme sağlayıcı üzerinden yapılan iadeler, sağlayıcının iade politikasına tabidir. Bu durumlarda, sağlayıcının politikası geçerlidir.</p>
           
           <h3>8. İletişim</h3>
-          <p>İade talepleri ve sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer" target="_blank">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
+          <p>İade talepleri ve sorularınız için <a href="mailto:destek@g-fitt.app" rel="noopener noreferrer">destek@g-fitt.app</a> adresinden bizimle iletişime geçebilirsiniz.</p>
         </div>
       </div>
     </div>
