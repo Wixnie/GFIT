@@ -75,43 +75,76 @@ export default function Profile() {
       </div>
 
       {error && (
-        <div className="card" style={{ marginBottom: 16, background: 'var(--error-bg)', color: 'var(--error-text)', padding: '12px', borderRadius: '6px' }}>
+        <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', padding: '12px', borderRadius: '6px' }}>
           {error}
         </div>
       )}
 
-      <form className="card" onSubmit={save} style={{ maxWidth: 560 }}>
-        {[
-          ['display_name', 'Ad', 'text'],
-          ['age', 'Yaş', 'number'],
-          ['height_cm', 'Boy (cm)', 'number'],
-          ['weight_kg', 'Kilo (kg)', 'number'],
-          ['calorie_target', 'Kalori hedefi', 'number'],
-          ['protein_target', 'Protein (g)', 'number'],
-          ['carb_target', 'Karb (g)', 'number'],
-          ['fat_target', 'Yağ (g)', 'number'],
-        ].map(([key, label, type]) => (
-          <div className="field" key={key}>
-            <label>{label}</label>
-            <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
-          </div>
-        ))}
-        <button className="btn" disabled={loading}>
-          {loading ? 'Kaydediliyor...' : 'Kaydet'}
-        </button>
-        {saved && <p className="sub">Hedefler güncellendi.</p>}
-      </form>
+      <div className="grid grid-2">
+        <form className="card" onSubmit={save}>
+          <h3 style={{ marginTop: 0, marginBottom: 16 }}>Kişisel Bilgiler</h3>
+          {[
+            ['display_name', 'Ad', 'text'],
+            ['age', 'Yaş', 'number'],
+            ['height_cm', 'Boy (cm)', 'number'],
+            ['weight_kg', 'Kilo (kg)', 'number'],
+          ].map(([key, label, type]) => (
+            <div className="field" key={key}>
+              <label>{label}</label>
+              <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
+            </div>
+          ))}
+          <button className="btn" disabled={loading}>
+            {loading ? 'Kaydediliyor...' : 'Kaydet'}
+          </button>
+          {saved && <p className="sub">Bilgiler güncellendi.</p>}
+        </form>
 
-      <div className="card" style={{ marginTop: 24, borderColor: 'var(--danger)' }}>
-        <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Hesabımı Sil</h3>
-        <p className="sub">Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecek.</p>
-        <button 
-          className="btn danger" 
-          onClick={() => setDeleteModalOpen(true)}
-          disabled={deleteLoading}
-        >
-          {deleteLoading ? 'Siliniyor...' : 'Hesabımı Sil'}
-        </button>
+        <form className="card" onSubmit={save}>
+          <h3 style={{ marginTop: 0, marginBottom: 16 }}>Hedefler</h3>
+          {[
+            ['calorie_target', 'Kalori hedefi', 'number'],
+            ['protein_target', 'Protein (g)', 'number'],
+            ['carb_target', 'Karb (g)', 'number'],
+            ['fat_target', 'Yağ (g)', 'number'],
+          ].map(([key, label, type]) => (
+            <div className="field" key={key}>
+              <label>{label}</label>
+              <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
+            </div>
+          ))}
+          <button className="btn" disabled={loading}>
+            {loading ? 'Kaydediliyor...' : 'Hedefleri Kaydet'}
+          </button>
+        </form>
+      </div>
+
+      <div className="grid grid-2">
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>VIP Koçluk</h3>
+          <p className="sub" style={{ marginBottom: 16 }}>Birebir WhatsApp koçluk desteği</p>
+          <a 
+            href="https://wa.me/905555555555" 
+            rel="noopener noreferrer" 
+            target="_blank"
+            className="btn" 
+            style={{ display: 'inline-block', textDecoration: 'none', background: '#25D366' }}
+          >
+            WhatsApp ile Başvur
+          </a>
+        </div>
+
+        <div className="card" style={{ borderColor: '#dc2626' }}>
+          <h3 style={{ marginTop: 0, color: '#dc2626' }}>Hesabımı Sil</h3>
+          <p className="sub">Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecek.</p>
+          <button 
+            className="btn danger" 
+            onClick={() => setDeleteModalOpen(true)}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? 'Siliniyor...' : 'Hesabımı Sil'}
+          </button>
+        </div>
       </div>
 
       {/* Medical Disclaimer */}
@@ -127,71 +160,75 @@ export default function Profile() {
 
       {/* Delete Account Modal - First Confirmation */}
       {deleteModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div className="card" style={{ maxWidth: 400, borderColor: 'var(--danger)' }}>
-            <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Hesabımı Sil - Onay</h3>
-            <p>Bu işlem şu verilerinizi kalıcı olarak silecek:</p>
-            <ul>
-              <li>Yemek kayıtları</li>
-              <li>Antrenman kayıtları</li>
-              <li>Supplement kayıtları</li>
-              <li>Kilo kayıtları</li>
-              <li>Profil bilgileri</li>
-              <li>Supabase Auth kaydı</li>
-            </ul>
-            <p style={{ color: 'var(--danger)', fontWeight: 600 }}>Bu işlem geri alınamaz!</p>
-            <div className="row" style={{ marginTop: 16 }}>
-              <button className="btn ghost" onClick={() => setDeleteModalOpen(false)} disabled={deleteLoading}>
-                İptal
-              </button>
-              <button className="btn danger" onClick={() => setDeleteConfirmOpen(true)} disabled={deleteLoading}>
-                Devam Et
-              </button>
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 400, borderColor: '#dc2626' }}>
+              <h3 style={{ marginTop: 0, color: '#dc2626' }}>Hesabımı Sil - Onay</h3>
+              <p>Bu işlem şu verilerinizi kalıcı olarak silecek:</p>
+              <ul>
+                <li>Yemek kayıtları</li>
+                <li>Antrenman kayıtları</li>
+                <li>Supplement kayıtları</li>
+                <li>Kilo kayıtları</li>
+                <li>Profil bilgileri</li>
+                <li>Supabase Auth kaydı</li>
+              </ul>
+              <p style={{ color: '#dc2626', fontWeight: 600 }}>Bu işlem geri alınamaz!</p>
+              <div className="row" style={{ marginTop: 16 }}>
+                <button className="btn ghost" onClick={() => setDeleteModalOpen(false)} disabled={deleteLoading}>
+                  İptal
+                </button>
+                <button className="btn danger" onClick={() => setDeleteConfirmOpen(true)} disabled={deleteLoading}>
+                  Devam Et
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Delete Account Modal - Second Confirmation */}
       {deleteConfirmOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div className="card" style={{ maxWidth: 400, borderColor: 'var(--danger)' }}>
-            <h3 style={{ marginTop: 0, color: 'var(--danger)' }}>Son Onay</h3>
-            <p>Hesabınızı kalıcı olarak silmek üzeresiniz. Bu işlem gerçekten geri alınamaz.</p>
-            <p style={{ color: 'var(--danger)', fontWeight: 600, fontSize: '1.1rem' }}>
-              Son bir şansınız var. Gerçekten silmek istiyor musunuz?
-            </p>
-            <div className="row" style={{ marginTop: 16 }}>
-              <button className="btn ghost" onClick={() => {
-                setDeleteConfirmOpen(false)
-                setDeleteModalOpen(false)
-              }} disabled={deleteLoading}>
-                İptal
-              </button>
-              <button className="btn danger" onClick={handleDeleteAccount} disabled={deleteLoading}>
-                {deleteLoading ? 'Siliniyor...' : 'Evet, Hesabımı Sil'}
-              </button>
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 400, borderColor: '#dc2626' }}>
+              <h3 style={{ marginTop: 0, color: '#dc2626' }}>Son Onay</h3>
+              <p>Hesabınızı kalıcı olarak silmek üzeresiniz. Bu işlem gerçekten geri alınamaz.</p>
+              <p style={{ color: '#dc2626', fontWeight: 600, fontSize: '1.1rem' }}>
+                Son bir şansınız var. Gerçekten silmek istiyor musunuz?
+              </p>
+              <div className="row" style={{ marginTop: 16 }}>
+                <button className="btn ghost" onClick={() => {
+                  setDeleteConfirmOpen(false)
+                  setDeleteModalOpen(false)
+                }} disabled={deleteLoading}>
+                  İptal
+                </button>
+                <button className="btn danger" onClick={handleDeleteAccount} disabled={deleteLoading}>
+                  {deleteLoading ? 'Siliniyor...' : 'Evet, Hesabımı Sil'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

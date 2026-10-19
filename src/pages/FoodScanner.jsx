@@ -211,6 +211,25 @@ export default function FoodScanner() {
         </div>
       )}
 
+      {/* Info Card */}
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>Nasıl Çalışır?</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+            <strong>Barkod Tarama</strong>
+            <p className="sub" style={{ marginTop: 4 }}>Ürün barkodunu tarayarak OpenFoodFacts veritabanından besin değerlerini alın.</p>
+          </div>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+            <strong>Fotoğraf Analizi</strong>
+            <p className="sub" style={{ marginTop: 4 }}>Etiket fotoğrafını yükleyerek Gemini AI ile otomatik analiz yapın.</p>
+          </div>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+            <strong>Önbellekleme</strong>
+            <p className="sub" style={{ marginTop: 4 }}>Analiz edilen ürünler otomatik olarak önbelleğe alınır, daha hızlı erişim sağlar.</p>
+          </div>
+        </div>
+      </div>
+
       {/* Scan Result */}
       {scanResult && (
         <div className="card" style={{ marginBottom: 16, borderColor: '#F59E0B' }}>

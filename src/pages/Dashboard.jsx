@@ -36,6 +36,10 @@ export default function Dashboard() {
   const [busy, setBusy] = useState(false)
   const [xp, setXp] = useState(0)
   const [streak, setStreak] = useState(0)
+  const [fastingMode, setFastingMode] = useState(false)
+  const [fastingStart, setFastingStart] = useState(null)
+  const [fastingHours, setFastingHours] = useState(0)
+  const [sleepHours, setSleepHours] = useState(0)
 
   async function refresh() {
     const [food, wo, supps, wt] = await Promise.all([
@@ -56,11 +60,33 @@ export default function Dashboard() {
     const savedStreak = localStorage.getItem('gfit_streak')
     setXp(savedXp ? parseInt(savedXp) : 0)
     setStreak(savedStreak ? parseInt(savedStreak) : 0)
+
+    // Load fasting data
+    const savedFasting = localStorage.getItem('gfit_fasting')
+    if (savedFasting) {
+      const data = JSON.parse(savedFasting)
+      setFastingMode(data.active || false)
+      setFastingStart(data.startTime || null)
+    }
+
+    // Load sleep data
+    const savedSleep = localStorage.getItem('gfit_sleep')
+    if (savedSleep) {
+      setSleepHours(parseFloat(savedSleep) || 0)
+    }
   }
 
   useEffect(() => {
     refresh().catch(() => {})
   }, [date, session.id])
+
+  // Calculate fasting hours
+  useEffect(() => {
+    if (fastingMode && fastingStart) {
+      const diff = Date.now() - new Date(fastingStart).getTime()
+      setFastingHours(Math.floor(diff / (1000 * 60 * 60)))
+    }
+  }, [fastingMode, fastingStart])
 
   const totals = sumLogs(logs)
   const { remaining, reason, foods } = suggestFoods(totals, p)
@@ -134,6 +160,20 @@ export default function Dashboard() {
     }
   }
 
+  const toggleFasting = () => {
+    if (fastingMode) {
+      setFastingMode(false)
+      setFastingStart(null)
+      setFastingHours(0)
+      localStorage.setItem('gfit_fasting', JSON.stringify({ active: false, startTime: null }))
+    } else {
+      setFastingMode(true)
+      const start = new Date().toISOString()
+      setFastingStart(start)
+      localStorage.setItem('gfit_fasting', JSON.stringify({ active: true, startTime: start }))
+    }
+  }
+
   return (
     <div className="app-container">
       <div className="page-head">
@@ -152,26 +192,88 @@ export default function Dashboard() {
         <DayNav date={date} onChange={setDate} />
       </div>
 
-      {/* XP Progress Bar */}
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span className="sub">XP Seviyesi</span>
-          <span style={{ fontWeight: 600, color: '#F59E0B' }}>{xp} XP</span>
+      {/* XP Circular Progress Ring */}
+      <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
+        <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke="#1E293B"
+              strokeWidth="8"
+            />
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              fill="none"
+              stroke="#F59E0B"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 54}`}
+              strokeDashoffset={`${2 * Math.PI * 54 * (1 - xpProgress / 100)}`}
+              transform="rotate(-90 60 60)"
+              style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+            />
+          </svg>
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: '#F59E0B' }}>{xp}</div>
+            <div className="sub" style={{ fontSize: '10px' }}>XP</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: rank.color, marginTop: 2 }}>{rank.name}</div>
+          </div>
         </div>
-        <div style={{ background: '#0B101B', borderRadius: '12px', padding: '8px' }}>
-          <div
-            style={{
-              height: '24px',
-              background: '#F59E0B',
-              borderRadius: '8px',
-              width: `${xpProgress}%`,
-              transition: 'width 0.5s ease'
-            }}
-          />
-        </div>
-        <p className="sub" style={{ marginTop: 8, fontSize: '12px' }}>
+        <p className="sub" style={{ marginTop: 8 }}>
           Sonraki seviye: {rank.next > 0 ? rank.next - (xp % rank.next) : 'Maksimum'} XP
         </p>
+      </div>
+
+      {/* Intermittent Fasting & Sleep Cards */}
+      <div className="grid grid-2" style={{ marginBottom: 16 }}>
+        <div className="card">
+          <h3 style={{ marginTop: 0, marginBottom: 12 }}>16:8 Aralıklı Oruç</h3>
+          {fastingMode ? (
+            <div>
+              <div style={{ fontSize: '32px', fontWeight: 700, color: '#10B981', marginBottom: 8 }}>
+                {fastingHours}h
+              </div>
+              <p className="sub" style={{ marginBottom: 12 }}>Oruç devam ediyor</p>
+              <button className="btn danger" onClick={toggleFasting} style={{ width: '100%' }}>
+                Orucu Bitir
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p className="sub" style={{ marginBottom: 12 }}>Oruç modu kapalı</p>
+              <button className="btn" onClick={toggleFasting} style={{ width: '100%' }}>
+                Oruca Başla
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <h3 style={{ marginTop: 0, marginBottom: 12 }}>Uyku Takibi</h3>
+          <div className="field">
+            <label>Dün kaç saat uyudun?</label>
+            <input
+              className="input"
+              type="number"
+              step="0.5"
+              min="0"
+              max="12"
+              value={sleepHours}
+              onChange={(e) => {
+                setSleepHours(parseFloat(e.target.value) || 0)
+                localStorage.setItem('gfit_sleep', e.target.value)
+              }}
+            />
+          </div>
+          <p className="sub">
+            {sleepHours >= 7 ? '✅ İdeal uyku süresi' : sleepHours >= 6 ? '⚠️ Yeterli ama ideal değil' : '❌ Uyku süresi düşük'}
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-4" style={{ marginBottom: 16 }}>

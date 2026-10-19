@@ -24,6 +24,8 @@ body {
   background-color: #141C2E;
   border-right: 1px solid #1E293B;
   padding: 1rem;
+  z-index: 50;
+  pointer-events: auto;
 }
 
 @media (min-width: 768px) {
@@ -68,6 +70,8 @@ body {
   display: flex;
   justify-content: space-around;
   padding: 0.5rem;
+  z-index: 50;
+  pointer-events: auto;
 }
 
 @media (min-width: 768px) {
@@ -80,6 +84,21 @@ body {
   max-width: 28rem;
   margin: 0 auto;
   width: 100%;
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 64rem;
+    padding: 0 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    max-width: 72rem;
+    padding: 0 2rem;
+  }
 }
 
 .page-head {
@@ -202,6 +221,22 @@ body {
   }
 }
 
+.grid-3 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .grid-4 {
   grid-template-columns: repeat(2, 1fr);
 }
@@ -210,6 +245,15 @@ body {
   .grid-4 {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-link {

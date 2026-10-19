@@ -323,68 +323,72 @@ export default function Food() {
 
       {/* Edit Modal */}
       {editingLog && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div className="card" style={{ maxWidth: 400 }}>
-            <h3 style={{ marginTop: 0 }}>{editingLog.food_name}</h3>
-            <div className="field">
-              <label>Gram</label>
-              <input className="input" type="number" min="1" value={editGrams} onChange={(e) => setEditGrams(e.target.value)} />
-            </div>
-            <div className="row">
-              <button className="btn ghost" onClick={() => setEditingLog(null)} disabled={loading}>
-                İptal
-              </button>
-              <button className="btn danger" onClick={() => {
-                handleDelete(editingLog.id)
-                setEditingLog(null)
-              }} disabled={loading}>
-                Sil
-              </button>
-              <button className="btn" onClick={handleUpdateGrams} disabled={loading}>
-                {loading ? 'Güncelleniyor...' : 'Güncelle'}
-              </button>
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 400 }}>
+              <h3 style={{ marginTop: 0 }}>{editingLog.food_name}</h3>
+              <div className="field">
+                <label>Gram</label>
+                <input className="input" type="number" min="1" value={editGrams} onChange={(e) => setEditGrams(e.target.value)} />
+              </div>
+              <div className="row">
+                <button className="btn ghost" onClick={() => setEditingLog(null)} disabled={loading}>
+                  İptal
+                </button>
+                <button className="btn danger" onClick={() => {
+                  handleDelete(editingLog.id)
+                  setEditingLog(null)
+                }} disabled={loading}>
+                  Sil
+                </button>
+                <button className="btn" onClick={handleUpdateGrams} disabled={loading}>
+                  {loading ? 'Güncelleniyor...' : 'Güncelle'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Save Template Modal */}
       {saveMealModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div className="card" style={{ maxWidth: 400 }}>
-            <h3 style={{ marginTop: 0 }}>Öğünü Şablon Olarak Kaydet</h3>
-            <div className="field">
-              <label>Şablon Adı</label>
-              <input className="input" value={mealTemplateName} onChange={(e) => setMealTemplateName(e.target.value)} placeholder="Örn: Sabah kahvaltısı" />
-            </div>
-            <div className="row">
-              <button className="btn ghost" onClick={() => setSaveMealModalOpen(false)} disabled={loading}>
-                İptal
-              </button>
-              <button className="btn" onClick={handleSaveAsTemplate} disabled={loading}>
-                {loading ? 'Kaydediliyor...' : 'Kaydet'}
-              </button>
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 400 }}>
+              <h3 style={{ marginTop: 0 }}>Öğünü Şablon Olarak Kaydet</h3>
+              <div className="field">
+                <label>Şablon Adı</label>
+                <input className="input" value={mealTemplateName} onChange={(e) => setMealTemplateName(e.target.value)} placeholder="Örn: Sabah kahvaltısı" />
+              </div>
+              <div className="row">
+                <button className="btn ghost" onClick={() => setSaveMealModalOpen(false)} disabled={loading}>
+                  İptal
+                </button>
+                <button className="btn" onClick={handleSaveAsTemplate} disabled={loading}>
+                  {loading ? 'Kaydediliyor...' : 'Kaydet'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

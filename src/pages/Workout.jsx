@@ -30,8 +30,9 @@ export default function Workout() {
       setHistory(Array.isArray(allData) ? allData : [])
     } catch (err) {
       console.error('Antrenmanlar yüklenirken hata:', err)
-      setError('Antrenmanlar yüklenirken hata oluştu')
+      // Hata durumunda sessizce yerel şablonlara fallback yap
       setLogs([])
+      setHistory([])
     } finally {
       setLoading(false)
     }
@@ -150,11 +151,7 @@ export default function Workout() {
         <DayNav date={date} onChange={setDate} />
       </div>
 
-      {error && (
-        <div className="card" style={{ marginBottom: 16, background: 'var(--error-bg)', color: 'var(--error-text)', padding: '12px', borderRadius: '12px' }}>
-          {error}
-        </div>
-      )}
+
 
       {/* Şablon Seçimi */}
       <div className="row" style={{ marginBottom: 18 }}>
@@ -170,10 +167,10 @@ export default function Workout() {
           {templates.map((p) => (
             <button key={p.id} className="card template" onClick={() => start(p)} style={{ textAlign: 'left' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span className="chip" style={{ color: 'var(--lime)', borderColor: 'var(--lime)' }}>{p.split}</span>
+                <span className="chip" style={{ color: '#F59E0B', borderColor: '#F59E0B', background: 'rgba(245, 158, 11, 0.2)' }}>{p.split}</span>
                 <span className="sub" style={{ fontSize: '12px' }}>{p.exercises.length} Hareket</span>
               </div>
-              <h3 style={{ margin: '0 0 6px', fontSize: '20px' }}>{p.name}</h3>
+              <h3 style={{ margin: '0 0 6px', fontSize: '20px', color: '#ffffff' }}>{p.name}</h3>
               <p className="sub" style={{ margin: 0, fontSize: '13px' }}>
                 {p.exercises.map((e) => e.name).slice(0, 3).join(', ')}...
               </p>
@@ -225,14 +222,14 @@ export default function Workout() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: '15px', fontWeight: 700, color: isOpen ? 'var(--lime)' : 'var(--text)' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>
                         {grp.name}
                       </span>
-                      <span className="chip" style={{ fontSize: '11px' }}>
+                      <span className="chip" style={{ fontSize: '11px', background: 'rgba(245, 158, 11, 0.2)', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
                         {completedCount}/{grp.sets.length} Set
                       </span>
                     </div>
-                    <span style={{ fontSize: '16px', color: 'var(--muted)', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                    <span style={{ fontSize: '16px', color: '#64748B', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
                       ▼
                     </span>
                   </div>

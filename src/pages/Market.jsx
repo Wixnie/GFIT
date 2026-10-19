@@ -123,7 +123,7 @@ export default function Market() {
 
       {/* Category Filter */}
       <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }} className="no-scrollbar flex-wrap">
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -143,7 +143,7 @@ export default function Market() {
       </div>
 
       {/* Products Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+      <div className="grid grid-3" style={{ gap: '16px' }}>
         {filteredProducts.map((product) => (
           <div key={product.id} className="card" style={{ position: 'relative' }}>
             {/* GFIT Approved Badge */}
