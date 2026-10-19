@@ -14,6 +14,7 @@ export default function Food() {
   const [date, setDate] = useState(todayISO())
   const [logs, setLogs] = useState([])
   const [q, setQ] = useState('')
+  const [selected, setSelected] = useState(null)
   const [grams, setGrams] = useState(100)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)

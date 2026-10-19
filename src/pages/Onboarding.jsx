@@ -66,7 +66,7 @@ export default function Onboarding() {
     e.preventDefault()
     
     if (!data.kvkkAccepted || !data.healthConsent) {
-      setError('Lutfen KVKK ve saglik verisi onay kutularini isaretleyin.')
+      setError('Lütfen KVKK ve sağlık verisi onay kutularını işaretleyin.')
       return
     }
 
@@ -184,8 +184,8 @@ export default function Onboarding() {
             {[
               { id: 'lose', label: 'Kilo Vermek', icon: '📉', desc: 'Sağlıklı kilo ver' },
               { id: 'maintain', label: 'Korumak', icon: '⚖️', desc: 'Mevcut kilonu koru' },
-              { id: 'gain', label: 'Kas Yapmak', icon: '💪', desc: 'Kas kutlesi artir' },
-              { id: 'track', label: 'Sadece Takip', icon: '📊', desc: 'Ne yedigini gor' },
+              { id: 'gain', label: 'Kas Yapmak', icon: '💪', desc: 'Kas kütlesi artır' },
+              { id: 'track', label: 'Sadece Takip', icon: '📊', desc: 'Ne yediğini gör' },
             ].map((goal) => (
               <button
                 key={goal.id}
@@ -228,8 +228,8 @@ export default function Onboarding() {
                 <span style={{ color: '#EF4444' }}>16%</span>
               </div>
               <div className="animated-progress-bar">
-                <div 
-                  className="animated-progress-bar-fill" 
+                <div
+                  className="animated-progress-bar-fill"
                   style={{ '--progress-width': '16%', background: '#EF4444' }}
                 />
               </div>
@@ -240,8 +240,8 @@ export default function Onboarding() {
                 <span style={{ color: '#10B981', fontWeight: 600 }}>84%</span>
               </div>
               <div className="animated-progress-bar">
-                <div 
-                  className="animated-progress-bar-fill" 
+                <div
+                  className="animated-progress-bar-fill"
                   style={{ '--progress-width': '84%', background: '#10B981' }}
                 />
               </div>
@@ -276,7 +276,7 @@ export default function Onboarding() {
           <div className="grid grid-2">
             <button
               className="card"
-              onClick={() => { handleFieldChange('gender', 'male'); handleNext() }}
+              onClick={() => handleFieldChange('gender', 'male')}
               style={{ 
                 textAlign: 'center', 
                 cursor: 'pointer',
@@ -289,7 +289,7 @@ export default function Onboarding() {
             </button>
             <button
               className="card"
-              onClick={() => { handleFieldChange('gender', 'female'); handleNext() }}
+              onClick={() => handleFieldChange('gender', 'female')}
               style={{ 
                 textAlign: 'center', 
                 cursor: 'pointer',
@@ -303,12 +303,15 @@ export default function Onboarding() {
           </div>
           {data.gender === 'female' && (
             <div className="card" style={{ marginTop: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
-              <h4 style={{ margin: '0 0 8px', color: '#F59E0B' }}>Regl Dongusu Senkronizasyonu</h4>
+              <h4 style={{ margin: '0 0 8px', color: '#F59E0B' }}>Regl Döngüsü Senkronizasyonu</h4>
               <p className="sub">
-                GFIT regl doneminde odem uyarisi ve tatli krizi icin Magnezyum onerileri sunacak.
+                GFIT regl döneminde ödem uyarısı ve tatlı krizi için Magnezyum önerileri sunacak.
               </p>
             </div>
           )}
+          <button className="btn" onClick={handleNext} style={{ width: '100%', marginTop: 16 }} disabled={!data.gender}>
+            Devam Et
+          </button>
         </div>
       )}
 
@@ -316,7 +319,7 @@ export default function Onboarding() {
         <div className="card onboarding-step">
           <h2 style={{ margin: '0 0 16px' }}>Vücut Ölçüleri</h2>
           <div className="field">
-            <label>Yas: {data.age} yas</label>
+            <label>Yaş: {data.age} yaş</label>
             <input
               className="input"
               type="range"
@@ -349,7 +352,7 @@ export default function Onboarding() {
             />
           </div>
           <div className="field">
-            <label>Dogum Tarihi</label>
+            <label>Doğum Tarihi</label>
             <input
               className="input"
               type="date"
@@ -358,7 +361,7 @@ export default function Onboarding() {
               max={new Date().toISOString().split('T')[0]}
             />
             <p className="sub" style={{ fontSize: '11px', marginTop: 4 }}>
-              Dogum gununde 1 gun ucretsiz PRO kazanicaksin!
+              Doğum gününde 1 gün ücretsiz PRO kazanacaksın!
             </p>
           </div>
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
@@ -373,15 +376,15 @@ export default function Onboarding() {
           <div className="grid grid-2">
             {[
               { id: 'lose_slow', rate: 0.12, emoji: '🐢', label: 'Sakin' },
-              { id: 'lose', rate: 0.25, emoji: '🚶', label: 'Dengeli - Onerilen' },
-              { id: 'lose_fast', rate: 0.5, emoji: '🐇', label: 'Hizli' },
+              { id: 'lose', rate: 0.25, emoji: '🚶', label: 'Dengeli - Önerilen' },
+              { id: 'lose_fast', rate: 0.5, emoji: '🐇', label: 'Hızlı' },
             ].map((option) => (
               <button
                 key={option.id}
                 className="card"
-                onClick={() => { handleFieldChange('goal_rate', option.id); handleNext() }}
-                style={{ 
-                  textAlign: 'center', 
+                onClick={() => handleFieldChange('goal_rate', option.id)}
+                style={{
+                  textAlign: 'center',
                   cursor: 'pointer',
                   border: data.goal_rate === option.id ? '2px solid #F59E0B' : '1px solid #1E293B',
                   background: data.goal_rate === option.id ? 'rgba(245, 158, 11, 0.1)' : 'transparent'
@@ -393,6 +396,9 @@ export default function Onboarding() {
               </button>
             ))}
           </div>
+          <button className="btn" onClick={handleNext} style={{ width: '100%', marginTop: 16 }} disabled={!data.goal_rate}>
+            Devam Et
+          </button>
         </div>
       )}
 
@@ -401,7 +407,7 @@ export default function Onboarding() {
           <h2 style={{ margin: '0 0 16px' }}>Aktivite Durumu</h2>
           <div className="field">
             <label>Hareket Seviyesi</label>
-            <select 
+            <select
               className="input"
               value={data.activity_level}
               onChange={(e) => handleFieldChange('activity_level', e.target.value)}
@@ -409,14 +415,14 @@ export default function Onboarding() {
               <option value="sedentary">Sedanter (Hareketsiz)</option>
               <option value="light">Hafif Aktif</option>
               <option value="moderate">Orta Aktif</option>
-              <option value="active">Cok Aktif</option>
-              <option value="very_active">Cok Cok Aktif</option>
+              <option value="active">Çok Aktif</option>
+              <option value="very_active">Çok Çok Aktif</option>
             </select>
           </div>
           <p className="sub" style={{ marginBottom: 16 }}>
-            {data.activity_level === 'sedentary' && 'Spor yapmiyorsan adim/su takibi one cikiyoruz.'}
-            {data.activity_level === 'moderate' && 'Haftada 3-4 gun orta yogunlukta antrenman.'}
-            {data.activity_level === 'active' && 'Haftada 5-6 gun yogun antrenman.'}
+            {data.activity_level === 'sedentary' && 'Spor yapmıyorsan adım/su takibi öne çıkıyor.'}
+            {data.activity_level === 'moderate' && 'Haftada 3-4 gün orta yoğunlukta antrenman.'}
+            {data.activity_level === 'active' && 'Haftada 5-6 gün yoğun antrenman.'}
           </p>
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
             Devam Et
@@ -429,15 +435,15 @@ export default function Onboarding() {
           <h2 style={{ margin: '0 0 16px' }}>Beslenme & Alerjiler</h2>
           <div className="field">
             <label>Beslenme Tipi</label>
-            <select 
+            <select
               className="input"
               value={data.diet_type}
               onChange={(e) => handleFieldChange('diet_type', e.target.value)}
             >
-              <option value="">Seciniz</option>
+              <option value="">Seçiniz</option>
               <option value="balanced">Dengeli</option>
-              <option value="low_carb">Dusuk Karbahidrat</option>
-              <option value="high_protein">Yuksek Protein</option>
+              <option value="low_carb">Düşük Karbahidrat</option>
+              <option value="high_protein">Yüksek Protein</option>
               <option value="vegetarian">Vejetaryan</option>
               <option value="vegan">Vegan</option>
             </select>
@@ -446,17 +452,17 @@ export default function Onboarding() {
             <label>Alerjiler (Varsa)</label>
             <input
               className="input"
-              placeholder="Orn: Findik, Kuruyemis, Gluten..."
+              placeholder="Örn: Fındık, Kuruyemiş, Gluten..."
               value={data.allergies}
               onChange={(e) => handleFieldChange('allergies', e.target.value)}
             />
           </div>
           <div className="card" style={{ marginTop: 16, background: 'rgba(16, 185, 129, 0.1)', borderColor: '#10B981' }}>
             <p className="sub" style={{ marginBottom: 8 }}>
-              <strong>Veri Guvenligi:</strong> Verileriniz asla reklam amaciyla kullanilmaz.
+              <strong>Veri Güvenliği:</strong> Verileriniz asla reklam amacıyla kullanılmaz.
             </p>
           </div>
-          <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
+          <button className="btn" onClick={handleNext} style={{ width: '100%' }} disabled={!data.diet_type}>
             Devam Et
           </button>
         </div>
@@ -507,7 +513,7 @@ export default function Onboarding() {
 
           <form onSubmit={handleSubmit}>
             <div className="field">
-              <label>Kullanici Adi (@kullaniciadi)</label>
+              <label>Kullanıcı Adı (@kullaniciadi)</label>
               <input
                 className="input"
                 placeholder="kullaniciadi"
@@ -526,7 +532,7 @@ export default function Onboarding() {
               />
             </div>
             <div className="field">
-              <label>Sifre</label>
+              <label>Şifre</label>
               <input
                 className="input"
                 type="password"
@@ -549,28 +555,28 @@ export default function Onboarding() {
                   }))
                   navigate('/dashboard')
                 }}
-                style={{ flex: 1 }}
+                style={{ flex: 1, padding: '12px 16px', fontSize: '14px' }}
               >
-                Simdilik Atla (Misafir)
+                Şimdilik Atla (Misafir)
               </button>
             </div>
 
             <div className="card" style={{ marginBottom: 16 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={data.kvkkAccepted}
                   onChange={(e) => handleFieldChange('kvkkAccepted', e.target.checked)}
                   style={{ width: 'auto' }}
                 />
-                <span className="sub">KVKK & Gizlilik Sozlesmesini kabul ediyorum</span>
+                <span className="sub">KVKK & Gizlilik Sözleşmesini kabul ediyorum</span>
               </label>
             </div>
 
             <div className="card" style={{ marginBottom: 16 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={data.healthConsent}
                   onChange={(e) => handleFieldChange('healthConsent', e.target.checked)}
                   style={{ width: 'auto' }}
@@ -583,15 +589,15 @@ export default function Onboarding() {
             <div className="card" style={{ marginBottom: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
               <h4 style={{ margin: '0 0 8px', color: '#F59E0B' }}>Tıbbi Yasal Uyarı</h4>
               <p className="sub" style={{ lineHeight: 1.6, fontSize: '12px' }}>
-                GFIT'te sunulan kalori, TDEE ve diger beslenme tavsiyeleri tıbbi teşhis veya tedavi değildir. 
-                Bu bilgiler genel tavsiye niteliğindedir ve kişisel sağlık durumunuza uyarlanmamış olabilir. 
-                Herhangi bir sağlık sorunu varsa veya diyet değişikliği yapmayı planlıyorsanız, 
-                lutfen önce bir sağlık uzmanına veya diyetisyene danışın.
+                GFIT'te sunulan kalori, TDEE ve diğer beslenme tavsiyeleri tıbbi teşhis veya tedavi değildir.
+                Bu bilgiler genel tavsiye niteliğindedir ve kişisel sağlık durumunuza uyarlanmamış olabilir.
+                Herhangi bir sağlık sorunu varsa veya diyet değişikliği yapmayı planlıyorsanız,
+                lütfen önce bir sağlık uzmanına veya diyetisyene danışın.
               </p>
             </div>
 
-            <button className="btn" type="submit" disabled={loading} style={{ width: '100%' }}>
-              {loading ? 'Kaydediliyor...' : 'Kayit Ol ve Basla'}
+            <button className="btn" type="submit" disabled={loading} style={{ width: '100%', padding: '14px 16px', fontSize: '16px' }}>
+              {loading ? 'Kaydediliyor...' : 'Kayıt Ol ve Başla'}
             </button>
           </form>
         </div>
