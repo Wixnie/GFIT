@@ -1,8 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 body {
   background-color: #0B101B;
   color: #f1f5f9;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app-shell {
@@ -277,11 +282,12 @@ body {
 }
 
 .brand {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #F59E0B;
   margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
 }
 
 .search-list {
@@ -407,4 +413,112 @@ body {
 .recharts-tooltip-item-value {
   color: #F59E0B !important;
   font-weight: 700 !important;
+}
+
+/* --- ONBOARDING ANIMATIONS --- */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+
+.onboarding-step {
+  animation: slideInRight 0.4s ease-out;
+}
+
+.onboarding-step-exit {
+  animation: slideOutLeft 0.3s ease-in;
+}
+
+.interactive-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.interactive-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.interactive-card.selected {
+  border: 2px solid #F59E0B !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  animation: scaleUp 0.2s ease;
+}
+
+/* --- ANIMATED PROGRESS BAR --- */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+.animated-progress-bar {
+  height: 8px;
+  background: #1E293B;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.animated-progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  animation: progressFill 1s ease-out forwards;
+}
+
+/* --- CONFETTI ANIMATION --- */
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  animation: confetti 3s ease-out forwards;
+  z-index: 9999;
 }

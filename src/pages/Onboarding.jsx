@@ -21,22 +21,27 @@ export default function Onboarding() {
     username: '',
     email: '',
     password: '',
+    birth_date: '',
     kvkkAccepted: false,
     healthConsent: false
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [stepDirection, setStepDirection] = useState('forward') // 'forward' or 'backward'
+  const [showConfetti, setShowConfetti] = useState(false)
 
   const totalSteps = 9
 
   const handleNext = () => {
     if (step < totalSteps) {
+      setStepDirection('forward')
       setStep(step + 1)
     }
   }
 
   const handleBack = () => {
     if (step > 1) {
+      setStepDirection('backward')
       setStep(step - 1)
     } else {
       navigate('/')
@@ -110,6 +115,36 @@ export default function Onboarding() {
 
   const progressPercent = ((step - 1) / (totalSteps - 1)) * 100
 
+  // Check for birthday and show confetti
+  useEffect(() => {
+    if (data.birth_date) {
+      const today = new Date()
+      const birthDate = new Date(data.birth_date)
+      const isBirthday = today.getDate() === birthDate.getDate() && 
+                        today.getMonth() === birthDate.getMonth()
+      
+      if (isBirthday) {
+        setShowConfetti(true)
+        localStorage.setItem('gfit_birthday_pro', 'true')
+        
+        // Generate confetti
+        for (let i = 0; i < 50; i++) {
+          const confetti = document.createElement('div')
+          confetti.className = 'confetti-piece'
+          confetti.style.left = Math.random() * 100 + 'vw'
+          confetti.style.top = '-10px'
+          confetti.style.background = ['#F59E0B', '#10B981', '#3B82F6', '#EF4444'][Math.floor(Math.random() * 4)]
+          confetti.style.animationDelay = Math.random() * 2 + 's'
+          document.body.appendChild(confetti)
+          
+          setTimeout(() => confetti.remove(), 5000)
+        }
+        
+        setTimeout(() => setShowConfetti(false), 5000)
+      }
+    }
+  }, [data.birth_date])
+
   return (
     <div className="app-container" style={{ paddingTop: '80px' }}>
       <div style={{ marginBottom: 24 }}>
@@ -143,8 +178,8 @@ export default function Onboarding() {
       )}
 
       {step === 1 && (
-        <div className="card">
-          <h2 style={{ margin: '0 0 16px' }}>Hedefin Ne?</h2>
+        <div className="card onboarding-step">
+          <h2 style={{ margin: '0 0 16px' }}>Seni GFIT'e Getiren Ne?</h2>
           <div className="grid grid-2">
             {[
               { id: 'lose', label: 'Kilo Vermek', icon: '📉', desc: 'Saglikli kilo ver' },
@@ -154,8 +189,8 @@ export default function Onboarding() {
             ].map((goal) => (
               <button
                 key={goal.id}
-                className="card"
-                onClick={() => { handleFieldChange('goal', goal.id); handleNext() }}
+                className={`card interactive-card ${data.goal === goal.id ? 'selected' : ''}`}
+                onClick={() => handleFieldChange('goal', goal.id)}
                 style={{ 
                   textAlign: 'center', 
                   cursor: 'pointer',
@@ -169,23 +204,47 @@ export default function Onboarding() {
               </button>
             ))}
           </div>
+          <button 
+            className="btn" 
+            onClick={handleNext} 
+            style={{ width: '100%', marginTop: 16 }}
+            disabled={!data.goal}
+          >
+            Devam Et
+          </button>
         </div>
       )}
 
       {step === 2 && (
-        <div className="card">
+        <div className="card onboarding-step">
           <h2 style={{ margin: '0 0 16px' }}>Zorluklar</h2>
           <p className="sub" style={{ marginBottom: 24 }}>
             Cogu kisi 1 haftada birakiyor ama GFIT ile %84 basari
           </p>
           <div style={{ background: '#0B101B', borderRadius: '12px', padding: '24px', marginBottom: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-              <span>Diger Uygulamalar</span>
-              <span style={{ color: '#EF4444' }}>16%</span>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span>Diger Uygulamalar</span>
+                <span style={{ color: '#EF4444' }}>16%</span>
+              </div>
+              <div className="animated-progress-bar">
+                <div 
+                  className="animated-progress-bar-fill" 
+                  style={{ '--progress-width': '16%', background: '#EF4444' }}
+                />
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#10B981', fontWeight: 600 }}>GFIT</span>
-              <span style={{ color: '#10B981', fontWeight: 600 }}>84%</span>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>GFIT</span>
+                <span style={{ color: '#10B981', fontWeight: 600 }}>84%</span>
+              </div>
+              <div className="animated-progress-bar">
+                <div 
+                  className="animated-progress-bar-fill" 
+                  style={{ '--progress-width': '84%', background: '#10B981' }}
+                />
+              </div>
             </div>
           </div>
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
@@ -254,7 +313,7 @@ export default function Onboarding() {
       )}
 
       {step === 5 && (
-        <div className="card">
+        <div className="card onboarding-step">
           <h2 style={{ margin: '0 0 16px' }}>Vucut Olculeri</h2>
           <div className="field">
             <label>Yas: {data.age} yas</label>
@@ -288,6 +347,19 @@ export default function Onboarding() {
               value={data.weight_kg}
               onChange={(e) => handleFieldChange('weight_kg', parseInt(e.target.value))}
             />
+          </div>
+          <div className="field">
+            <label>Dogum Tarihi</label>
+            <input
+              className="input"
+              type="date"
+              value={data.birth_date}
+              onChange={(e) => handleFieldChange('birth_date', e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+            />
+            <p className="sub" style={{ fontSize: '11px', marginTop: 4 }}>
+              Dogum gununde 1 gun ucretsiz PRO kazanicaksin!
+            </p>
           </div>
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
             Devam Et

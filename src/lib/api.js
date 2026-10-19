@@ -3,8 +3,11 @@ import { localDb } from './localStore'
 
 export async function getProfile(userId) {
   if (!isSupabaseConfigured) return localDb.getProfile(userId)
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
-  if (error) throw error
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+  if (error) {
+    console.error('Profile fetch error:', error)
+    return localDb.getProfile(userId) // Fallback to local
+  }
   return data
 }
 
@@ -23,8 +26,11 @@ export async function listFood(userId, date) {
     .eq('user_id', userId)
     .eq('logged_on', date)
     .order('created_at', { ascending: true })
-  if (error) throw error
-  return data
+  if (error) {
+    console.error('Food list error:', error)
+    return [] // Fallback to empty array instead of throwing
+  }
+  return data || []
 }
 
 export async function addFood(userId, row) {
@@ -52,8 +58,11 @@ export async function listWorkouts(userId, date) {
     .eq('user_id', userId)
     .eq('logged_on', date)
     .order('created_at', { ascending: true })
-  if (error) throw error
-  return data.map((w) => ({
+  if (error) {
+    console.error('Workout list error:', error)
+    return [] // Fallback to empty array
+  }
+  return (data || []).map((w) => ({
     ...w,
     sets: (w.workout_sets || []).sort((a, b) => a.set_index - b.set_index),
   }))

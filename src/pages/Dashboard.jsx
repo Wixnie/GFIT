@@ -318,9 +318,78 @@ export default function Dashboard() {
             <h3 style={{ margin: 0 }}>Kalori & makro</h3>
             <Link className="chip" to="/yemek">Tümü</Link>
           </div>
-          <div style={{ margin: '14px 0' }}>
-            <MacroBars totals={totals} profile={p} />
+          
+          {/* Visual Progress Bars */}
+          <div style={{ margin: '16px 0' }}>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span className="sub">Kalori</span>
+                <span className="sub" style={{ color: '#F59E0B' }}>{Math.round(totals.calories)} / {p.calorie_target}</span>
+              </div>
+              <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    height: '100%', 
+                    background: '#F59E0B', 
+                    width: `${Math.min((totals.calories / p.calorie_target) * 100, 100)}%`,
+                    transition: 'width 0.3s ease'
+                  }} 
+                />
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span className="sub">Protein</span>
+                <span className="sub" style={{ color: '#10B981' }}>{Math.round(totals.protein)}g / {p.protein_target}g</span>
+              </div>
+              <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    height: '100%', 
+                    background: '#10B981', 
+                    width: `${Math.min((totals.protein / p.protein_target) * 100, 100)}%`,
+                    transition: 'width 0.3s ease'
+                  }} 
+                />
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span className="sub">Karbonhidrat</span>
+                <span className="sub" style={{ color: '#3B82F6' }}>{Math.round(totals.carbs)}g / {p.carb_target}g</span>
+              </div>
+              <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    height: '100%', 
+                    background: '#3B82F6', 
+                    width: `${Math.min((totals.carbs / p.carb_target) * 100, 100)}%`,
+                    transition: 'width 0.3s ease'
+                  }} 
+                />
+              </div>
+            </div>
+            
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span className="sub">Yağ</span>
+                <span className="sub" style={{ color: '#8B5CF6' }}>{Math.round(totals.fat)}g / {p.fat_target}g</span>
+              </div>
+              <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    height: '100%', 
+                    background: '#8B5CF6', 
+                    width: `${Math.min((totals.fat / p.fat_target) * 100, 100)}%`,
+                    transition: 'width 0.3s ease'
+                  }} 
+                />
+              </div>
+            </div>
           </div>
+          
           <div className="row">
             <input
               className="input"
