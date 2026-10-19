@@ -29,6 +29,7 @@ export default function Supplements() {
   const [customSupplements, setCustomSupplements] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState('brands') // 'brands', 'scanner', 'manual'
+  const [selectedSupplement, setSelectedSupplement] = useState(null)
 
   async function refresh() {
     setLoading(true)
@@ -109,7 +110,7 @@ export default function Supplements() {
         <div className="card" style={{ marginBottom: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
           <h3 style={{ margin: '0 0 8px', color: '#F59E0B' }}>PRO: Akıllı Bildirim Şablonu</h3>
           <p className="sub" style={{ marginBottom: 12 }}>Supplement saatlerini otomatik hatırlatıcı olarak ayarla.</p>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+          <div style={{ padding: '12px', background: '#0F172A', borderRadius: '8px' }}>
             <div className="field">
               <label>Sabah Bildirimi (09:00)</label>
               <select className="input" defaultValue="on">
@@ -175,7 +176,10 @@ export default function Supplements() {
                 <button
                   key={s.id}
                   className={`check-item ${on ? 'done' : ''}`}
-                  onClick={() => onToggle(s.id)}
+                  onClick={() => {
+                    onToggle(s.id)
+                    setSelectedSupplement(s)
+                  }}
                   disabled={loading}
                   style={{ width: '100%', background: 'transparent', border: 0, cursor: loading ? 'not-allowed' : 'pointer', textAlign: 'left' }}
                 >
@@ -194,7 +198,7 @@ export default function Supplements() {
         )}
 
         {activeTab === 'scanner' && (
-          <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
+          <div style={{ textAlign: 'center', padding: '32px', background: '#0F172A', borderRadius: '12px' }}>
             <div style={{ fontSize: '48px', marginBottom: 16 }}>📸</div>
             <h3 style={{ margin: '0 0 8px' }}>Supplement Kutusunu Tara</h3>
             <p className="sub" style={{ marginBottom: 16 }}>
@@ -207,7 +211,7 @@ export default function Supplements() {
         )}
 
         {activeTab === 'manual' && (
-          <div style={{ padding: '16px', background: '#0B101B', borderRadius: '12px' }}>
+          <div style={{ padding: '16px', background: '#0F172A', borderRadius: '12px' }}>
             <div className="field">
               <label>Supplement Adı</label>
               <input
@@ -242,28 +246,69 @@ export default function Supplements() {
         )}
       </div>
 
-      {/* Bilgi Kartı */}
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Supplement Kullanım İpuçları</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong style={{ color: '#F59E0B' }}>Creatine</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Günde 5g, bol su ile alın. İlk 5 gün yüklenme yapılabilir.</p>
+      {/* Bilgi Paneli (Rehber Alanı) */}
+      {selectedSupplement && (
+        <div className="card" style={{ marginBottom: 16, border: '2px solid #F59E0B' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h3 style={{ margin: 0, color: '#F59E0B' }}>{selectedSupplement.name}</h3>
+            <button className="btn ghost" onClick={() => setSelectedSupplement(null)} style={{ padding: '4px 8px' }}>✕</button>
           </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong style={{ color: '#F59E0B' }}>Whey Protein</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Antrenman sonrası 30 dakika içinde alın. En iyi sindirim için su ile karıştırın.</p>
-          </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong style={{ color: '#F59E0B' }}>Magnesium</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Yatmadan 1-2 saat önce alın. Uyku kalitesini artırır ve kas gevşemesine yardımcı olur.</p>
-          </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong style={{ color: '#EF4444' }}>Etkileşim Uyarısı</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Birden fazla supplement kullanmadan önce doktorunuza danışın. Bazı supplementler birbirleriyle etkileşebilir.</p>
+          <div style={{ padding: '16px', background: '#0F172A', borderRadius: '8px' }}>
+            <div style={{ marginBottom: 16 }}>
+              <p className="sub" style={{ margin: 0, marginBottom: 4 }}>Marka</p>
+              <strong style={{ fontSize: '18px' }}>{selectedSupplement.brand}</strong>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <p className="sub" style={{ margin: 0, marginBottom: 4 }}>Dozaj</p>
+              <strong style={{ fontSize: '18px', color: '#10B981' }}>{selectedSupplement.dose}</strong>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <p className="sub" style={{ margin: 0, marginBottom: 4 }}>Zamanlama</p>
+              <strong style={{ fontSize: '18px', color: '#3B82F6' }}>{selectedSupplement.timing}</strong>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <p className="sub" style={{ margin: 0, marginBottom: 4 }}>Ne İşe Yarar?</p>
+              <p style={{ margin: 0 }}>{selectedSupplement.hint}</p>
+            </div>
+            <div style={{ marginTop: 16, padding: '12px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px' }}>
+              <p className="sub" style={{ margin: 0, color: '#F59E0B' }}>💡 Kullanım İpucu</p>
+              <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
+                {selectedSupplement.type === 'protein' && 'Antrenman sonrası 30 dakika içinde alın. En iyi sindirim için su ile karıştırın.'}
+                {selectedSupplement.type === 'creatine' && 'Günde 5g, bol su ile alın. İlk 5 gün yüklenme yapılabilir.'}
+                {selectedSupplement.type === 'magnesium' && 'Yatmadan 1-2 saat önce alın. Uyku kalitesini artırır.'}
+                {selectedSupplement.type === 'vitamin' && 'Yağlı öğünlerle birlikte alın. Yağda çözünen vitaminlerin emilimi artar.'}
+                {selectedSupplement.type === 'omega' && 'Yemeklerle birlikte alın. Kalp ve beyin sağlığı için önemli.'}
+                {selectedSupplement.type === 'recovery' && 'Antrenman sonrası veya yatmadan önce alın. İyileşmeyi hızlandırır.'}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Supplement Kullanım İpuçları (Varsayılan Bilgi Kartı) */}
+      {!selectedSupplement && (
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Supplement Kullanım İpuçları</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ padding: '12px', background: '#0F172A', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setSelectedSupplement(POPULAR_BRANDS.find(s => s.type === 'creatine'))}>
+              <strong style={{ color: '#F59E0B' }}>Creatine</strong>
+              <p className="sub" style={{ marginTop: 4 }}>Günde 5g, bol su ile alın. İlk 5 gün yüklenme yapılabilir.</p>
+            </div>
+            <div style={{ padding: '12px', background: '#0F172A', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setSelectedSupplement(POPULAR_BRANDS.find(s => s.type === 'protein'))}>
+              <strong style={{ color: '#F59E0B' }}>Whey Protein</strong>
+              <p className="sub" style={{ marginTop: 4 }}>Antrenman sonrası 30 dakika içinde alın. En iyi sindirim için su ile karıştırın.</p>
+            </div>
+            <div style={{ padding: '12px', background: '#0F172A', borderRadius: '8px', cursor: 'pointer' }} onClick={() => setSelectedSupplement(POPULAR_BRANDS.find(s => s.type === 'magnesium'))}>
+              <strong style={{ color: '#F59E0B' }}>Magnesium</strong>
+              <p className="sub" style={{ marginTop: 4 }}>Yatmadan 1-2 saat önce alın. Uyku kalitesini artırır ve kas gevşemesine yardımcı olur.</p>
+            </div>
+            <div style={{ padding: '12px', background: '#0F172A', borderRadius: '8px' }}>
+              <strong style={{ color: '#EF4444' }}>Etkileşim Uyarısı</strong>
+              <p className="sub" style={{ marginTop: 4 }}>Birden fazla supplement kullanmadan önce doktorunuza danışın. Bazı supplementler birbirleriyle etkileşebilir.</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -106,8 +106,8 @@ export default function Onboarding() {
 
       navigate('/dashboard')
     } catch (err) {
-      console.error('Kayit hatasi:', err)
-      setError('Kayit sirasinda hata olustu. Lutfen tekrar deneyin.')
+      console.error('Kayıt hatası:', err)
+      setError('Kayıt sırasında hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setLoading(false)
     }
@@ -182,7 +182,7 @@ export default function Onboarding() {
           <h2 style={{ margin: '0 0 16px' }}>Seni GFIT'e Getiren Ne?</h2>
           <div className="grid grid-2">
             {[
-              { id: 'lose', label: 'Kilo Vermek', icon: '📉', desc: 'Saglikli kilo ver' },
+              { id: 'lose', label: 'Kilo Vermek', icon: '📉', desc: 'Sağlıklı kilo ver' },
               { id: 'maintain', label: 'Korumak', icon: '⚖️', desc: 'Mevcut kilonu koru' },
               { id: 'gain', label: 'Kas Yapmak', icon: '💪', desc: 'Kas kutlesi artir' },
               { id: 'track', label: 'Sadece Takip', icon: '📊', desc: 'Ne yedigini gor' },
@@ -219,12 +219,12 @@ export default function Onboarding() {
         <div className="card onboarding-step">
           <h2 style={{ margin: '0 0 16px' }}>Zorluklar</h2>
           <p className="sub" style={{ marginBottom: 24 }}>
-            Cogu kisi 1 haftada birakiyor ama GFIT ile %84 basari
+            Çoğu kişi 1 haftada bırakıyor ama GFIT ile %84 başarı
           </p>
-          <div style={{ background: '#0B101B', borderRadius: '12px', padding: '24px', marginBottom: 24 }}>
+          <div style={{ background: '#0F172A', borderRadius: '12px', padding: '24px', marginBottom: 24 }}>
             <div style={{ marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span>Diger Uygulamalar</span>
+                <span>Diğer Uygulamalar</span>
                 <span style={{ color: '#EF4444' }}>16%</span>
               </div>
               <div className="animated-progress-bar">
@@ -254,14 +254,14 @@ export default function Onboarding() {
       )}
 
       {step === 3 && (
-        <div className="card">
-          <h2 style={{ margin: '0 0 16px' }}>Mukemmel Olmana Gerek Yok</h2>
+        <div className="card onboarding-step">
+          <h2 style={{ margin: '0 0 16px' }}>Mükemmel Olmana Gerek Yok</h2>
           <p className="sub" style={{ marginBottom: 24 }}>
-            Ilk zafer: 2 haftada -4 kg
+            İlk zafer: 2 haftada -4 kg
           </p>
-          <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
+          <div style={{ textAlign: 'center', padding: '32px', background: '#0F172A', borderRadius: '12px' }}>
             <div style={{ fontSize: '64px', marginBottom: 16 }}>🏆</div>
-            <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>Ilk Zafer Rozeti</h3>
+            <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>İlk Zafer Rozeti</h3>
             <p className="sub">2 haftada -4 kg</p>
           </div>
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
@@ -298,7 +298,7 @@ export default function Onboarding() {
               }}
             >
               <div style={{ fontSize: '48px', marginBottom: 8 }}>👩</div>
-              <h3 style={{ margin: 0 }}>Kadin</h3>
+              <h3 style={{ margin: 0 }}>Kadın</h3>
             </button>
           </div>
           {data.gender === 'female' && (
@@ -314,7 +314,7 @@ export default function Onboarding() {
 
       {step === 5 && (
         <div className="card onboarding-step">
-          <h2 style={{ margin: '0 0 16px' }}>Vucut Olculeri</h2>
+          <h2 style={{ margin: '0 0 16px' }}>Vücut Ölçüleri</h2>
           <div className="field">
             <label>Yas: {data.age} yas</label>
             <input
@@ -369,7 +369,7 @@ export default function Onboarding() {
 
       {step === 6 && (
         <div className="card">
-          <h2 style={{ margin: '0 0 16px' }}>Hedef Hizi</h2>
+          <h2 style={{ margin: '0 0 16px' }}>Hedef Hızı</h2>
           <div className="grid grid-2">
             {[
               { id: 'lose_slow', rate: 0.12, emoji: '🐢', label: 'Sakin' },
@@ -463,17 +463,17 @@ export default function Onboarding() {
       )}
 
       {step === 9 && (
-        <div className="card">
-          <h2 style={{ margin: '0 0 16px' }}>Planin Hazirlaniyor...</h2>
+        <div className="card onboarding-step">
+          <h2 style={{ margin: '0 0 16px' }}>Planın Hazırlanıyor...</h2>
           
           {(() => {
             const targets = calculateFinalTargets()
             const goalInfo = getGoalRateDisplay(data.goal)
             
             return (
-              <div style={{ textAlign: 'center', padding: '24px', background: '#0B101B', borderRadius: '12px', marginBottom: 24 }}>
+              <div style={{ textAlign: 'center', padding: '24px', background: '#0F172A', borderRadius: '12px', marginBottom: 24 }}>
                 <div style={{ fontSize: '48px', marginBottom: 16 }}>📊</div>
-                <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>Kisisel Hedeflerin</h3>
+                <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>Kişisel Hedeflerin</h3>
                 <div className="grid grid-2" style={{ textAlign: 'left', marginBottom: 16 }}>
                   <div>
                     <p className="sub">Kalori Hedefi</p>
@@ -575,7 +575,7 @@ export default function Onboarding() {
                   onChange={(e) => handleFieldChange('healthConsent', e.target.checked)}
                   style={{ width: 'auto' }}
                 />
-                <span className="sub">Saglik verilerimin islenmesine acik riza gosteriyorum</span>
+                <span className="sub">Sağlık verilerimin işlenmesine açık rıza gösteriyorum</span>
               </label>
             </div>
 

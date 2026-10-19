@@ -291,6 +291,34 @@ export default function Workout() {
         </div>
       )}
 
+      {/* Ücretsiz Örnek Antrenman Planları */}
+      <div className="card" style={{ marginBottom: 20 }}>
+        <h3 style={{ marginTop: 0, fontSize: '18px', marginBottom: 16 }}>Ücretsiz Örnek Antrenman Planları</h3>
+        <p className="sub" style={{ marginBottom: 16 }}>
+          Ücretsiz olarak temel programlara göz atabilir ve seçebilirsiniz.
+        </p>
+        <div className="grid grid-2">
+          {PROGRAMS.slice(0, 4).map((program) => (
+            <button
+              key={program.id}
+              className="card"
+              onClick={() => start(program)}
+              style={{
+                cursor: 'pointer',
+                border: active?.id === program.id ? '2px solid #F59E0B' : '1px solid #334155',
+                background: active?.id === program.id ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
+                textAlign: 'left',
+                padding: '16px'
+              }}
+            >
+              <div style={{ fontSize: '32px', marginBottom: 8 }}>{program.icon}</div>
+              <h4 style={{ margin: '0 0 4px', color: '#fff' }}>{program.name}</h4>
+              <p className="sub" style={{ margin: 0, fontSize: '12px' }}>{program.desc}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Bugünkü Kayıtlar & Performans İlerlemesi Yan Yana Düzen */}
       <div className="grid grid-2">
         {/* Bugünkü Kayıtlar */}

@@ -59,8 +59,8 @@ export default function Food() {
 
   const results = useMemo(() => {
     const s = q.trim().toLocaleLowerCase('tr')
-    if (!s) return FOODS.slice(0, 8)
-    return FOODS.filter((f) => f.name.toLocaleLowerCase('tr').includes(s)).slice(0, 12)
+    if (!s) return FOODS.slice(0, 12)
+    return FOODS.filter((f) => f.name.toLocaleLowerCase('tr').includes(s)).slice(0, 20)
   }, [q])
 
   const totals = sumLogs(logs)

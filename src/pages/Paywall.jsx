@@ -26,6 +26,7 @@ export default function Paywall() {
   })
   const [vipSubmitting, setVipSubmitting] = useState(false)
   const [vipSuccess, setVipSuccess] = useState(false)
+  const [isPro, setIsPro] = useState(localStorage.getItem('gfit_is_pro') === 'true')
 
   async function handleRestorePurchases() {
     setLoading(true)
@@ -93,6 +94,25 @@ export default function Paywall() {
     return ''
   }
 
+  if (isPro) {
+    return (
+      <div style={{ maxWidth: '600px', margin: '0 auto', width: '100%', textAlign: 'center', padding: '48px' }}>
+        <div style={{ fontSize: '64px', marginBottom: 16 }}>🎉</div>
+        <h1 style={{ margin: '0 0 16px', color: '#10B981' }}>PRO Üyeliğiniz Aktif!</h1>
+        <p className="sub" style={{ marginBottom: 24 }}>
+          Tüm PRO özelliklere erişiminiz var. Hedeflerinize ulaşmak için devam edin!
+        </p>
+        <button 
+          className="btn" 
+          onClick={() => window.location.href = '/dashboard'}
+          style={{ width: '100%' }}
+        >
+          Dashboard'a Dön
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -107,22 +127,38 @@ export default function Paywall() {
         </p>
       </div>
 
+      {/* 3 Gün Ücretsiz Deneme Banner */}
+      <div className="card" style={{ marginBottom: 24, background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', border: 'none', textAlign: 'center' }}>
+        <div style={{ fontSize: '48px', marginBottom: 8 }}>🎁</div>
+        <h3 style={{ margin: '0 0 8px', color: '#fff' }}>3 Gün Ücretsiz Deneme Başlat</h3>
+        <p className="sub" style={{ marginBottom: 16, color: 'rgba(255,255,255,0.9)' }}>
+          GFIT PRO özelliklerini risksiz deneyin. Memnun kalmazsanız iptal edin.
+        </p>
+        <button 
+          className="btn" 
+          style={{ width: '100%', background: '#fff', color: '#10B981' }}
+          onClick={() => setSelectedPlan('yearly')}
+        >
+          Denemeyi Başlat
+        </button>
+      </div>
+
       <div className="grid grid-2" style={{ alignItems: 'stretch', marginBottom: '24px' }}>
         {/* Aylık Plan */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <h3 style={{ margin: '0 0 6px', fontSize: '20px' }}>Aylık Plan</h3>
             <p className="sub" style={{ marginBottom: '18px' }}>Esnek ve dilediğin zaman iptal et</p>
-            <div style={{ fontSize: '30px', fontWeight: 800, color: 'var(--text)', marginBottom: '18px' }}>
-              ₺149 <span style={{ fontSize: '14px', color: 'var(--muted)', fontWeight: 400 }}>/ ay</span>
+            <div style={{ fontSize: '30px', fontWeight: 800, color: '#f1f5f9', marginBottom: '18px' }}>
+              ₺149 <span style={{ fontSize: '14px', color: '#9ca3af', fontWeight: 400 }}>/ ay</span>
             </div>
-            <ul style={{ color: 'var(--muted)', lineHeight: '2', paddingLeft: '18px', margin: '0 0 24px' }}>
+            <ul style={{ color: '#9ca3af', lineHeight: '2', paddingLeft: '18px', margin: '0 0 24px' }}>
               <li>Sınırsız Barkod & Besin Tarama</li>
               <li>Yapay Zeka Destekli Öğün Analizi</li>
               <li>Kişiselleştirilmiş Antrenman Programı</li>
             </ul>
           </div>
-          <button className="btn ghost" style={{ width: '100%' }}>Aylık Başla</button>
+          <button className="btn" style={{ width: '100%' }}>Aylık Başla</button>
         </div>
 
         {/* Yıllık Pro Plan */}
