@@ -1,5 +1,8 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import Footer from './Footer'
+import FeedbackModal from './FeedbackModal'
 
 const links = [
   { to: '/dashboard', label: 'Özet' },
@@ -19,6 +22,14 @@ const links = [
 
 export default function Layout() {
   const { profile, signOut, demo } = useAuth()
+  const [showFeedback, setShowFeedback] = useState(false)
+
+  useEffect(() => {
+    const handleOpenFeedback = () => setShowFeedback(true)
+    window.addEventListener('openFeedback', handleOpenFeedback)
+    return () => window.removeEventListener('openFeedback', handleOpenFeedback)
+  }, [])
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -43,6 +54,7 @@ export default function Layout() {
           </div>
         </div>
         <Outlet />
+        <Footer />
       </main>
       <nav className="bottom-nav">
         {links.slice(0, 5).map((l) => (
@@ -54,6 +66,7 @@ export default function Layout() {
           Sosyal
         </NavLink>
       </nav>
+      <FeedbackModal isOpen={showFeedback} onClose={() => setShowFeedback(false)} />
     </div>
   )
 }

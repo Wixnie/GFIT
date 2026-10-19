@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import Footer from '../components/Footer'
 
 export default function Landing() {
   const [openFaq, setOpenFaq] = useState(null)
@@ -42,7 +43,7 @@ export default function Landing() {
   return (
     <div style={{ backgroundColor: '#0B101B', color: '#EEF3EA', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '26px', fontWeight: 800, color: '#F59E0B' }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '26px', fontWeight: 800, color: '#F59E0B' }}>
           GFIT
         </div>
         <Link to="/giris" className="btn ghost" style={{ padding: '8px 18px', fontSize: '14px' }}>
@@ -93,16 +94,7 @@ export default function Landing() {
         </div>
       </main>
 
-      <footer style={{ borderTop: '1px solid #1E293B', padding: '24px 20px', textAlign: 'center', color: '#8B9788', fontSize: '13px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginBottom: '12px' }}>
-          <Link to="/kvkk" rel="noopener noreferrer" style={{ color: '#8B9788' }}>KVKK</Link>
-          <Link to="/gizlilik-politikasi" rel="noopener noreferrer" style={{ color: '#8B9788' }}>Gizlilik Politikası</Link>
-          <Link to="/kullanim-kosullari" rel="noopener noreferrer" style={{ color: '#8B9788' }}>Kullanım Koşulları</Link>
-          <Link to="/iade-politikasi" rel="noopener noreferrer" style={{ color: '#8B9788' }}>İade Politikası</Link>
-          <Link to="/mesafeli-satis-sozlesmesi" rel="noopener noreferrer" style={{ color: '#8B9788' }}>Mesafeli Satış</Link>
-        </div>
-        <p style={{ margin: 0 }}>© 2026 GFIT. Tüm hakları saklıdır.</p>
-      </footer>
+      <Footer />
     </div>
   )
 }

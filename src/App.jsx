@@ -23,6 +23,7 @@ import Landing from './pages/Landing'
 import Paywall from './pages/Paywall'
 import Onboarding from './pages/Onboarding'
 import Social from './pages/Social'
+import Support from './pages/Support'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />
           <Route path="/mesafeli-satis-sozlesmesi" element={<MesafeliSatisSozlesmesi />} />
           <Route path="/iade-politikasi" element={<IadePolitikasi />} />
+          <Route path="/destek" element={<Support />} />
 
           {/* Giriş Yapılmış Panel (Sidebar + İçerik) */}
           <Route element={<Guard><Layout /></Guard>}>
