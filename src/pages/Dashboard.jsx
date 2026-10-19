@@ -292,7 +292,7 @@ export default function Dashboard() {
         <Stat label="Kalan kcal" value={Math.round(remaining.calories)} />
         <Stat label="Kalan protein" value={`${Math.round(remaining.protein)}g`} />
         <Stat label="Antrenman" value={workouts.length ? workouts[0].name : 'Yok'} />
-        <Stat label="Supplement" value={`${taken.length}/${SUPPLEMENTS.length}`} />
+        <Stat label="Takviye" value={`${taken.length}/${SUPPLEMENTS.length}`} />
       </div>
 
       {/* Water Reminder */}
@@ -497,7 +497,7 @@ export default function Dashboard() {
 
         <div className="grid" style={{ gap: 16 }}>
           <section className="card">
-            <h3 style={{ marginTop: 0 }}>Supplement</h3>
+            <h3 style={{ marginTop: 0 }}>Takviye</h3>
             {SUPPLEMENTS.map((s) => {
               const on = taken.includes(s.id)
               return (

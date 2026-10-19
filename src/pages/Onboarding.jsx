@@ -542,25 +542,6 @@ export default function Onboarding() {
               />
             </div>
 
-            <div className="row" style={{ marginBottom: 16 }}>
-              <button 
-                type="button"
-                className="btn ghost" 
-                onClick={() => {
-                  localStorage.setItem('gfit_demo_mode', 'true')
-                  localStorage.setItem('gfit_user_profile', JSON.stringify({
-                    display_name: data.username || 'Misafir',
-                    ...data,
-                    ...calculateFinalTargets()
-                  }))
-                  navigate('/dashboard')
-                }}
-                style={{ flex: 1, padding: '12px 16px', fontSize: '14px' }}
-              >
-                Şimdilik Atla (Misafir)
-              </button>
-            </div>
-
             <div className="card" style={{ marginBottom: 16 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                 <input

@@ -6,16 +6,16 @@ import { todayISO } from '../lib/dates'
 import DayNav from '../components/DayNav'
 
 const POPULAR_BRANDS = [
-  { id: 'hiq-whey', name: 'HIQ High Pro+ Whey', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Kas gelisimi icin', brand: 'HIQ' },
-  { id: 'proteinocean-whey', name: 'Proteinocean Whey Protein', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Gunluk protein ihtiyaci', brand: 'Proteinocean' },
-  { id: 'proteinocean-creatine', name: 'Proteinocean Creatine', type: 'creatine', dose: '5g (1 silme)', timing: 'Antrenman oncesi/sonrasi', hint: 'Guc ve performans', brand: 'Proteinocean' },
-  { id: 'bigjoy-whey', name: 'Bigjoy Bigwhey Classic', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Klasik whey', brand: 'Bigjoy' },
-  { id: 'bigjoy-creatine', name: 'Bigjoy Creatine Monohydrate', type: 'creatine', dose: '5g (1 silme)', timing: 'Antrenman oncesi/sonrasi', hint: 'Guc ve performans', brand: 'Bigjoy' },
-  { id: 'ocean-magnesium', name: 'Ocean Extramag Uclu Magnezyum', type: 'magnesium', dose: '2 tablet', timing: 'Yatmadan 1 saat once', hint: 'Kas gevsemesi ve uyku', brand: 'Ocean' },
-  { id: 'ocean-d3k2', name: 'Ocean Vitamin D3K2', type: 'vitamin', dose: '3 damla', timing: 'Yagli ogunle', hint: 'Bagisiklik ve kemik', brand: 'Ocean' },
-  { id: 'hardline-zma', name: 'Hardline ZMA', type: 'recovery', dose: '3 kapsul', timing: 'Yatmadan once', hint: 'Iyilesme ve uyku', brand: 'Hardline' },
-  { id: 'solgar-whey', name: 'Solgar Whey Protein', type: 'protein', dose: '30g (1 silme)', timing: 'Antrenman sonrasi', hint: 'Kalite whey', brand: 'Solgar' },
-  { id: 'natures-omega', name: 'Nature Supreme Omega-3', type: 'omega', dose: '2 kapsul', timing: 'Yemeklerle', hint: 'Kalp ve beyin sagligi', brand: 'Nature Supreme' },
+  { id: 'hiq-whey', name: 'HIQ High Pro+ Whey', type: 'protein', dose: '30g (1 ölçek)', timing: 'Antrenman sonrası', hint: 'Kas gelişimi için', brand: 'HIQ' },
+  { id: 'proteinocean-whey', name: 'Proteinocean Whey Protein', type: 'protein', dose: '30g (1 ölçek)', timing: 'Antrenman sonrası', hint: 'Günlük protein ihtiyacı', brand: 'Proteinocean' },
+  { id: 'proteinocean-creatine', name: 'Proteinocean Creatine', type: 'creatine', dose: '5g (1 ölçek)', timing: 'Antrenman öncesi/sonrası', hint: 'Güç ve performans', brand: 'Proteinocean' },
+  { id: 'bigjoy-whey', name: 'Bigjoy Bigwhey Classic', type: 'protein', dose: '30g (1 ölçek)', timing: 'Antrenman sonrası', hint: 'Klasik whey', brand: 'Bigjoy' },
+  { id: 'bigjoy-creatine', name: 'Bigjoy Creatine Monohydrate', type: 'creatine', dose: '5g (1 ölçek)', timing: 'Antrenman öncesi/sonrası', hint: 'Güç ve performans', brand: 'Bigjoy' },
+  { id: 'ocean-magnesium', name: 'Ocean Extramag Üçlü Magnezyum', type: 'magnesium', dose: '2 tablet', timing: 'Yatmadan 1 saat önce', hint: 'Kas gevşemesi ve uyku', brand: 'Ocean' },
+  { id: 'ocean-d3k2', name: 'Ocean Vitamin D3K2', type: 'vitamin', dose: '3 damla', timing: 'Yağlı öğünle', hint: 'Bağışıklık ve kemik', brand: 'Ocean' },
+  { id: 'hardline-zma', name: 'Hardline ZMA', type: 'recovery', dose: '3 kapsül', timing: 'Yatmadan önce', hint: 'İyileşme ve uyku', brand: 'Hardline' },
+  { id: 'solgar-whey', name: 'Solgar Whey Protein', type: 'protein', dose: '30g (1 ölçek)', timing: 'Antrenman sonrası', hint: 'Kaliteli whey', brand: 'Solgar' },
+  { id: 'natures-omega', name: 'Nature Supreme Omega-3', type: 'omega', dose: '2 kapsül', timing: 'Yemeklerle', hint: 'Kalp ve beyin sağlığı', brand: 'Nature Supreme' },
 ]
 
 export default function Supplements() {
@@ -94,7 +94,7 @@ export default function Supplements() {
       <div className="page-head">
         <div>
           <p className="sub">{done}/{total} tamamlandı</p>
-          <h1>Supplement</h1>
+          <h1>Takviye</h1>
         </div>
         <DayNav date={date} onChange={setDate} />
       </div>
