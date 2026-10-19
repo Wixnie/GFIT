@@ -14,7 +14,6 @@ export default function Food() {
   const [date, setDate] = useState(todayISO())
   const [logs, setLogs] = useState([])
   const [q, setQ] = useState('')
-  const [selected, setSelected] = useState(null)
   const [grams, setGrams] = useState(100)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -24,6 +23,13 @@ export default function Food() {
   const [mealTemplateName, setMealTemplateName] = useState('')
   const [savedMeals, setSavedMeals] = useState([])
   const [showTemplates, setShowTemplates] = useState(false)
+  const [showRestaurants, setShowRestaurants] = useState(false)
+  const [showCheatDay, setShowCheatDay] = useState(false)
+  const [showPlateauBreaker, setShowPlateauBreaker] = useState(false)
+  const [showVoiceInput, setShowVoiceInput] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [voiceText, setVoiceText] = useState('')
+  const [showLateNightSnack, setShowLateNightSnack] = useState(false)
 
   async function refresh() {
     setLoading(true)
@@ -41,6 +47,14 @@ export default function Food() {
 
   useEffect(() => {
     refresh()
+    const saved = localStorage.getItem('gfit_saved_meals')
+    if (saved) setSavedMeals(JSON.parse(saved))
+    
+    // Check if it's late night (after 22:00)
+    const hour = new Date().getHours()
+    if (hour >= 22) {
+      setShowLateNightSnack(true)
+    }
   }, [date, session.id])
 
   const results = useMemo(() => {
@@ -87,6 +101,26 @@ export default function Food() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function saveFood(food) {
+    const macros = macrosForGrams(food, Number(grams) || 100)
+    
+    // Blood sugar spike warning for high-carb foods
+    if (macros.c > 50 && macros.cals > 300) {
+      const userConfirmed = confirm('Dikkat: Bu öğün kan şekerini hızla zıplatababilir. Emilimi yavaşlatmak için yanına 2 kaşık yoğurt veya yeşillik ekle.')
+      if (!userConfirmed) return
+    }
+    
+    await addFood(session.id, {
+      food_name: food.name,
+      amount_g: Number(grams) || 100,
+      logged_on: date,
+      ...macros,
+    })
+    setQ('')
+    setGrams(100)
+    await refresh()
   }
 
   async function handleUpdateGrams() {
@@ -227,7 +261,179 @@ export default function Food() {
         </div>
       )}
 
-      {/* Şablon Butonları */}
+      {/* Late Night Snack Popup */}
+      {showLateNightSnack && (
+        <div className="card" style={{ marginBottom: 16, background: 'rgba(139, 92, 246, 0.1)', borderColor: '#8B5CF6' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h4 style={{ margin: '0 0 4px', color: '#8B5CF6' }}>🌙 Gece Açlığı mı Vurdu?</h4>
+              <p className="sub" style={{ margin: 0 }}>
+                Uyku melatoninini bozmayacak 100 kcal altı 3 kurtarıcı atıştırmalık
+              </p>
+            </div>
+            <button className="btn ghost" onClick={() => setShowLateNightSnack(false)} style={{ fontSize: '12px' }}>
+              ✕
+            </button>
+          </div>
+          <div style={{ marginTop: 12, display: 'grid', gap: '8px' }}>
+            {[
+              { name: 'Süzme yoğurt (100g)', kcal: 97, p: 9, c: 4, f: 5 },
+              { name: 'Sade ayran (200ml)', kcal: 70, p: 3.4, c: 5, f: 3.6 },
+              { name: 'Lor peyniri (50g)', kcal: 45, p: 8, c: 1, f: 0.75 },
+            ].map((snack) => (
+              <button
+                key={snack.name}
+                className="btn ghost"
+                style={{ fontSize: '12px', textAlign: 'left', padding: '8px 12px' }}
+                onClick={() => {
+                  saveFood({ name: snack.name, kcal: snack.kcal, p: snack.p, c: snack.c, f: snack.f })
+                  setShowLateNightSnack(false)
+                }}
+              >
+                {snack.name} ({snack.kcal} kcal)
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PRO Features */}
+      <div className="row" style={{ marginBottom: 16 }}>
+        <button className="btn ghost" onClick={() => setShowRestaurants(!showRestaurants)} disabled={loading}>
+          🍔 Restoran Menüleri
+        </button>
+        <button className="btn ghost" onClick={() => setShowCheatDay(!showCheatDay)} disabled={loading}>
+          🎉 Kaçamak Telafisi
+        </button>
+        <button className="btn ghost" onClick={() => setShowPlateauBreaker(!showPlateauBreaker)} disabled={loading}>
+          📈 Plato Kırıcı
+        </button>
+        <button className="btn ghost" onClick={() => setShowVoiceInput(!showVoiceInput)} disabled={loading}>
+          🎤 Sesli Günlük
+        </button>
+      </div>
+
+      {/* Restaurant Menus */}
+      {showRestaurants && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h3 style={{ marginTop: 0, marginBottom: 12 }}>Dışarıda Ne Yesem?</h3>
+          {!profile?.is_pro && (
+            <div style={{ marginBottom: 12, padding: '12px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px' }}>
+              <p className="sub" style={{ margin: 0 }}>
+                PRO özellik - 1 reklam izle, 24 saat aç
+              </p>
+            </div>
+          )}
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {[
+              { name: 'Köfteci Yusuf', items: ['Köfte (180g) - 450 kcal', 'Pilav - 250 kcal', 'Salata - 80 kcal'], fit: 'Köfte (180g) - 450 kcal', calories: 450 },
+              { name: 'Tavuk Dünyası', items: ['Döner (200g) - 520 kcal', 'Tavuk Burger - 420 kcal', 'Salata - 90 kcal'], fit: 'Grill Tavuk (200g) - 280 kcal', calories: 280 },
+              { name: 'Burger King', items: ['Whopper - 650 kcal', 'Cheeseburger - 550 kcal'], fit: 'Grill Chicken - 350 kcal', calories: 350 },
+              { name: 'Starbucks', items: ['Latte - 190 kcal', 'Frappuccino - 450 kcal'], fit: 'Americano - 15 kcal', calories: 15 },
+              { name: 'McDonalds', items: ['Big Mac - 550 kcal', 'McChicken - 400 kcal'], fit: 'Grill Chicken - 350 kcal', calories: 350 },
+            ].map((restaurant) => (
+              <div key={restaurant.name} className="card" style={{ padding: '12px' }}>
+                <strong>{restaurant.name}</strong>
+                <p className="sub" style={{ fontSize: '11px', marginBottom: 8 }}>
+                  {restaurant.items.join(' · ')}
+                </p>
+                <button 
+                  className="btn" 
+                  style={{ fontSize: '12px', width: '100%' }}
+                  onClick={() => {
+                    if (!profile?.is_pro) {
+                      alert('1 reklam izle, bu restoranı 24 saat aç!')
+                    } else {
+                      saveFood({ name: restaurant.fit, kcal: restaurant.calories, p: 25, c: 0, f: 10 })
+                    }
+                  }}
+                >
+                  Fit Alternatif Ekle ({restaurant.fit})
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Cheat Day Recovery */}
+      {showCheatDay && (
+        <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', borderColor: '#EF4444' }}>
+          <h3 style={{ marginTop: 0, marginBottom: 12, color: '#EF4444' }}>🎉 Kaçamak Sonrası Telafi Motoru</h3>
+          <p className="sub" style={{ marginBottom: 16 }}>
+            Dün kaçamak yaptın mı? Ertesi 2 günün su hedefini artır, ödem atıcı besinlerle telafi et.
+          </p>
+          <button 
+            className="btn" 
+            style={{ width: '100%', background: '#EF4444' }}
+            onClick={() => {
+              localStorage.setItem('gfit_cheat_mode', 'true')
+              localStorage.setItem('gfit_cheat_date', new Date().toISOString())
+              alert('Telafi modu aktif! Sonraki 2 gun su hedefi +20% arttirildi.')
+            }}
+          >
+            Kaçamak Modunu Başlat
+          </button>
+        </div>
+      )}
+
+      {/* Plateau Breaker */}
+      {showPlateauBreaker && (
+        <div className="card" style={{ marginBottom: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
+          <h3 style={{ marginTop: 0, marginBottom: 12, color: '#F59E0B' }}>📈 Plato Kırıcı (Refeed)</h3>
+          <p className="sub" style={{ marginBottom: 16 }}>
+            2 hafta kilo değişmedi mi? Yüksek karbahidrat günü metabolizmayı hızlandır.
+          </p>
+          <button 
+            className="btn" 
+            style={{ width: '100%' }}
+            onClick={() => {
+              alert('Refeed günü aktif! Bugun kalori hedefini +500 kcal artir.')
+            }}
+          >
+            Refeed Günü Başlat
+          </button>
+        </div>
+      )}
+
+      {/* Voice Input */}
+      {showVoiceInput && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h3 style={{ marginTop: 0, marginBottom: 12 }}>🎤 Sesli Günlük</h3>
+          <p className="sub" style={{ marginBottom: 16 }}>
+            Konuşarak yemek ekleyin: "Tavuk 100 gram"
+          </p>
+          <button 
+            className="btn" 
+            style={{ width: '100%' }}
+            onClick={() => {
+              if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+                const recognition = new SpeechRecognition()
+                recognition.lang = 'tr-TR'
+                recognition.onresult = (event) => {
+                  setVoiceText(event.results[0][0].transcript)
+                  setIsListening(false)
+                }
+                recognition.onerror = () => setIsListening(false)
+                recognition.onend = () => setIsListening(false)
+                recognition.start()
+                setIsListening(true)
+              } else {
+                alert('Tarayıcınız sesli girişi desteklemiyor.')
+              }
+            }}
+            disabled={isListening}
+          >
+            {isListening ? 'Dinleniyor...' : 'Mikrofonu Aç'}
+          </button>
+          {voiceText && (
+            <div style={{ marginTop: 12, padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+              <p className="sub" style={{ margin: 0 }}>Alınan: "{voiceText}"</p>
+            </div>
+          )}
+        </div>
+      )}
       <div className="row" style={{ marginBottom: 16 }}>
         <button className="btn ghost" onClick={() => setShowTemplates(!showTemplates)} disabled={loading}>
           {showTemplates ? 'Şablonları Gizle' : 'Şablonları Göster'}

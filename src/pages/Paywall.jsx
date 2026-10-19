@@ -162,6 +162,17 @@ export default function Paywall() {
         )}
       </div>
 
+      {/* Medical Disclaimer */}
+      <div className="card" style={{ marginTop: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
+        <h4 style={{ margin: '0 0 8px', color: '#F59E0B' }}>Tıbbi Yasal Uyarı</h4>
+        <p className="sub" style={{ lineHeight: 1.6, fontSize: '12px' }}>
+          GFIT'te sunulan kalori, TDEE ve diger beslenme tavsiyeleri tıbbi teşhis veya tedavi değildir. 
+          Bu bilgiler genel tavsiye niteliğindedir ve kişisel sağlık durumunuza uyarlanmamış olabilir. 
+          Herhangi bir sağlık sorunu varsa veya diyet değişikliği yapmayı planlıyorsanız, 
+          lutfen önce bir sağlık uzmanına veya diyetisyene danışın.
+        </p>
+      </div>
+
       {/* 3D Secure Payment Modal */}
       {showPaymentModal && (
         <>

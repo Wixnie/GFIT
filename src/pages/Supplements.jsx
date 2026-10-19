@@ -104,11 +104,31 @@ export default function Supplements() {
         </div>
       )}
 
-      {/* PRO Özellik Banner */}
+      {/* PRO Notification Templates */}
       {profile?.is_pro && (
         <div className="card" style={{ marginBottom: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
           <h3 style={{ margin: '0 0 8px', color: '#F59E0B' }}>PRO: Akıllı Bildirim Şablonu</h3>
-          <p className="sub">Supplement saatlerini otomatik hatırlatıcı olarak ayarla.</p>
+          <p className="sub" style={{ marginBottom: 12 }}>Supplement saatlerini otomatik hatırlatıcı olarak ayarla.</p>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+            <div className="field">
+              <label>Sabah Bildirimi (09:00)</label>
+              <select className="input" defaultValue="on">
+                <option value="on">Açık - C Vitamini & Multivitamin</option>
+                <option value="off">Kapalı</option>
+              </select>
+            </div>
+            <div className="field">
+              <label>Akşam Bildirimi (21:00)</label>
+              <select className="input" defaultValue="on">
+                <option value="on">Açık - Magnezyum & ZMA</option>
+                <option value="off">Kapalı</option>
+              </select>
+            </div>
+            <p className="sub" style={{ fontSize: '11px', marginTop: 8 }}>
+              ☀️ Sabah: "Sabah rutini: C Vitamini ve Multivitaminini almayı unutma!"<br/>
+              🌙 Akşam: "Akşam rutini: Magnezyumunu alıp derin bir uykuya hazırlan."
+            </p>
+          </div>
         </div>
       )}
 

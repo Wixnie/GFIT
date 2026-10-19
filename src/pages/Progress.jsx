@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { listRecentFood, listWeight } from '../lib/api'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { calculateProjectedWeight } from '../lib/tdee'
 
 export default function Progress() {
   const { session, profile } = useAuth()
@@ -23,7 +24,6 @@ export default function Progress() {
     return Object.values(map).sort((a, b) => a.day.localeCompare(b.day))
   }, [foods])
 
-  // Kilo verilerini hatalı uç değerlerden (örneğin 300kg üstü yanlış girişlerden) arındır
   const cleanWeights = useMemo(() => {
     return (weights || [])
       .filter((w) => Number(w.weight_kg) > 30 && Number(w.weight_kg) < 250)
@@ -40,7 +40,6 @@ export default function Progress() {
       </div>
 
       <div className="grid" style={{ gap: '20px' }}>
-        {/* Günlük Kalori Grafiği (Canlı Degrade Amber / Altın) */}
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h3 style={{ margin: 0, fontSize: '18px' }}>Günlük Kalori</h3>
@@ -72,7 +71,6 @@ export default function Progress() {
           )}
         </div>
 
-        {/* Günlük Protein Grafiği (Elektrik Zümrüt Yeşili) */}
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h3 style={{ margin: 0, fontSize: '18px' }}>Günlük Protein Alımı</h3>
@@ -104,7 +102,6 @@ export default function Progress() {
           )}
         </div>
 
-        {/* Kilo Eğilimi (Canlı Cyan / Elektrik Mavisi) */}
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h3 style={{ margin: 0, fontSize: '18px' }}>Kilo Değişim Trendi</h3>
@@ -135,6 +132,45 @@ export default function Progress() {
             <p className="sub">Kilo grafiği için Kilo sayfasından en az iki tartı kaydı ekleyin.</p>
           )}
         </div>
+
+        {cleanWeights.length >= 2 && (() => {
+          const currentWeight = cleanWeights[cleanWeights.length - 1]?.weight_kg || profile?.weight_kg || 75
+          const targetWeight = currentWeight - 5
+          const avgCalories = byDay.length > 0 ? byDay.reduce((sum, day) => sum + day.calories, 0) / byDay.length : 0
+          const calorieDeficit = (profile?.calorie_target || 2000) - avgCalories
+          const projection = calculateProjectedWeight(currentWeight, targetWeight, calorieDeficit)
+          
+          if (projection && projection.daysNeeded > 0) {
+            return (
+              <div className="card" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
+                <h3 style={{ margin: '0 0 12px', color: '#F59E0B' }}>Gelecek Ayna Simülatörü</h3>
+                <p className="sub" style={{ marginBottom: 16 }}>
+                  Bu tempoda gidersen {projection.daysNeeded} gün sonra ({projection.targetDate}) tam {targetWeight.toFixed(1)} kg olacaksın.
+                </p>
+                <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+                  <p className="sub" style={{ margin: 0 }}>
+                    Mevcut tempoda: {calorieDeficit > 0 ? `${Math.round(calorieDeficit)} kcal/ gün açık` : `${Math.abs(calorieDeficit)} kcal/ gün fazla`}
+                  </p>
+                </div>
+              </div>
+            )
+          }
+          return null
+        })()}
+      </div>
+
+      <div className="card" style={{ marginTop: 20 }}>
+        <h3 style={{ margin: '0 0 12px' }}>Diyetisyene Özel Sağlık Raporu</h3>
+        <p className="sub" style={{ marginBottom: 16 }}>
+          Son 30 günlük verilerinizi tek sayfada toplayan PDF raporu.
+        </p>
+        <button 
+          className="btn" 
+          style={{ width: '100%' }}
+          onClick={() => window.print()}
+        >
+          PDF İndir / Yazdır
+        </button>
       </div>
     </div>
   )

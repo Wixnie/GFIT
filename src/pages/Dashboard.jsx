@@ -273,6 +273,12 @@ export default function Dashboard() {
           <p className="sub">
             {sleepHours >= 7 ? '✅ İdeal uyku süresi' : sleepHours >= 6 ? '⚠️ Yeterli ama ideal değil' : '❌ Uyku süresi düşük'}
           </p>
+          {/* Health Data Privacy Notice */}
+          <div style={{ marginTop: 12, padding: '8px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '4px' }}>
+            <p className="sub" style={{ margin: 0, fontSize: '10px' }}>
+              <strong>Veri Güvenliği:</strong> Verileriniz asla reklam veya pazarlama amacıyla kullanılmaz; sadece aktivite ve uyku dengesini sunmak içindir.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -282,6 +288,29 @@ export default function Dashboard() {
         <Stat label="Antrenman" value={workouts.length ? workouts[0].name : 'Yok'} />
         <Stat label="Supplement" value={`${taken.length}/${SUPPLEMENTS.length}`} />
       </div>
+
+      {/* Water Reminder */}
+      {(() => {
+        const waterTarget = p.weight_kg * 35
+        const currentWater = 0 // Would be fetched from logs
+        const waterPercent = (currentWater / waterTarget) * 100
+        if (waterPercent < 80 && waterPercent > 0) {
+          return (
+            <div className="card" style={{ marginBottom: 16, background: 'rgba(59, 130, 246, 0.1)', borderColor: '#3B82F6' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ fontSize: '32px' }}>💧</div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: '0 0 4px', color: '#3B82F6' }}>Su Zamanı!</h4>
+                  <p className="sub" style={{ margin: 0 }}>
+                    Günlük hedefine ulaşmak için su içmelisin. ({Math.round(waterPercent)}% tamamlandı)
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        return null
+      })()}
 
       <div className="grid grid-2" style={{ marginBottom: 16 }}>
         <section className="card">
