@@ -19,6 +19,7 @@ import { todayISO } from '../lib/dates'
 import { suggestFoods, sumLogs } from '../lib/suggestions'
 import DayNav from '../components/DayNav'
 import MacroBars from '../components/MacroBars'
+import NudgeBanner from '../components/NudgeBanner'
 
 export default function Dashboard() {
   const { profile, session } = useAuth()
@@ -78,6 +79,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     refresh().catch(() => {})
+    
+    // Update last activity time
+    localStorage.setItem('gfit_last_activity', new Date().toDateString())
+    localStorage.setItem('gfit_last_activity_time', Date.now().toString())
   }, [date, session.id])
 
   // Calculate fasting hours
@@ -176,6 +181,7 @@ export default function Dashboard() {
 
   return (
     <div className="app-container">
+      <NudgeBanner />
       <div className="page-head">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>

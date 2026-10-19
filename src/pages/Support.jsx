@@ -19,8 +19,8 @@ export default function Support() {
     setError(null)
 
     try {
-      // Formspree endpoint - Replace YOUR_FORMSPREE_ID with actual form ID from Formspree
-      const response = await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
+      // Formspree endpoint
+      const response = await fetch('https://formspree.io/f/mqpeoqal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ export default function Support() {
           Acil sorularınız için WhatsApp üzerinden bize ulaşabilirsiniz.
         </p>
         <a
-          href="https://wa.me/905XXXXXXXXX"
+          href="https://wa.me/905555555555"
           target="_blank"
           rel="noopener noreferrer"
           className="btn"

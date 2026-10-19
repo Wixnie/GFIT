@@ -10,6 +10,8 @@ export const FOODS = [
   { id: 'somon', name: 'Somon', kcal: 208, p: 20, c: 0, f: 13, cat: 'protein' },
   { id: 'ton', name: 'Ton balığı (suda)', kcal: 116, p: 26, c: 0, f: 1, cat: 'protein' },
   { id: 'yumurta', name: 'Yumurta (haşlanmış)', kcal: 155, p: 13, c: 1.1, f: 11, cat: 'protein' },
+  { id: 'yumurta-ak', name: 'Yumurta Akı (Sadece Ak) 🥚', kcal: 17, p: 3.6, c: 0.2, f: 0.1, cat: 'protein' },
+  { id: 'yumurta-sarisiz', name: 'Sarısı Çıkarılmış Yumurta 🥚', kcal: 52, p: 11, c: 0.7, f: 0.2, cat: 'protein' },
   { id: 'yumurta-beyaz', name: 'Yumurta akı', kcal: 52, p: 11, c: 0.7, f: 0.2, cat: 'protein' },
   { id: 'lor', name: 'Lor peyniri', kcal: 90, p: 16, c: 2, f: 1.5, cat: 'protein' },
   { id: 'beyaz-peynir', name: 'Beyaz peynir', kcal: 264, p: 17, c: 1.4, f: 21, cat: 'protein' },

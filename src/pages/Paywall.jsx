@@ -50,7 +50,7 @@ export default function Paywall() {
     e.preventDefault()
     setVipSubmitting(true)
     try {
-      const response = await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
+      const response = await fetch('https://formspree.io/f/mqpeoqal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -486,7 +486,7 @@ export default function Paywall() {
                     Alternatif olarak WhatsApp üzerinden bize ulaşabilirsiniz:
                   </p>
                   <a
-                    href="https://wa.me/905XXXXXXXXX"
+                    href="https://wa.me/905555555555"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn ghost"
