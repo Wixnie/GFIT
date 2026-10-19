@@ -5,6 +5,7 @@ export default function Paywall() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showVipModal, setShowVipModal] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
   const [paymentStep, setPaymentStep] = useState('card') // 'card', 'verify', 'success'
   const [cardData, setCardData] = useState({
@@ -14,6 +15,17 @@ export default function Paywall() {
     cvv: ''
   })
   const [smsCode, setSmsCode] = useState('')
+  const [vipFormData, setVipFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    goals: '',
+    experience: '',
+    _subject: 'GFIT VIP Koçluk Başvurusu',
+    _replyto: ''
+  })
+  const [vipSubmitting, setVipSubmitting] = useState(false)
+  const [vipSuccess, setVipSuccess] = useState(false)
 
   async function handleRestorePurchases() {
     setLoading(true)
@@ -34,6 +46,46 @@ export default function Paywall() {
     }
   }
 
+  async function handleVipSubmit(e) {
+    e.preventDefault()
+    setVipSubmitting(true)
+    try {
+      const response = await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(vipFormData)
+      })
+
+      if (response.ok) {
+        setVipSuccess(true)
+        setVipFormData({
+          name: '',
+          email: '',
+          phone: '',
+          goals: '',
+          experience: '',
+          _subject: 'GFIT VIP Koçluk Başvurusu',
+          _replyto: ''
+        })
+        setTimeout(() => {
+          setVipSuccess(false)
+          setShowVipModal(false)
+        }, 3000)
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Form gonderilemedi')
+      }
+    } catch (err) {
+      console.error('VIP form error:', err)
+      alert('Başvuru gönderilirken hata oluştu. Lütfen tekrar deneyin.')
+    } finally {
+      setVipSubmitting(false)
+    }
+  }
+
   const getPlanPrice = (plan) => {
     if (plan === 'yearly') return '₺500'
     if (plan === 'monthly') return '₺149'
@@ -47,7 +99,7 @@ export default function Paywall() {
         <div className="chip" style={{ color: '#F59E0B', borderColor: '#F59E0B', display: 'inline-block', marginBottom: '12px' }}>
           GFIT PRO
         </div>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: '32px', margin: '0 0 8px' }}>
+        <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: '32px', margin: '0 0 8px' }}>
           Potansiyelini Açığa Çıkar
         </h1>
         <p className="sub" style={{ fontSize: '15px' }}>
@@ -135,15 +187,13 @@ export default function Paywall() {
       <div className="card" style={{ marginBottom: '24px', textAlign: 'center' }}>
         <h3 style={{ margin: '0 0 8px' }}>VIP Koçluk</h3>
         <p className="sub" style={{ marginBottom: '16px' }}>Birebir WhatsApp koçluk desteği</p>
-        <a 
-          href="https://wa.me/905555555555" 
-          rel="noopener noreferrer" 
-          target="_blank"
+        <button 
           className="btn" 
-          style={{ display: 'inline-block', textDecoration: 'none', background: '#25D366' }}
+          onClick={() => setShowVipModal(true)}
+          style={{ background: '#25D366', color: '#fff' }}
         >
-          WhatsApp ile Başvur
-        </a>
+          VIP Koçluğa Başvur
+        </button>
       </div>
 
       <div className="card" style={{ textAlign: 'center', padding: '18px' }}>
@@ -324,6 +374,135 @@ export default function Paywall() {
                     Devam Et
                   </button>
                 </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* VIP Koçluk Modal */}
+      {showVipModal && (
+        <>
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 16
+          }}>
+            <div className="card" style={{ maxWidth: 500, width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0 }}>VIP Koçluk Başvurusu</h3>
+                <button className="btn ghost" onClick={() => setShowVipModal(false)}>✕</button>
+              </div>
+
+              {vipSuccess ? (
+                <div style={{ textAlign: 'center', padding: '32px' }}>
+                  <div style={{ fontSize: '64px', marginBottom: 16 }}>✅</div>
+                  <h3 style={{ margin: '0 0 8px', color: '#10B981' }}>Başvurunuz Alındı!</h3>
+                  <p className="sub" style={{ marginBottom: 24 }}>
+                    En kısa sürede WhatsApp üzerinden size dönüş yapacağız.
+                  </p>
+                  <button 
+                    className="btn" 
+                    onClick={() => {
+                      setVipSuccess(false)
+                      setShowVipModal(false)
+                    }}
+                  >
+                    Tamam
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleVipSubmit}>
+                  <div className="field">
+                    <label>Ad Soyad</label>
+                    <input
+                      className="input"
+                      value={vipFormData.name}
+                      onChange={(e) => setVipFormData({ ...vipFormData, name: e.target.value })}
+                      placeholder="Adınız Soyadınız"
+                      required
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>E-posta</label>
+                    <input
+                      className="input"
+                      type="email"
+                      value={vipFormData.email}
+                      onChange={(e) => setVipFormData({ ...vipFormData, email: e.target.value, _replyto: e.target.value })}
+                      placeholder="ornek@email.com"
+                      required
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>Telefon (WhatsApp)</label>
+                    <input
+                      className="input"
+                      type="tel"
+                      value={vipFormData.phone}
+                      onChange={(e) => setVipFormData({ ...vipFormData, phone: e.target.value })}
+                      placeholder="905XXXXXXXXX"
+                      required
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>Hedefleriniz</label>
+                    <textarea
+                      className="input"
+                      value={vipFormData.goals}
+                      onChange={(e) => setVipFormData({ ...vipFormData, goals: e.target.value })}
+                      placeholder="Kilo vermek, kas yapmak, vs."
+                      rows={3}
+                      style={{ resize: 'vertical' }}
+                      required
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label>Spor Geçmişiniz</label>
+                    <textarea
+                      className="input"
+                      value={vipFormData.experience}
+                      onChange={(e) => setVipFormData({ ...vipFormData, experience: e.target.value })}
+                      placeholder="Spor yapma süreniz, deneyiminiz..."
+                      rows={3}
+                      style={{ resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <button className="btn" type="submit" disabled={vipSubmitting} style={{ width: '100%' }}>
+                    {vipSubmitting ? 'Gönderiliyor...' : 'Başvuruyu Gönder'}
+                  </button>
+
+                  <p className="sub" style={{ marginTop: 12, fontSize: '12px', textAlign: 'center' }}>
+                    Alternatif olarak WhatsApp üzerinden bize ulaşabilirsiniz:
+                  </p>
+                  <a
+                    href="https://wa.me/905XXXXXXXXX"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn ghost"
+                    style={{ 
+                      width: '100%', 
+                      display: 'inline-block',
+                      textAlign: 'center',
+                      marginTop: 8,
+                      background: '#25D366',
+                      color: '#fff',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    💬 WhatsApp ile İletişime Geç
+                  </a>
+                </form>
               )}
             </div>
           </div>

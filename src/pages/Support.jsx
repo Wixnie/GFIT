@@ -5,21 +5,53 @@ export default function Support() {
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
+    _subject: 'GFIT Destek Formu - Yeni Mesaj',
+    _replyto: '' // Will be set from email field
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    
-    // Simulate support ticket submission
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    setSuccess(true)
-    setLoading(false)
-    setFormData({ name: '', email: '', subject: '', message: '' })
+    setError(null)
+
+    try {
+      // Formspree endpoint - Replace YOUR_FORMSPREE_ID with actual form ID from Formspree
+      const response = await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+
+      if (response.ok) {
+        setSuccess(true)
+        setFormData({ 
+          name: '', 
+          email: '', 
+          subject: '', 
+          message: '',
+          _subject: 'GFIT Destek Formu - Yeni Mesaj',
+          _replyto: ''
+        })
+        setTimeout(() => {
+          setSuccess(false)
+        }, 3000)
+      } else {
+        const data = await response.json()
+        throw new Error(data.error || 'Form gonderilemedi')
+      }
+    } catch (err) {
+      console.error('Form submission error:', err)
+      setError('Mesaj gönderilirken hata oluştu. Lütfen tekrar deneyin.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (success) {
@@ -34,9 +66,9 @@ export default function Support() {
 
         <div className="card" style={{ textAlign: 'center', padding: '48px' }}>
           <div style={{ fontSize: '64px', marginBottom: 16 }}>✅</div>
-          <h3 style={{ margin: '0 0 8px', color: '#10B981' }}>Mesajınız Gönderildi</h3>
+          <h3 style={{ margin: '0 0 8px', color: '#10B981' }}>Mesajınız Başarıyla İletildi</h3>
           <p className="sub" style={{ marginBottom: 24 }}>
-            Ekibimiz en kısa sürede size dönecektir.
+            En kısa sürede dönüş yapacağız!
           </p>
           <button 
             className="btn" 
@@ -82,7 +114,7 @@ export default function Support() {
               className="input"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value, _replyto: e.target.value })}
               placeholder="ornek@email.com"
               required
             />
@@ -112,6 +144,12 @@ export default function Support() {
             />
           </div>
 
+          {error && (
+            <div style={{ marginBottom: 16, padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: '#EF4444', fontSize: '13px' }}>
+              {error}
+            </div>
+          )}
+
           <button className="btn" type="submit" disabled={loading} style={{ width: '100%' }}>
             {loading ? 'Gönderiliyor...' : 'Gönder'}
           </button>
@@ -123,8 +161,8 @@ export default function Support() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div>
             <p className="sub" style={{ margin: 0 }}>E-posta</p>
-            <a href="mailto:destek@g-fitt.app" style={{ color: '#F59E0B', textDecoration: 'none' }}>
-              destek@g-fitt.app
+            <a href="mailto:getgfitapp@gmail.com" style={{ color: '#F59E0B', textDecoration: 'none' }}>
+              getgfitapp@gmail.com
             </a>
           </div>
           <div>
@@ -132,6 +170,29 @@ export default function Support() {
             <p style={{ margin: 0 }}>Genellikle 24 saat içinde</p>
           </div>
         </div>
+      </div>
+
+      <div className="card" style={{ background: 'rgba(37, 211, 102, 0.1)', borderColor: '#25D366' }}>
+        <h3 style={{ marginTop: 0, marginBottom: 16, color: '#25D366' }}>WhatsApp ile Destek Al</h3>
+        <p className="sub" style={{ marginBottom: 16 }}>
+          Acil sorularınız için WhatsApp üzerinden bize ulaşabilirsiniz.
+        </p>
+        <a
+          href="https://wa.me/905XXXXXXXXX"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn"
+          style={{ 
+            width: '100%', 
+            background: '#25D366',
+            color: '#fff',
+            display: 'inline-block',
+            textAlign: 'center',
+            textDecoration: 'none'
+          }}
+        >
+          💬 WhatsApp ile Destek Al
+        </a>
       </div>
     </div>
   )

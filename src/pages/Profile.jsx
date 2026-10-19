@@ -124,7 +124,7 @@ export default function Profile() {
           <h3 style={{ marginTop: 0 }}>VIP Koçluk</h3>
           <p className="sub" style={{ marginBottom: 16 }}>Birebir WhatsApp koçluk desteği</p>
           <a 
-            href="https://wa.me/905555555555" 
+            href="https://wa.me/905XXXXXXXXX" 
             rel="noopener noreferrer" 
             target="_blank"
             className="btn" 
