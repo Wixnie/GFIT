@@ -7,6 +7,7 @@ export default function Signup() {
   const { session, signUp, demo } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
@@ -20,7 +21,7 @@ export default function Signup() {
     setError('')
     setInfo('')
     try {
-      await signUp(email, password, displayName)
+      await signUp(email, password, displayName, phone)
       if (!demo) setInfo('Kayıt alındı. E-posta onayını açtıysan gelen kutunu kontrol et, sonra giriş yap.')
     } catch (err) {
       setError(err.message || 'Kayıt başarısız')
@@ -42,6 +43,10 @@ export default function Signup() {
         <div className="field">
           <label>E-posta</label>
           <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div className="field">
+          <label>Telefon Numarası</label>
+          <input className="input" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05XX XXX XX XX" />
         </div>
         <div className="field">
           <label>Şifre (min 6)</label>

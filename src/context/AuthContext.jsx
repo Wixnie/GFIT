@@ -53,16 +53,16 @@ export function AuthProvider({ children }) {
       setProfile,
       loading,
       demo: !isSupabaseConfigured,
-      async signUp(email, password, display_name) {
+      async signUp(email, password, display_name, phone) {
         if (isSupabaseConfigured) {
           const { error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { display_name } },
+            options: { data: { display_name, phone } },
           })
           if (error) throw error
         } else {
-          await hydrate(localAuth.signUp({ email, password, display_name }))
+          await hydrate(localAuth.signUp({ email, password, display_name, phone }))
         }
       },
       async signIn(email, password) {

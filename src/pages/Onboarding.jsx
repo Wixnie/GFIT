@@ -20,6 +20,7 @@ export default function Onboarding() {
     allergies: '',
     username: '',
     email: '',
+    phone: '',
     password: '',
     birth_date: '',
     kvkkAccepted: false,
@@ -82,19 +83,7 @@ export default function Onboarding() {
       }))
 
       if (data.email && data.password) {
-        await signUp(data.email, data.password, {
-          display_name: data.username,
-          age: data.age,
-          height_cm: data.height_cm,
-          weight_kg: data.weight_kg,
-          gender: data.gender,
-          activity_level: data.activity_level,
-          goal: data.goal,
-          calorie_target: targets.targetCalories,
-          protein_target: targets.macros.protein,
-          carb_target: targets.macros.carbs,
-          fat_target: targets.macros.fat
-        })
+        await signUp(data.email, data.password, data.username, data.phone)
       } else {
         localStorage.setItem('gfit_demo_mode', 'true')
         localStorage.setItem('gfit_user_profile', JSON.stringify({
@@ -529,6 +518,16 @@ export default function Onboarding() {
                 placeholder="ornek@email.com"
                 value={data.email}
                 onChange={(e) => handleFieldChange('email', e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>Telefon Numarası</label>
+              <input
+                className="input"
+                type="tel"
+                placeholder="05XX XXX XX XX"
+                value={data.phone}
+                onChange={(e) => handleFieldChange('phone', e.target.value)}
               />
             </div>
             <div className="field">
