@@ -26,14 +26,14 @@ export default function Paywall() {
   })
   const [vipSubmitting, setVipSubmitting] = useState(false)
   const [vipSuccess, setVipSuccess] = useState(false)
-  const [isPro, setIsPro] = useState(localStorage.getItem('gfit_is_pro') === 'true')
+  const [isPro, setIsPro] = useState(localStorage.getItem('gfitt_is_pro') === 'true')
 
   async function handleRestorePurchases() {
     setLoading(true)
     setMessage(null)
     try {
       await new Promise((resolve) => setTimeout(resolve, 1200))
-      const isPro = localStorage.getItem('gfit_is_pro')
+      const isPro = localStorage.getItem('gfitt_is_pro')
       if (isPro === 'true') {
         setMessage('Satın alımlarınız kontrol edildi. Aktif PRO aboneliğiniz bulundu.')
       } else {
@@ -378,7 +378,7 @@ export default function Paywall() {
                       setTimeout(() => {
                         setLoading(false)
                         setPaymentStep('success')
-                        localStorage.setItem('gfit_is_pro', 'true')
+                        localStorage.setItem('gfitt_is_pro', 'true')
                       }, 1500)
                     }}
                     disabled={loading || smsCode.length !== 6}

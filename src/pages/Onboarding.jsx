@@ -14,7 +14,7 @@ export default function Onboarding() {
     age: 25,
     height_cm: 175,
     weight_kg: 75,
-    goal_rate: 'lose',
+    goal_rate: 0.25,
     activity_level: 'moderate',
     diet_type: '',
     allergies: '',
@@ -53,6 +53,13 @@ export default function Onboarding() {
     setData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleCardSelect = (field, value, nextStepDelay = 250) => {
+    setData(prev => ({ ...prev, [field]: value }))
+    setTimeout(() => {
+      handleNext()
+    }, nextStepDelay)
+  }
+
   const calculateFinalTargets = () => {
     const bmr = calculateBMR(data.weight_kg, data.height_cm, data.age, data.gender)
     const tdee = calculateTDEE(bmr, data.activity_level)
@@ -77,7 +84,7 @@ export default function Onboarding() {
     try {
       const targets = calculateFinalTargets()
       
-      localStorage.setItem('gfit_onboarding_data', JSON.stringify({
+      localStorage.setItem('gfitt_onboarding_data', JSON.stringify({
         ...data,
         ...targets
       }))
@@ -85,8 +92,8 @@ export default function Onboarding() {
       if (data.email && data.password) {
         await signUp(data.email, data.password, data.username, data.phone)
       } else {
-        localStorage.setItem('gfit_demo_mode', 'true')
-        localStorage.setItem('gfit_user_profile', JSON.stringify({
+        localStorage.setItem('gfitt_demo_mode', 'true')
+        localStorage.setItem('gfitt_user_profile', JSON.stringify({
           display_name: data.username || 'Misafir',
           ...data,
           ...targets
@@ -114,7 +121,7 @@ export default function Onboarding() {
       
       if (isBirthday) {
         setShowConfetti(true)
-        localStorage.setItem('gfit_birthday_pro', 'true')
+        localStorage.setItem('gfitt_birthday_pro', 'true')
         
         // Generate confetti
         for (let i = 0; i < 50; i++) {
@@ -179,12 +186,13 @@ export default function Onboarding() {
               <button
                 key={goal.id}
                 className={`card interactive-card ${data.goal === goal.id ? 'selected' : ''}`}
-                onClick={() => handleFieldChange('goal', goal.id)}
-                style={{ 
-                  textAlign: 'center', 
+                onClick={() => handleCardSelect('goal', goal.id)}
+                style={{
+                  textAlign: 'center',
                   cursor: 'pointer',
-                  border: data.goal === goal.id ? '2px solid #F59E0B' : '1px solid #1E293B',
-                  background: data.goal === goal.id ? 'rgba(245, 158, 11, 0.1)' : 'transparent'
+                  border: data.goal === goal.id ? '2px solid #FF8A00' : '1px solid #1E293B',
+                  background: data.goal === goal.id ? 'rgba(255, 138, 0, 0.1)' : 'transparent',
+                  transition: 'transform 0.25s ease'
                 }}
               >
                 <div style={{ fontSize: '48px', marginBottom: 8 }}>{goal.icon}</div>
@@ -193,14 +201,6 @@ export default function Onboarding() {
               </button>
             ))}
           </div>
-          <button 
-            className="btn" 
-            onClick={handleNext} 
-            style={{ width: '100%', marginTop: 16 }}
-            disabled={!data.goal}
-          >
-            Devam Et
-          </button>
         </div>
       )}
 
@@ -265,12 +265,13 @@ export default function Onboarding() {
           <div className="grid grid-2">
             <button
               className="card"
-              onClick={() => handleFieldChange('gender', 'male')}
-              style={{ 
-                textAlign: 'center', 
+              onClick={() => handleCardSelect('gender', 'male')}
+              style={{
+                textAlign: 'center',
                 cursor: 'pointer',
-                border: data.gender === 'male' ? '2px solid #F59E0B' : '1px solid #1E293B',
-                background: data.gender === 'male' ? 'rgba(245, 158, 11, 0.1)' : 'transparent'
+                border: data.gender === 'male' ? '2px solid #FF8A00' : '1px solid #1E293B',
+                background: data.gender === 'male' ? 'rgba(255, 138, 0, 0.1)' : 'transparent',
+                transition: 'transform 0.25s ease'
               }}
             >
               <div style={{ fontSize: '48px', marginBottom: 8 }}>👨</div>
@@ -278,12 +279,13 @@ export default function Onboarding() {
             </button>
             <button
               className="card"
-              onClick={() => handleFieldChange('gender', 'female')}
-              style={{ 
-                textAlign: 'center', 
+              onClick={() => handleCardSelect('gender', 'female')}
+              style={{
+                textAlign: 'center',
                 cursor: 'pointer',
-                border: data.gender === 'female' ? '2px solid #F59E0B' : '1px solid #1E293B',
-                background: data.gender === 'female' ? 'rgba(245, 158, 11, 0.1)' : 'transparent'
+                border: data.gender === 'female' ? '2px solid #FF8A00' : '1px solid #1E293B',
+                background: data.gender === 'female' ? 'rgba(255, 138, 0, 0.1)' : 'transparent',
+                transition: 'transform 0.25s ease'
               }}
             >
               <div style={{ fontSize: '48px', marginBottom: 8 }}>👩</div>
@@ -291,16 +293,13 @@ export default function Onboarding() {
             </button>
           </div>
           {data.gender === 'female' && (
-            <div className="card" style={{ marginTop: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
-              <h4 style={{ margin: '0 0 8px', color: '#F59E0B' }}>Regl Döngüsü Senkronizasyonu</h4>
+            <div className="card" style={{ marginTop: 16, background: 'rgba(255, 138, 0, 0.1)', borderColor: '#FF8A00' }}>
+              <h4 style={{ margin: '0 0 8px', color: '#FF8A00' }}>Regl Döngüsü Senkronizasyonu</h4>
               <p className="sub">
                 GFIT regl döneminde ödem uyarısı ve tatlı krizi için Magnezyum önerileri sunacak.
               </p>
             </div>
           )}
-          <button className="btn" onClick={handleNext} style={{ width: '100%', marginTop: 16 }} disabled={!data.gender}>
-            Devam Et
-          </button>
         </div>
       )}
 
@@ -362,30 +361,53 @@ export default function Onboarding() {
       {step === 6 && (
         <div className="card">
           <h2 style={{ margin: '0 0 16px' }}>Hedef Hızı</h2>
-          <div className="grid grid-2">
-            {[
-              { id: 'lose_slow', rate: 0.12, emoji: '🐢', label: 'Sakin' },
-              { id: 'lose', rate: 0.25, emoji: '🚶', label: 'Dengeli - Önerilen' },
-              { id: 'lose_fast', rate: 0.5, emoji: '🐇', label: 'Hızlı' },
-            ].map((option) => (
-              <button
-                key={option.id}
-                className="card"
-                onClick={() => handleFieldChange('goal_rate', option.id)}
+          <p className="sub" style={{ marginBottom: 24 }}>
+            Haftalık kilo değişim hedefini seç
+          </p>
+
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div style={{ fontSize: '48px', fontWeight: 700, color: '#FF8A00', marginBottom: 8 }}>
+                {data.goal_rate || 0.25}
+              </div>
+              <p className="sub" style={{ fontSize: '18px', color: '#FFFFFF', fontWeight: 500 }}>
+                {(() => {
+                  const rate = parseFloat(data.goal_rate) || 0.25
+                  if (rate < 0.2) return '🐢 Sakin'
+                  if (rate >= 0.2 && rate < 0.4) return '� Dengeli - Önerilen'
+                  return '🐇 Hızlı'
+                })()}
+              </p>
+              <p className="sub" style={{ fontSize: '14px' }}>kg/hafta</p>
+            </div>
+
+            <div style={{ padding: '0 8px' }}>
+              <input
+                className="input"
+                type="range"
+                min="0.1"
+                max="1.0"
+                step="0.05"
+                value={data.goal_rate || 0.25}
+                onChange={(e) => handleFieldChange('goal_rate', parseFloat(e.target.value))}
                 style={{
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  border: data.goal_rate === option.id ? '2px solid #F59E0B' : '1px solid #1E293B',
-                  background: data.goal_rate === option.id ? 'rgba(245, 158, 11, 0.1)' : 'transparent'
+                  width: '100%',
+                  height: '8px',
+                  borderRadius: '4px',
+                  background: '#1E293B',
+                  outline: 'none',
+                  WebkitAppearance: 'none',
+                  cursor: 'pointer'
                 }}
-              >
-                <div style={{ fontSize: '32px', marginBottom: 8 }}>{option.emoji}</div>
-                <h3 style={{ margin: '0 0 4px' }}>{option.label}</h3>
-                <p className="sub">{option.rate} kg/hafta</p>
-              </button>
-            ))}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+                <span className="sub" style={{ fontSize: '12px' }}>0.1 kg</span>
+                <span className="sub" style={{ fontSize: '12px' }}>1.0 kg</span>
+              </div>
+            </div>
           </div>
-          <button className="btn" onClick={handleNext} style={{ width: '100%', marginTop: 16 }} disabled={!data.goal_rate}>
+
+          <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
             Devam Et
           </button>
         </div>

@@ -11,7 +11,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!message.trim()) {
-      setError('Lutfen mesajinizi girin.')
+      setError('Lütfen mesajınızı girin.')
       return
     }
 
@@ -27,17 +27,16 @@ export default function FeedbackModal({ isOpen, onClose }) {
             message,
             created_at: new Date().toISOString()
           })
-        
+
         if (error) throw error
       } else {
-        // Fallback to localStorage for demo mode
-        const feedbacks = JSON.parse(localStorage.getItem('gfit_feedback') || '[]')
+        const feedbacks = JSON.parse(localStorage.getItem('gfitt_feedback') || '[]')
         feedbacks.push({
           category,
           message,
           created_at: new Date().toISOString()
         })
-        localStorage.setItem('gfit_feedback', JSON.stringify(feedbacks))
+        localStorage.setItem('gfitt_feedback', JSON.stringify(feedbacks))
       }
 
       setSuccess(true)
@@ -48,7 +47,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
       }, 2000)
     } catch (err) {
       console.error('Feedback error:', err)
-      setError('Bildirim gonderilirken hata olustu.')
+      setError('Bildirim gönderilirken hata oluştu.')
     } finally {
       setLoading(false)
     }
@@ -77,8 +76,8 @@ export default function FeedbackModal({ isOpen, onClose }) {
           {success ? (
             <div style={{ textAlign: 'center', padding: '32px' }}>
               <div style={{ fontSize: '48px', marginBottom: 16 }}>✅</div>
-              <h4 style={{ margin: '0 0 8px', color: '#10B981' }}>Teşekkürler!</h4>
-              <p className="sub">Bildiriminiz alındı.</p>
+              <h4 style={{ margin: '0 0 8px', color: '#22C55E' }}>Teşekkürler!</h4>
+              <p className="sub">Geri bildiriminiz başarıyla iletildi!</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
@@ -101,7 +100,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
                   className="input"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Lutfen detaylı bir sekilde aciklayin..."
+                  placeholder="Lütfen detaylı bir şekilde açıklayın..."
                   rows={4}
                   style={{ resize: 'vertical' }}
                 />
@@ -114,7 +113,7 @@ export default function FeedbackModal({ isOpen, onClose }) {
               )}
 
               <button className="btn" type="submit" disabled={loading} style={{ width: '100%' }}>
-                {loading ? 'Gonderiliyor...' : 'Gonder'}
+                {loading ? 'Gönderiliyor...' : 'Gönder'}
               </button>
             </form>
           )}

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Layout from './components/Layout'
+import PwaInstallPrompt from './components/PwaInstallPrompt'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
@@ -24,6 +25,7 @@ import Paywall from './pages/Paywall'
 import Onboarding from './pages/Onboarding'
 import Social from './pages/Social'
 import Support from './pages/Support'
+import Strength from './pages/Strength'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
@@ -68,6 +70,7 @@ export default function App() {
             <Route path="/supplement" element={<Supplements />} />
             <Route path="/kilo" element={<Weight />} />
             <Route path="/ilerleme" element={<Progress />} />
+            <Route path="/guc-artisi" element={<Strength />} />
             <Route path="/aliskanliklar" element={<Habits />} />
             <Route path="/ai-koc" element={<AICoach />} />
             <Route path="/etiket-okuyucu" element={<FoodScanner />} />
@@ -79,6 +82,7 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <PwaInstallPrompt />
       </BrowserRouter>
     </AuthProvider>
   )

@@ -19,7 +19,7 @@ export default function NudgeBanner() {
 
   useEffect(() => {
     // Check if user is inactive for a while or hasn't logged today
-    const lastActivity = localStorage.getItem('gfit_last_activity')
+    const lastActivity = localStorage.getItem('gfitt_last_activity')
     const today = new Date().toDateString()
     
     if (lastActivity !== today) {
@@ -38,7 +38,7 @@ export default function NudgeBanner() {
 
     // Random nudge every 30 minutes of inactivity
     const checkInactivity = () => {
-      const lastLog = parseInt(localStorage.getItem('gfit_last_activity_time') || Date.now())
+      const lastLog = parseInt(localStorage.getItem('gfitt_last_activity_time') || Date.now())
       const inactiveTime = Date.now() - lastLog
       
       if (inactiveTime > 30 * 60 * 1000) { // 30 minutes

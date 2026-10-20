@@ -48,7 +48,7 @@ export default function Supplements() {
 
   useEffect(() => {
     refresh()
-    const saved = localStorage.getItem('gfit_custom_supplements')
+    const saved = localStorage.getItem('gfitt_custom_supplements')
     if (saved) setCustomSupplements(JSON.parse(saved))
   }, [date, session.id])
 
@@ -75,7 +75,7 @@ export default function Supplements() {
     }
     const updated = [...customSupplements, custom]
     setCustomSupplements(updated)
-    localStorage.setItem('gfit_custom_supplements', JSON.stringify(updated))
+    localStorage.setItem('gfitt_custom_supplements', JSON.stringify(updated))
     setNewSupplement({ name: '', dose: '', timing: '' })
     setShowAddForm(false)
   }

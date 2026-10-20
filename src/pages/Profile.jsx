@@ -1,19 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { updateProfile } from '../lib/api'
 import { supabase } from '../lib/supabase'
+import { PERSONAL_DEFAULTS } from '../data/programs'
 
 export default function Profile() {
   const { session, profile, setProfile, demo } = useAuth()
   const [form, setForm] = useState({
-    display_name: profile?.display_name || '',
-    age: profile?.age || 22,
-    height_cm: profile?.height_cm || 185,
-    weight_kg: profile?.weight_kg || 90,
-    calorie_target: profile?.calorie_target || 2600,
-    protein_target: profile?.protein_target || 170,
-    carb_target: profile?.carb_target || 310,
-    fat_target: profile?.fat_target || 75,
+    display_name: profile?.display_name || PERSONAL_DEFAULTS.display_name,
+    age: profile?.age || PERSONAL_DEFAULTS.age,
+    height_cm: profile?.height_cm || PERSONAL_DEFAULTS.height_cm,
+    weight_kg: profile?.weight_kg || PERSONAL_DEFAULTS.weight_kg,
+    calorie_target: profile?.calorie_target || PERSONAL_DEFAULTS.calorie_target,
+    protein_target: profile?.protein_target || PERSONAL_DEFAULTS.protein_target,
+    carb_target: profile?.carb_target || PERSONAL_DEFAULTS.carb_target,
+    fat_target: profile?.fat_target || PERSONAL_DEFAULTS.fat_target,
   })
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -21,6 +23,21 @@ export default function Profile() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        display_name: profile.display_name || PERSONAL_DEFAULTS.display_name,
+        age: profile.age || PERSONAL_DEFAULTS.age,
+        height_cm: profile.height_cm || PERSONAL_DEFAULTS.height_cm,
+        weight_kg: profile.weight_kg || PERSONAL_DEFAULTS.weight_kg,
+        calorie_target: profile.calorie_target || PERSONAL_DEFAULTS.calorie_target,
+        protein_target: profile.protein_target || PERSONAL_DEFAULTS.protein_target,
+        carb_target: profile.carb_target || PERSONAL_DEFAULTS.carb_target,
+        fat_target: profile.fat_target || PERSONAL_DEFAULTS.fat_target,
+      })
+    }
+  }, [profile])
 
   function set(key, value) {
     setForm((f) => ({ ...f, [key]: value }))
@@ -151,11 +168,61 @@ export default function Profile() {
       <div className="card" style={{ marginTop: 16 }}>
         <h3 style={{ marginTop: 0 }}>Tıbbi Yasal Uyarı</h3>
         <p className="sub" style={{ lineHeight: 1.6 }}>
-          GFIT'te sunulan kalori, TDEE ve diğer beslenme tavsiyeleri tıbbi teşhis veya tedavi değildir. 
-          Bu bilgiler genel tavsiye niteliğindedir ve kişisel sağlık durumunuza uyarlanmamış olabilir. 
-          Herhangi bir sağlık sorunu varsa veya diyet değişikliği yapmayı planlıyorsanız, 
+          GFIT'te sunulan kalori, TDEE ve diğer beslenme tavsiyeleri tıbbi teşhis veya tedavi değildir.
+          Bu bilgiler genel tavsiye niteliğindedir ve kişisel sağlık durumunuza uyarlanmamış olabilir.
+          Herhangi bir sağlık sorunu varsa veya diyet değişikliği yapmayı planlıyorsanız,
           lütfen önce bir sağlık uzmanına veya diyetisyene danışın.
         </p>
+      </div>
+
+      {/* Daha Fazla / Ayarlar Section */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 16 }}>Daha Fazla</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <Link
+            to="/gizlilik-politikasi"
+            className="btn ghost"
+            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+          >
+            Gizlilik Politikası
+          </Link>
+          <Link
+            to="/kvkk"
+            className="btn ghost"
+            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+          >
+            KVKK
+          </Link>
+          <Link
+            to="/kullanim-kosullari"
+            className="btn ghost"
+            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+          >
+            Kullanım Şartları
+          </Link>
+          <Link
+            to="/destek"
+            className="btn ghost"
+            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+          >
+            Destek
+          </Link>
+          <button
+            className="btn ghost"
+            style={{ textAlign: 'left', justifyContent: 'flex-start', color: '#F59E0B' }}
+            onClick={() => window.dispatchEvent(new CustomEvent('openFeedback'))}
+          >
+            Hata / Öneri Bildir 🐛
+          </button>
+        </div>
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <p className="sub" style={{ fontSize: '12px', marginBottom: 4 }}>
+            GFIT © 2026 GFIT, Inc. Tüm hakları saklıdır.
+          </p>
+          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+            Crafted with 💻 by Efehan Çetin © 2026
+          </p>
+        </div>
       </div>
 
       {/* Delete Account Modal - First Confirmation */}

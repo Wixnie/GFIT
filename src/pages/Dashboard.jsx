@@ -17,9 +17,11 @@ import {
 } from '../lib/api'
 import { todayISO } from '../lib/dates'
 import { suggestFoods, sumLogs } from '../lib/suggestions'
+import { getAICoachAdvice } from '../lib/ai'
 import DayNav from '../components/DayNav'
 import MacroBars from '../components/MacroBars'
 import NudgeBanner from '../components/NudgeBanner'
+import { Sparkles, Beef, UtensilsCrossed, Wheat, Coffee, Apple, Carrot, Cake, ChefHat, GlassWater, Dumbbell } from 'lucide-react'
 
 export default function Dashboard() {
   const { profile, session } = useAuth()
@@ -31,7 +33,7 @@ export default function Dashboard() {
   const [weights, setWeights] = useState([])
   const [q, setQ] = useState('')
   const [grams, setGrams] = useState(100)
-  const [kg, setKg] = useState(profile?.weight_kg || 90)
+  const [kg, setKg] = useState(profile?.weight_kg || PERSONAL_DEFAULTS.weight_kg)
   const [active, setActive] = useState(null)
   const [draft, setDraft] = useState([])
   const [busy, setBusy] = useState(false)
@@ -41,6 +43,9 @@ export default function Dashboard() {
   const [fastingStart, setFastingStart] = useState(null)
   const [fastingHours, setFastingHours] = useState(0)
   const [sleepHours, setSleepHours] = useState(0)
+  const [workoutSplit, setWorkoutSplit] = useState('Upper/Lower')
+  const [aiAdvice, setAiAdvice] = useState('')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   async function refresh() {
     const [food, wo, supps, wt] = await Promise.all([
@@ -57,13 +62,13 @@ export default function Dashboard() {
     if (todayW) setKg(todayW.weight_kg)
 
     // Load gamification data
-    const savedXp = localStorage.getItem('gfit_xp')
-    const savedStreak = localStorage.getItem('gfit_streak')
+    const savedXp = localStorage.getItem('gfitt_xp')
+    const savedStreak = localStorage.getItem('gfitt_streak')
     setXp(savedXp ? parseInt(savedXp) : 0)
     setStreak(savedStreak ? parseInt(savedStreak) : 0)
 
     // Load fasting data
-    const savedFasting = localStorage.getItem('gfit_fasting')
+    const savedFasting = localStorage.getItem('gfitt_fasting')
     if (savedFasting) {
       const data = JSON.parse(savedFasting)
       setFastingMode(data.active || false)
@@ -71,7 +76,7 @@ export default function Dashboard() {
     }
 
     // Load sleep data
-    const savedSleep = localStorage.getItem('gfit_sleep')
+    const savedSleep = localStorage.getItem('gfitt_sleep')
     if (savedSleep) {
       setSleepHours(parseFloat(savedSleep) || 0)
     }
@@ -79,10 +84,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     refresh().catch(() => {})
-    
+
     // Update last activity time
-    localStorage.setItem('gfit_last_activity', new Date().toDateString())
-    localStorage.setItem('gfit_last_activity_time', Date.now().toString())
+    localStorage.setItem('gfitt_last_activity', new Date().toDateString())
+    localStorage.setItem('gfitt_last_activity_time', Date.now().toString())
   }, [date, session.id])
 
   // Calculate fasting hours
@@ -111,6 +116,21 @@ export default function Dashboard() {
 
   const rank = getRank(xp)
   const xpProgress = rank.next > 0 ? (xp % rank.next) / rank.next * 100 : 100
+
+  // Get icon based on food category
+  const getFoodIcon = (category) => {
+    const iconMap = {
+      'protein': <Beef size={20} className="text-green-400" />,
+      'karb': <Wheat size={20} className="text-indigo-400" />,
+      'yemek': <UtensilsCrossed size={20} className="text-orange-400" />,
+      'icecek': <GlassWater size={20} className="text-blue-400" />,
+      'meyve': <Apple size={20} className="text-red-400" />,
+      'sebze': <Carrot size={20} className="text-yellow-400" />,
+      'tatli': <Cake size={20} className="text-pink-400" />,
+      'atistirmalik': <ChefHat size={20} className="text-purple-400" />,
+    }
+    return iconMap[category] || <UtensilsCrossed size={20} className="text-gray-400" />
+  }
 
   async function saveFood(food) {
     const macros = macrosForGrams(food, Number(grams) || 100)
@@ -158,7 +178,7 @@ export default function Dashboard() {
       // Add XP for workout
       const newXp = xp + 100
       setXp(newXp)
-      localStorage.setItem('gfit_xp', newXp.toString())
+      localStorage.setItem('gfitt_xp', newXp.toString())
       await refresh()
     } finally {
       setBusy(false)
@@ -170,12 +190,12 @@ export default function Dashboard() {
       setFastingMode(false)
       setFastingStart(null)
       setFastingHours(0)
-      localStorage.setItem('gfit_fasting', JSON.stringify({ active: false, startTime: null }))
+      localStorage.setItem('gfitt_fasting', JSON.stringify({ active: false, startTime: null }))
     } else {
       setFastingMode(true)
       const start = new Date().toISOString()
       setFastingStart(start)
-      localStorage.setItem('gfit_fasting', JSON.stringify({ active: true, startTime: start }))
+      localStorage.setItem('gfitt_fasting', JSON.stringify({ active: true, startTime: start }))
     }
   }
 
@@ -203,6 +223,13 @@ export default function Dashboard() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="circular-progress" style={{ position: 'relative', width: '140px', height: '140px' }}>
             <svg width="140" height="140" viewBox="0 0 140 140">
+              <defs>
+                <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#22C55E" />
+                  <stop offset="50%" stopColor="#818CF8" />
+                  <stop offset="100%" stopColor="#FB923C" />
+                </linearGradient>
+              </defs>
               <circle
                 cx="70"
                 cy="70"
@@ -216,7 +243,7 @@ export default function Dashboard() {
                 cy="70"
                 r="60"
                 fill="none"
-                className="progress-fill"
+                stroke="url(#rainbow)"
                 strokeWidth="12"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 60}`}
@@ -225,25 +252,132 @@ export default function Dashboard() {
               />
             </svg>
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', fontWeight: 800, color: '#F59E0B' }}>{Math.round(totals.calories)}</div>
+              <div style={{ fontSize: '32px', fontWeight: 800, color: '#FF8A00' }}>{Math.round(totals.calories)}</div>
               <div className="sub" style={{ fontSize: '12px' }}>/ {p.calorie_target} kcal</div>
             </div>
           </div>
           <div style={{ flex: 1, marginLeft: 24 }}>
             <div className="macro-indicator" style={{ marginBottom: 12 }}>
               <div className="macro-dot protein"></div>
-              <span style={{ color: '#10B981' }}>Protein: {Math.round(totals.protein)}g / {p.protein_target}g</span>
+              <span style={{ color: '#22C55E' }}>Protein: {Math.round(totals.protein)}g / {p.protein_target}g</span>
             </div>
             <div className="macro-indicator" style={{ marginBottom: 12 }}>
               <div className="macro-dot carb"></div>
-              <span style={{ color: '#3B82F6' }}>Karb: {Math.round(totals.carbs)}g / {p.carb_target}g</span>
+              <span style={{ color: '#818CF8' }}>Karb: {Math.round(totals.carbs)}g / {p.carb_target}g</span>
             </div>
             <div className="macro-indicator">
               <div className="macro-dot fat"></div>
-              <span style={{ color: '#8B5CF6' }}>Yağ: {Math.round(totals.fat)}g / {p.fat_target}g</span>
+              <span style={{ color: '#FB923C' }}>Yağ: {Math.round(totals.fat)}g / {p.fat_target}g</span>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Goal-Based Widget */}
+      {(() => {
+        const goal = p.goal || 'maintain'
+        if (goal === 'weight_loss') {
+          return (
+            <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', borderColor: '#EF4444' }}>
+              <h3 style={{ margin: '0 0 12px', color: '#EF4444' }}>🔥 Kilo Verme Modu</h3>
+              <div className="grid grid-2">
+                <div>
+                  <p className="sub">Net Kalori Açığı</p>
+                  <strong style={{ fontSize: '20px', color: '#EF4444' }}>{Math.round(remaining.calories)} kcal</strong>
+                </div>
+                <div>
+                  <p className="sub">Kardiyo Hedefi</p>
+                  <strong style={{ fontSize: '20px', color: '#3B82F6' }}>30 dk</strong>
+                </div>
+              </div>
+            </div>
+          )
+        } else if (goal === 'gain') {
+          return (
+            <div className="card" style={{ marginBottom: 16, background: 'rgba(34, 197, 94, 0.1)', borderColor: '#22C55E' }}>
+              <h3 style={{ margin: '0 0 12px', color: '#22C55E' }}>💪 Kas Yapma Modu</h3>
+              <div className="grid grid-2">
+                <div>
+                  <p className="sub">Protein Fazlası</p>
+                  <strong style={{ fontSize: '20px', color: '#22C55E' }}>{Math.round(remaining.protein)}g</strong>
+                </div>
+                <div>
+                  <p className="sub">Set Hacmi</p>
+                  <strong style={{ fontSize: '20px', color: '#FF8A00' }}>{workouts.length * 20} set</strong>
+                </div>
+              </div>
+            </div>
+          )
+        } else {
+          return (
+            <div className="card" style={{ marginBottom: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#FF8A00' }}>
+              <h3 style={{ margin: '0 0 12px', color: '#FF8A00' }}>⚖️ Form Koruma Modu</h3>
+              <div className="grid grid-2">
+                <div>
+                  <p className="sub">Makro Dengesi</p>
+                  <strong style={{ fontSize: '20px', color: '#FF8A00' }}>Optimal</strong>
+                </div>
+                <div>
+                  <p className="sub">Su Hedefi</p>
+                  <strong style={{ fontSize: '20px', color: '#3B82F6' }}>{Math.round(p.weight_kg * 35)}ml</strong>
+                </div>
+              </div>
+            </div>
+          )
+        }
+      })()}
+
+      {/* AI Coach Card */}
+      <div className="card" style={{ marginBottom: 16, background: 'rgba(255, 138, 0, 0.1)', borderColor: '#FF8A00' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h3 style={{ margin: 0, color: '#FF8A00' }}>✨ AI Koç Tavsiyesi</h3>
+          <button
+            className="btn"
+            onClick={async () => {
+              setIsAnalyzing(true)
+              const advice = await getAICoachAdvice({
+                totals,
+                targets: {
+                  calorie_target: p.calorie_target,
+                  protein_target: p.protein_target,
+                  carb_target: p.carb_target,
+                  fat_target: p.fat_target
+                },
+                remaining,
+                workouts,
+                profileName: p.display_name || 'Sporcu'
+              })
+              setAiAdvice(advice)
+              setIsAnalyzing(false)
+            }}
+            disabled={isAnalyzing}
+            style={{ fontSize: '0.75rem', padding: '0.5rem 1rem' }}
+          >
+            {isAnalyzing ? 'Analiz ediliyor...' : 'Analiz Et'}
+          </button>
+        </div>
+        {aiAdvice ? (
+          <div>
+            <p style={{ marginBottom: 12, lineHeight: 1.6 }}>{aiAdvice}</p>
+            <div style={{ marginTop: 12 }}>
+              <p className="sub" style={{ marginBottom: 8 }}>Önerilen Yemekler:</p>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                {foods.slice(0, 3).map((food) => (
+                  <button
+                    key={food.id}
+                    className="btn ghost"
+                    onClick={() => saveFood(food)}
+                    style={{ fontSize: '0.75rem', textAlign: 'left', padding: '8px 12px' }}
+                  >
+                    {food.name} ({food.kcal} kcal)
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="sub">Analiz butonuna tıklayarak akşam öğünü önerisi alın.</p>
+        )}
       </div>
 
       {/* Intermittent Fasting & Sleep Cards */}
@@ -279,16 +413,24 @@ export default function Dashboard() {
               type="number"
               step="0.5"
               min="0"
-              max="12"
+              max="24"
               value={sleepHours}
               onChange={(e) => {
-                setSleepHours(parseFloat(e.target.value) || 0)
-                localStorage.setItem('gfit_sleep', e.target.value)
+                const val = parseFloat(e.target.value) || 0
+                setSleepHours(Math.min(24, Math.max(0, val)))
+                localStorage.setItem('gfitt_sleep', e.target.value)
               }}
             />
           </div>
-          <p className="sub">
-            {sleepHours >= 7 ? '✅ İdeal uyku süresi' : sleepHours >= 6 ? '⚠️ Yeterli ama ideal değil' : '❌ Uyku süresi düşük'}
+          <p className="sub" style={
+            sleepHours < 6 ? { color: '#F87171' } :
+            sleepHours >= 7 && sleepHours <= 9 ? { color: '#22C55E' } :
+            sleepHours > 10 ? { color: '#FBBF24' } : {}
+          }>
+            {sleepHours < 6 ? '❌ Yetersiz uyku: Toparlanma ve kas onarımı için riskli' :
+             sleepHours >= 7 && sleepHours <= 9 ? '✅ İdeal uyku süresi: Optimum anabolik yenilenme' :
+             sleepHours > 10 ? '⚠️ Aşırı uyku / Halsizlik eğilimi' :
+             '⚠️ Yeterli ama ideal değil'}
           </p>
           {/* Health Data Privacy Notice */}
           <div style={{ marginTop: 12, padding: '8px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '4px' }}>
@@ -341,67 +483,67 @@ export default function Dashboard() {
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                 <span className="sub">Kalori</span>
-                <span className="sub" style={{ color: '#F59E0B' }}>{Math.round(totals.calories)} / {p.calorie_target}</span>
+                <span className="sub" style={{ color: '#FF8A00' }}>{Math.round(totals.calories)} / {p.calorie_target}</span>
               </div>
               <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
-                <div 
-                  style={{ 
-                    height: '100%', 
-                    background: '#F59E0B', 
+                <div
+                  style={{
+                    height: '100%',
+                    background: '#FF8A00',
                     width: `${Math.min((totals.calories / p.calorie_target) * 100, 100)}%`,
                     transition: 'width 0.3s ease'
-                  }} 
+                  }}
                 />
               </div>
             </div>
-            
+
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                 <span className="sub">Protein</span>
-                <span className="sub" style={{ color: '#10B981' }}>{Math.round(totals.protein)}g / {p.protein_target}g</span>
+                <span className="sub" style={{ color: '#22C55E' }}>{Math.round(totals.protein)}g / {p.protein_target}g</span>
               </div>
               <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
-                <div 
-                  style={{ 
-                    height: '100%', 
-                    background: '#10B981', 
+                <div
+                  style={{
+                    height: '100%',
+                    background: '#22C55E',
                     width: `${Math.min((totals.protein / p.protein_target) * 100, 100)}%`,
                     transition: 'width 0.3s ease'
-                  }} 
+                  }}
                 />
               </div>
             </div>
-            
+
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                 <span className="sub">Karbonhidrat</span>
-                <span className="sub" style={{ color: '#3B82F6' }}>{Math.round(totals.carbs)}g / {p.carb_target}g</span>
+                <span className="sub" style={{ color: '#818CF8' }}>{Math.round(totals.carbs)}g / {p.carb_target}g</span>
               </div>
               <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
-                <div 
-                  style={{ 
-                    height: '100%', 
-                    background: '#3B82F6', 
+                <div
+                  style={{
+                    height: '100%',
+                    background: '#818CF8',
                     width: `${Math.min((totals.carbs / p.carb_target) * 100, 100)}%`,
                     transition: 'width 0.3s ease'
-                  }} 
+                  }}
                 />
               </div>
             </div>
-            
+
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                 <span className="sub">Yağ</span>
-                <span className="sub" style={{ color: '#8B5CF6' }}>{Math.round(totals.fat)}g / {p.fat_target}g</span>
+                <span className="sub" style={{ color: '#FB923C' }}>{Math.round(totals.fat)}g / {p.fat_target}g</span>
               </div>
               <div style={{ height: '8px', background: '#1E293B', borderRadius: '4px', overflow: 'hidden' }}>
-                <div 
-                  style={{ 
-                    height: '100%', 
-                    background: '#8B5CF6', 
+                <div
+                  style={{
+                    height: '100%',
+                    background: '#FB923C',
                     width: `${Math.min((totals.fat / p.fat_target) * 100, 100)}%`,
                     transition: 'width 0.3s ease'
-                  }} 
+                  }}
                 />
               </div>
             </div>
@@ -434,15 +576,24 @@ export default function Dashboard() {
               <span className="chip">+</span>
             </button>
           ))}
-          {logs.map((row) => (
-            <div className="food-item" key={row.id}>
-              <div>
-                <strong>{row.food_name}</strong>
-                <div className="sub">{row.amount_g}g · {Math.round(row.calories)} kcal</div>
+          {logs.map((row) => {
+            const food = FOODS.find(f => f.name === row.food_name)
+            const category = food?.cat || 'yemek'
+            return (
+              <div className="food-item" key={row.id}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.05)' }}>
+                    {getFoodIcon(category)}
+                  </div>
+                  <div>
+                    <strong>{row.food_name}</strong>
+                    <div className="sub">{row.amount_g}g · {Math.round(row.calories)} kcal</div>
+                  </div>
+                </div>
+                <button className="btn ghost" onClick={async () => { await deleteFood(session.id, row.id); await refresh() }}>Sil</button>
               </div>
-              <button className="btn ghost" onClick={async () => { await deleteFood(session.id, row.id); await refresh() }}>Sil</button>
-            </div>
-          ))}
+            )
+          })}
           {!q && logs.length === 0 && <p className="sub">Bugün henüz yemek yok. Yukarıdan ara.</p>}
         </section>
 
@@ -468,10 +619,28 @@ export default function Dashboard() {
             <Link className="chip" to="/antrenman">Şablonlar</Link>
           </div>
           {!active && (
-            <div className="row" style={{ marginTop: 12 }}>
-              {PROGRAMS.filter((pr) => pr.split === 'Upper/Lower').map((pr) => (
-                <button key={pr.id} className="btn ghost" onClick={() => start(pr)}>{pr.name}</button>
-              ))}
+            <div style={{ marginTop: 12 }}>
+              <div className="row" style={{ marginBottom: 12 }}>
+                <button
+                  className={`btn ${workoutSplit === 'Upper/Lower' ? '' : 'ghost'}`}
+                  onClick={() => setWorkoutSplit('Upper/Lower')}
+                  style={{ flex: 1 }}
+                >
+                  Upper/Lower
+                </button>
+                <button
+                  className={`btn ${workoutSplit === 'PPL' ? '' : 'ghost'}`}
+                  onClick={() => setWorkoutSplit('PPL')}
+                  style={{ flex: 1 }}
+                >
+                  PPL
+                </button>
+              </div>
+              <div className="row">
+                {PROGRAMS.filter((pr) => pr.split === workoutSplit).map((pr) => (
+                  <button key={pr.id} className="btn ghost" onClick={() => start(pr)}>{pr.name}</button>
+                ))}
+              </div>
             </div>
           )}
           {active && (

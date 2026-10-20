@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import Footer from '../components/Footer'
 
 export default function Login() {
-  const { session, signIn, startDemo, demo } = useAuth()
+  const { session, signIn, signInWithOAuth, startDemo, demo } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -25,6 +24,17 @@ export default function Login() {
     }
   }
 
+  async function handleOAuthLogin(provider) {
+    setBusy(true)
+    setError('')
+    try {
+      await signInWithOAuth(provider)
+    } catch (err) {
+      setError(err.message || 'OAuth girişi başarısız')
+      setBusy(false)
+    }
+  }
+
   async function demoLogin() {
     setBusy(true)
     setError('')
@@ -40,32 +50,34 @@ export default function Login() {
   return (
     <div className="auth-wrap" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <form className="card auth-card" onSubmit={submit} style={{ marginTop: 'auto', marginBottom: 'auto' }}>
-        <div className="brand">GFIT</div>
-        <h1>Giris yap</h1>
+        <div className="brand">G<span>Fitt</span></div>
+        <h1>Giriş yap</h1>
         <p className="sub">Kalori, makro ve antrenman takibini tek yerden tut.</p>
         {demo && (
           <div className="banner">
-            Supabase bagli degil. Hesap bu tarayicida saklanir. Istersen hemen demo ac.
+            Supabase bağlı değil. Hesap bu tarayıcıda saklanır. İstersen hemen demo aç.
           </div>
         )}
-        
+
         {/* Social Login Buttons */}
         <div style={{ marginBottom: 16 }}>
-          <button 
+          <button
             type="button"
-            className="btn ghost" 
+            className="btn ghost"
             style={{ width: '100%', marginBottom: 8, border: '1px solid #1E293B' }}
-            onClick={() => alert('Apple ile Giris - Yakinda aktif')}
+            onClick={() => handleOAuthLogin('apple')}
+            disabled={busy}
           >
-            🍎 Apple ile Giris Yap
+            🍎 Apple ile Giriş Yap
           </button>
-          <button 
+          <button
             type="button"
-            className="btn ghost" 
+            className="btn ghost"
             style={{ width: '100%', marginBottom: 8, border: '1px solid #1E293B' }}
-            onClick={() => alert('Google ile Giris - Yakinda aktif')}
+            onClick={() => handleOAuthLogin('google')}
+            disabled={busy}
           >
-            🔵 Google ile Giris Yap
+            🔵 Google ile Giriş Yap
           </button>
         </div>
 
@@ -78,20 +90,20 @@ export default function Login() {
           <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div className="field">
-          <label>Sifre</label>
+          <label>Şifre</label>
           <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
         {error && <p className="error">{error}</p>}
-        <button className="btn" disabled={busy} style={{ width: '100%' }}>{busy ? 'Giriliyor…' : 'Giris'}</button>
-        
+        <button className="btn" disabled={busy} style={{ width: '100%' }}>{busy ? 'Giriliyor…' : 'Giriş'}</button>
+
         {/* Guest Mode */}
-        <button 
+        <button
           type="button"
-          className="btn ghost" 
-          style={{ width: '100%', marginTop: 12 }} 
+          className="btn ghost"
+          style={{ width: '100%', marginTop: 12 }}
           onClick={demoLogin}
         >
-          Simdilik Atla (Misafir Modu)
+          Şimdilik Atla (Misafir Modu)
         </button>
 
         {demo && (
@@ -100,10 +112,9 @@ export default function Login() {
           </button>
         )}
         <p className="sub" style={{ marginTop: 14 }}>
-          Hesabin yok mu? <Link to="/kayit">Kayit ol</Link>
+          Hesabın yok mu? <Link to="/kayit">Kayıt ol</Link>
         </p>
       </form>
-      <Footer />
     </div>
   )
 }

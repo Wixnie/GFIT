@@ -1,11 +1,11 @@
 {
-  "name": "GFIT - Akıllı Fitness & Beslenme Takibi",
-  "short_name": "GFIT",
+  "name": "GFitt - Akıllı Fitness & Beslenme Takibi",
+  "short_name": "GFitt",
   "description": "Kalori, makro ve antrenman takibi",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0B101B",
-  "theme_color": "#0B101B",
+  "background_color": "#08070F",
+  "theme_color": "#FF8A00",
   "orientation": "portrait",
   "icons": [
     {

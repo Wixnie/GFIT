@@ -17,7 +17,7 @@ export default function FoodScanner() {
   const [cameraError, setCameraError] = useState(null)
 
   useEffect(() => {
-    const count = localStorage.getItem('gfit_scan_count')
+    const count = localStorage.getItem('gfitt_scan_count')
     setScanCount(count ? parseInt(count) : 0)
     return () => {
       if (scannerRef.current) {
@@ -76,7 +76,7 @@ export default function FoodScanner() {
     setError(null)
     try {
       // Check Supabase food_cache first
-      const cached = JSON.parse(localStorage.getItem('gfit_food_cache') || '[]')
+      const cached = JSON.parse(localStorage.getItem('gfitt_food_cache') || '[]')
       const cachedProduct = cached.find(item => item.barcode === decodedText)
       
       if (cachedProduct) {
@@ -112,11 +112,11 @@ export default function FoodScanner() {
           ...scanData,
           cached_at: new Date().toISOString()
         })
-        localStorage.setItem('gfit_food_cache', JSON.stringify(cached))
+        localStorage.setItem('gfitt_food_cache', JSON.stringify(cached))
         
         const newCount = scanCount + 1
         setScanCount(newCount)
-        localStorage.setItem('gfit_scan_count', newCount.toString())
+        localStorage.setItem('gfitt_scan_count', newCount.toString())
       } else {
         setError('Ürün bulunamadı. Lütfen barkodu kontrol edin veya manuel girin.')
       }
@@ -165,16 +165,16 @@ export default function FoodScanner() {
       setScanResult(mockData)
       const newCount = scanCount + 1
       setScanCount(newCount)
-      localStorage.setItem('gfit_scan_count', newCount.toString())
+      localStorage.setItem('gfitt_scan_count', newCount.toString())
 
       // Cache the result in Supabase food_cache (mock)
-      const cached = JSON.parse(localStorage.getItem('gfit_food_cache') || '[]')
+      const cached = JSON.parse(localStorage.getItem('gfitt_food_cache') || '[]')
       cached.push({
         id: Date.now().toString(),
         ...mockData,
         cached_at: new Date().toISOString()
       })
-      localStorage.setItem('gfit_food_cache', JSON.stringify(cached))
+      localStorage.setItem('gfitt_food_cache', JSON.stringify(cached))
     } catch (err) {
       console.error('Fotoğraf analiz edilirken hata:', err)
       setError('Fotoğraf analiz edilirken hata oluştu')

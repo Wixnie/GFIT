@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import Footer from '../components/Footer'
 
 export default function Signup() {
-  const { session, signUp, demo } = useAuth()
+  const { session, signUp, signInWithOAuth, demo } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -30,12 +29,50 @@ export default function Signup() {
     }
   }
 
+  async function handleOAuthLogin(provider) {
+    setBusy(true)
+    setError('')
+    try {
+      await signInWithOAuth(provider)
+    } catch (err) {
+      setError(err.message || 'OAuth girişi başarısız')
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="auth-wrap" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <form className="card auth-card" onSubmit={submit} style={{ marginTop: 'auto', marginBottom: 'auto' }}>
-        <div className="brand">GFIT</div>
+        <div className="brand">G<span>Fitt</span></div>
         <h1>Hesap oluştur</h1>
         <p className="sub">Hedefler varsayılan olarak 2600 kcal / 170g protein.</p>
+
+        {/* Social Login Buttons */}
+        <div style={{ marginBottom: 16 }}>
+          <button
+            type="button"
+            className="btn ghost"
+            style={{ width: '100%', marginBottom: 8, border: '1px solid #1E293B' }}
+            onClick={() => handleOAuthLogin('apple')}
+            disabled={busy}
+          >
+            🍎 Apple ile Kayıt Ol
+          </button>
+          <button
+            type="button"
+            className="btn ghost"
+            style={{ width: '100%', marginBottom: 8, border: '1px solid #1E293B' }}
+            onClick={() => handleOAuthLogin('google')}
+            disabled={busy}
+          >
+            🔵 Google ile Kayıt Ol
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center', margin: '16px 0' }}>
+          <span className="sub" style={{ fontSize: '12px' }}>veya</span>
+        </div>
+
         <div className="field">
           <label>Ad</label>
           <input className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
@@ -59,7 +96,6 @@ export default function Signup() {
           Zaten hesabın var mı? <Link to="/giris">Giriş yap</Link>
         </p>
       </form>
-      <Footer />
     </div>
   )
 }

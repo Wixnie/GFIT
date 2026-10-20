@@ -27,23 +27,42 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }
 
+  async function refreshProfile() {
+    if (session) {
+      try {
+        const p = await getProfile(session.id)
+        setProfile(p)
+      } catch {
+        console.error('Failed to refresh profile')
+      }
+    }
+  }
+
   useEffect(() => {
-    let unsub = () => {}
+    let subscription = null
+
     async function boot() {
       if (isSupabaseConfigured) {
         const { data } = await supabase.auth.getSession()
         const user = data.session?.user
         await hydrate(user ? { id: user.id, email: user.email } : null)
+
         const { data: listener } = supabase.auth.onAuthStateChange((_e, s) => {
           hydrate(s?.user ? { id: s.user.id, email: s.user.email } : null)
         })
-        unsub = () => listener.subscription.unsubscribe()
+        subscription = listener.subscription
       } else {
         await hydrate(localAuth.getSession())
       }
     }
+
     boot()
-    return () => unsub()
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+      }
+    }
   }, [])
 
   const value = useMemo(
@@ -52,6 +71,7 @@ export function AuthProvider({ children }) {
       profile,
       setProfile,
       loading,
+      refreshProfile,
       demo: !isSupabaseConfigured,
       async signUp(email, password, display_name, phone) {
         if (isSupabaseConfigured) {
@@ -73,14 +93,26 @@ export function AuthProvider({ children }) {
           await hydrate(localAuth.signIn({ email, password }))
         }
       },
+      async signInWithOAuth(provider) {
+        if (!isSupabaseConfigured) {
+          throw new Error('OAuth sadece Supabase bağlantısı ile çalışır.')
+        }
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: window.location.origin + '/dashboard'
+          }
+        })
+        if (error) throw error
+      },
       async startDemo() {
         if (isSupabaseConfigured) throw new Error('Supabase bağlıyken demo kapalı.')
         try {
-          await hydrate(localAuth.signIn({ email: 'demo@fitapp.local', password: 'demo123' }))
+          await hydrate(localAuth.signIn({ email: 'demo@gfitt.local', password: 'demo123' }))
         } catch {
           await hydrate(
             localAuth.signUp({
-              email: 'demo@fitapp.local',
+              email: 'demo@gfitt.local',
               password: 'demo123',
               display_name: 'Demo',
             }),

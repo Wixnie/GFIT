@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # FitApp
 
 Kalori/makro takibi, Türk yemekleri, Upper/Lower + PPL antrenman, supplement checklist, kilo ve ilerleme grafikleri.
@@ -51,3 +52,7 @@ Vercel dashboard’da aynı `VITE_SUPABASE_*` değişkenlerini ekle, sonra yenid
 | `/kilo` | kg kaydı + mini grafik |
 | `/ilerleme` | Kalori, protein, kilo grafikleri |
 | `/profil` | Hedef kalori/makro ve vücut ölçüleri |
+=======
+# GFIT
+Fitness &amp; nutrition tracking app. Calorie/macro counting, workout programs, supplement tracking. Built with Next.js &amp; Supabase.
+>>>>>>> 92d29c81e4b75b569a4944f111c6d0c77ff645e0

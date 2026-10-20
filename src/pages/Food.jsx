@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { FOODS, macrosForGrams } from '../data/foods'
 import { useAuth } from '../context/AuthContext'
 import { addFood, deleteFood, listFood } from '../lib/api'
@@ -7,6 +8,7 @@ import DayNav from '../components/DayNav'
 import MacroBars from '../components/MacroBars'
 import { PERSONAL_DEFAULTS } from '../data/programs'
 import { sumLogs } from '../lib/suggestions'
+import { ScanLine } from 'lucide-react'
 
 export default function Food() {
   const { session, profile } = useAuth()
@@ -51,7 +53,7 @@ export default function Food() {
 
   useEffect(() => {
     refresh()
-    const saved = localStorage.getItem('gfit_saved_meals')
+    const saved = localStorage.getItem('gfitt_saved_meals')
     if (saved) setSavedMeals(JSON.parse(saved))
     
     // Check if it's late night (after 22:00)
@@ -180,12 +182,12 @@ export default function Food() {
         total_carbs: totals.carbs,
         total_fat: totals.fat
       }
-      const existing = JSON.parse(localStorage.getItem('gfit_saved_meals') || '[]')
+      const existing = JSON.parse(localStorage.getItem('gfitt_saved_meals') || '[]')
       if (existing.length >= 2 && !profile?.is_pro) {
         setError('Ücretsiz kullanıcılar maksimum 2 şablon kaydedebilir.')
       } else {
         existing.push(template)
-        localStorage.setItem('gfit_saved_meals', JSON.stringify(existing))
+        localStorage.setItem('gfitt_saved_meals', JSON.stringify(existing))
         setSavedMeals(existing)
         setSaveMealModalOpen(false)
         setMealTemplateName('')
@@ -249,7 +251,7 @@ export default function Food() {
   }
 
   useEffect(() => {
-    setSavedMeals(JSON.parse(localStorage.getItem('gfit_saved_meals') || '[]'))
+    setSavedMeals(JSON.parse(localStorage.getItem('gfitt_saved_meals') || '[]'))
   }, [])
 
   return (
@@ -259,7 +261,17 @@ export default function Food() {
           <p className="sub">Türk yemek veritabanı</p>
           <h1>Yemek</h1>
         </div>
-        <DayNav date={date} onChange={setDate} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Link
+            to="/etiket-okuyucu"
+            className="btn ghost"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}
+          >
+            <ScanLine size={20} />
+            <span style={{ fontSize: '14px' }}>Etiket Oku</span>
+          </Link>
+          <DayNav date={date} onChange={setDate} />
+        </div>
       </div>
 
       {error && (
@@ -374,8 +386,8 @@ export default function Food() {
             className="btn" 
             style={{ width: '100%', background: '#EF4444' }}
             onClick={() => {
-              localStorage.setItem('gfit_cheat_mode', 'true')
-              localStorage.setItem('gfit_cheat_date', new Date().toISOString())
+              localStorage.setItem('gfitt_cheat_mode', 'true')
+              localStorage.setItem('gfitt_cheat_date', new Date().toISOString())
               alert('Telafi modu aktif! Sonraki 2 gun su hedefi +20% arttirildi.')
             }}
           >

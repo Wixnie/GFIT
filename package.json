@@ -1,5 +1,5 @@
 {
-  "name": "fitapp",
+  "name": "gfitt",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -29,6 +29,7 @@
     "autoprefixer": "^10.6.1",
     "postcss": "^8.5.31",
     "tailwindcss": "^4.3.3",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }

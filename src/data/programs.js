@@ -108,12 +108,12 @@ export const PROGRAMS = [
 ]
 
 export const PERSONAL_DEFAULTS = {
-  display_name: 'Efehan',
-  age: 22,
-  height_cm: 185,
-  weight_kg: 90,
-  calorie_target: 2600,
-  protein_target: 170,
-  carb_target: 310,
-  fat_target: 75,
+  display_name: 'Sporcu',
+  age: 25,
+  height_cm: 175,
+  weight_kg: 75,
+  calorie_target: 2400,
+  protein_target: 150,
+  carb_target: 250,
+  fat_target: 65,
 }

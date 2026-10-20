@@ -10,7 +10,7 @@ export default function Habits() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem('gfit_smoking_habit')
+    const saved = localStorage.getItem('gfitt_smoking_habit')
     if (saved) {
       const data = JSON.parse(saved)
       setCigarettesPerDay(data.cigarettesPerDay || 20)
@@ -21,7 +21,7 @@ export default function Habits() {
 
   const saveHabit = () => {
     const data = { cigarettesPerDay, pricePerPack, quitDate }
-    localStorage.setItem('gfit_smoking_habit', JSON.stringify(data))
+    localStorage.setItem('gfitt_smoking_habit', JSON.stringify(data))
   }
 
   const handleStartQuit = () => {

@@ -1,31 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Logma-inspired Color Palette */
-  --bg-primary: #0F0F1A;
-  --bg-secondary: #1A1A2E;
-  --bg-card: #16213E;
+  /* Logma Dark + GFit Orange Design System */
+  --bg-primary: #08070F;
+  --bg-secondary: #0E0C1B;
+  --bg-card: #181528;
   --bg-card-hover: #1E2A4A;
 
-  /* Navy/Purple Gradient Colors */
-  --gradient-start: #0F0F1A;
-  --gradient-mid: #1A1A2E;
-  --gradient-end: #16213E;
+  /* Gradient Colors */
+  --gradient-start: #1C1836;
+  --gradient-mid: #0E0C1B;
+  --gradient-end: #08070F;
 
-  /* Accent Colors (Orange preserved from GFIT) */
-  --accent-primary: #F59E0B;
-  --accent-secondary: #D97706;
-  --accent-hover: #FBBF24;
+  /* Accent Colors (GFit Orange) */
+  --accent-primary: #FF8A00;
+  --accent-secondary: #FFA02E;
+  --accent-hover: #FFA02E;
+  --accent-glow: rgba(255, 138, 0, 0.45);
 
   /* Macro Colors */
-  --macro-protein: #10B981;
-  --macro-carb: #3B82F6;
-  --macro-fat: #8B5CF6;
+  --macro-protein: #22C55E;
+  --macro-protein-alt: #FACC15;
+  --macro-carb: #818CF8;
+  --macro-fat: #FB923C;
 
   /* Chart Colors */
-  --chart-green: #10B981;
-  --chart-blue: #3B82F6;
-  --chart-orange: #F59E0B;
+  --chart-green: #22C55E;
+  --chart-blue: #818CF8;
+  --chart-orange: #FF8A00;
 
   /* Text Colors */
   --text-primary: #F1F5F9;
@@ -33,8 +35,8 @@
   --text-muted: #64748B;
 
   /* Border Colors */
-  --border-light: #334155;
-  --border-dark: #1E293B;
+  --border-light: rgba(255, 255, 255, 0.1);
+  --border-dark: rgba(255, 255, 255, 0.05);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -48,17 +50,18 @@
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+  --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.3);
+  --shadow-glow: 0 0 25px rgba(255, 138, 0, 0.45);
 }
 
 body {
-  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
+  background: radial-gradient(ellipse at top, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
   background-attachment: fixed;
   color: var(--text-primary);
   margin: 0;
@@ -66,6 +69,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
 .app-shell {

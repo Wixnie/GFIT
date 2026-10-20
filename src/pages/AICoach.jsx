@@ -39,7 +39,7 @@ export default function AICoach() {
 
   useEffect(() => {
     refresh()
-    const count = localStorage.getItem('gfit_ai_usage_count')
+    const count = localStorage.getItem('gfitt_ai_usage_count')
     setAiUsageCount(count ? parseInt(count) : 0)
   }, [session.id])
 
@@ -132,7 +132,7 @@ export default function AICoach() {
       })
       const newCount = aiUsageCount + 1
       setAiUsageCount(newCount)
-      localStorage.setItem('gfit_ai_usage_count', newCount.toString())
+      localStorage.setItem('gfitt_ai_usage_count', newCount.toString())
       setQuestion('')
     } catch (err) {
       console.error('AI sorusu işlenirken hata:', err)
