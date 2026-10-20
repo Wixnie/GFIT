@@ -31,6 +31,9 @@ export default function Food() {
   const [isListening, setIsListening] = useState(false)
   const [voiceText, setVoiceText] = useState('')
   const [showLateNightSnack, setShowLateNightSnack] = useState(false)
+  const [loggedModalOpen, setLoggedModalOpen] = useState(false)
+  const [loggedFoodName, setLoggedFoodName] = useState('')
+  const [loggedCalories, setLoggedCalories] = useState(0)
 
   async function refresh() {
     setLoading(true)
@@ -78,6 +81,9 @@ export default function Food() {
         logged_on: date,
         ...preview,
       })
+      setLoggedFoodName(selected.name)
+      setLoggedCalories(preview.calories)
+      setLoggedModalOpen(true)
       setSelected(null)
       setQ('')
       setGrams(100)
@@ -481,9 +487,12 @@ export default function Food() {
           />
           <div className="search-list">
             {results.map((f) => (
-              <button key={f.id} onClick={() => setSelected(f)}>
-                <strong>{f.name}</strong>
-                <div className="sub">{f.kcal} kcal · P{f.p} C{f.c} F{f.f} / 100g</div>
+              <button key={f.id} onClick={() => setSelected(f)} className="food-card">
+                <span className="food-emoji">{f.emoji || '🍽️'}</span>
+                <div>
+                  <strong>{f.name}</strong>
+                  <div className="sub">{f.kcal} kcal · P{f.p} C{f.c} F{f.f} / 100g</div>
+                </div>
               </button>
             ))}
           </div>
@@ -596,6 +605,23 @@ export default function Food() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Logged Modal Popup */}
+      {loggedModalOpen && (
+        <div className="logged-modal" onClick={() => setLoggedModalOpen(false)}>
+          <div className="logged-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="logged-modal-icon">✅</div>
+            <div className="logged-modal-title">Kaydedildi!</div>
+            <div className="logged-modal-text">
+              {loggedFoodName}<br />
+              {Math.round(loggedCalories)} kcal loglandı
+            </div>
+            <button className="btn" onClick={() => setLoggedModalOpen(false)} style={{ width: '100%' }}>
+              Tamam
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

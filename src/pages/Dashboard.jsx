@@ -198,41 +198,52 @@ export default function Dashboard() {
         <DayNav date={date} onChange={setDate} />
       </div>
 
-      {/* XP Circular Progress Ring */}
-      <div className="card" style={{ marginBottom: 16, textAlign: 'center' }}>
-        <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto' }}>
-          <svg width="120" height="120" viewBox="0 0 120 120">
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke="#1E293B"
-              strokeWidth="8"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              fill="none"
-              stroke="#F59E0B"
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 54}`}
-              strokeDashoffset={`${2 * Math.PI * 54 * (1 - xpProgress / 100)}`}
-              transform="rotate(-90 60 60)"
-              style={{ transition: 'stroke-dashoffset 0.5s ease' }}
-            />
-          </svg>
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#F59E0B' }}>{xp}</div>
-            <div className="sub" style={{ fontSize: '10px' }}>XP</div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: rank.color, marginTop: 2 }}>{rank.name}</div>
+      {/* Calorie Circular Progress Ring - Logma Style */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="circular-progress" style={{ position: 'relative', width: '140px', height: '140px' }}>
+            <svg width="140" height="140" viewBox="0 0 140 140">
+              <circle
+                cx="70"
+                cy="70"
+                r="60"
+                fill="none"
+                className="progress-bg"
+                strokeWidth="12"
+              />
+              <circle
+                cx="70"
+                cy="70"
+                r="60"
+                fill="none"
+                className="progress-fill"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 60}`}
+                strokeDashoffset={`${2 * Math.PI * 60 * (1 - Math.min(totals.calories / p.calorie_target, 1))}`}
+                style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+              <div style={{ fontSize: '32px', fontWeight: 800, color: '#F59E0B' }}>{Math.round(totals.calories)}</div>
+              <div className="sub" style={{ fontSize: '12px' }}>/ {p.calorie_target} kcal</div>
+            </div>
+          </div>
+          <div style={{ flex: 1, marginLeft: 24 }}>
+            <div className="macro-indicator" style={{ marginBottom: 12 }}>
+              <div className="macro-dot protein"></div>
+              <span style={{ color: '#10B981' }}>Protein: {Math.round(totals.protein)}g / {p.protein_target}g</span>
+            </div>
+            <div className="macro-indicator" style={{ marginBottom: 12 }}>
+              <div className="macro-dot carb"></div>
+              <span style={{ color: '#3B82F6' }}>Karb: {Math.round(totals.carbs)}g / {p.carb_target}g</span>
+            </div>
+            <div className="macro-indicator">
+              <div className="macro-dot fat"></div>
+              <span style={{ color: '#8B5CF6' }}>Yağ: {Math.round(totals.fat)}g / {p.fat_target}g</span>
+            </div>
           </div>
         </div>
-        <p className="sub" style={{ marginTop: 8 }}>
-          Sonraki seviye: {rank.next > 0 ? rank.next - (xp % rank.next) : 'Maksimum'} XP
-        </p>
       </div>
 
       {/* Intermittent Fasting & Sleep Cards */}

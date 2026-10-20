@@ -5,19 +5,10 @@ import Footer from './Footer'
 import FeedbackModal from './FeedbackModal'
 
 const links = [
-  { to: '/dashboard', label: 'Özet' },
-  { to: '/yemek', label: 'Yemek' },
-  { to: '/antrenman', label: 'Antrenman' },
-  { to: '/supplement', label: 'Supplement' },
-  { to: '/kilo', label: 'Kilo' },
-  { to: '/ilerleme', label: 'İlerleme' },
-  { to: '/aliskanliklar', label: 'Alışkanlıklar' },
-  { to: '/ai-koc', label: 'AI Koç' },
-  { to: '/etiket-okuyucu', label: 'Etiket' },
-  { to: '/pazar', label: 'Pazar' },
-  { to: '/sosyal', label: 'Sosyal' },
-  { to: '/premium', label: 'Premium' },
-  { to: '/profil', label: 'Profil' },
+  { to: '/dashboard', label: 'Özet', icon: '📊' },
+  { to: '/yemek', label: 'Yemek', icon: '🍽️' },
+  { to: '/antrenman', label: 'Antrenman', icon: '💪' },
+  { to: '/profil', label: 'Profil', icon: '👤' },
 ]
 
 export default function Layout() {
@@ -57,15 +48,16 @@ export default function Layout() {
         <Footer />
       </main>
       <nav className="bottom-nav">
-        {links.slice(0, 5).map((l) => (
-          <NavLink key={l.to} to={l.to} end={l.to === '/dashboard'} className={({ isActive }) => (isActive ? 'active' : '')}>
-            {l.label}
+        {links.map((l) => (
+          <NavLink key={l.to} to={l.to} end={l.to === '/dashboard'} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+            <span className="nav-icon">{l.icon}</span>
+            <span>{l.label}</span>
           </NavLink>
         ))}
-        <NavLink to="/sosyal" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Sosyal
-        </NavLink>
       </nav>
+      <button className="fab" onClick={() => window.location.href = '/yemek'}>
+        <span className="fab-icon">+</span>
+      </button>
       <FeedbackModal isOpen={showFeedback} onClose={() => setShowFeedback(false)} />
     </div>
   )
