@@ -64,7 +64,7 @@ export default function Onboarding() {
     const bmr = calculateBMR(data.weight_kg, data.height_cm, data.age, data.gender)
     const tdee = calculateTDEE(bmr, data.activity_level)
     const targetCalories = calculateTargetCalories(tdee, data.goal, data.gender)
-    const macros = calculateMacros(data.weight_kg, targetCalories)
+    const macros = calculateMacros(data.weight_kg, targetCalories, data.goal)
     const waterTarget = calculateWaterTarget(data.weight_kg)
     
     return { bmr, tdee, targetCalories, macros, waterTarget }
@@ -481,40 +481,50 @@ export default function Onboarding() {
 
       {step === 9 && (
         <div className="card onboarding-step">
-          <h2 style={{ margin: '0 0 16px' }}>Planın Hazırlanıyor...</h2>
+          <h2 style={{ margin: '0 0 16px' }}>Planın Hazır</h2>
           
           {(() => {
             const targets = calculateFinalTargets()
             const goalInfo = getGoalRateDisplay(data.goal)
             
+            // Calculate target date based on goal and rate
+            const targetDate = new Date()
+            const weeksToGoal = Math.abs((data.goal === 'lose' ? -5 : data.goal === 'gain' ? 5 : 0) / (data.goal_rate || 0.25))
+            targetDate.setDate(targetDate.getDate() + (weeksToGoal * 7))
+            const formattedDate = targetDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+            
             return (
               <div style={{ textAlign: 'center', padding: '24px', background: '#0F172A', borderRadius: '12px', marginBottom: 24 }}>
                 <div style={{ fontSize: '48px', marginBottom: 16 }}>📊</div>
-                <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>Kişisel Hedeflerin</h3>
-                <div className="grid grid-2" style={{ textAlign: 'left', marginBottom: 16 }}>
-                  <div>
-                    <p className="sub">Kalori Hedefi</p>
-                    <strong style={{ fontSize: '20px', color: '#F59E0B' }}>{Math.round(targets.targetCalories)} kcal</strong>
-                  </div>
-                  <div>
-                    <p className="sub">Su Hedefi</p>
-                    <strong style={{ fontSize: '20px', color: '#10B981' }}>{targets.waterTarget} ml</strong>
-                  </div>
+                <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>PLANIN HAZIR</h3>
+                
+                {/* Goal & Target Date */}
+                <div style={{ marginBottom: 16, padding: '16px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px' }}>
+                  <p className="sub" style={{ margin: 0, fontSize: '14px' }}>
+                    {data.goal === 'lose' ? `${Math.abs(5)} kg Ver` : data.goal === 'gain' ? '5 kg Al' : 'Form Koru'} — {formattedDate} tarihine kadar
+                  </p>
                 </div>
-                <div className="grid grid-3" style={{ textAlign: 'left', marginBottom: 16 }}>
-                  <div>
-                    <p className="sub">Protein</p>
-                    <strong style={{ fontSize: '18px', color: '#10B981' }}>{targets.macros.protein}g</strong>
-                  </div>
-                  <div>
-                    <p className="sub">Karb</p>
-                    <strong style={{ fontSize: '18px', color: '#F59E0B' }}>{targets.macros.carbs}g</strong>
-                  </div>
-                  <div>
-                    <p className="sub">Yag</p>
-                    <strong style={{ fontSize: '18px', color: '#64748B' }}>{targets.macros.fat}g</strong>
-                  </div>
+                
+                {/* Daily Budget Box */}
+                <div style={{ marginBottom: 16, padding: '16px', background: '#0B101B', borderRadius: '8px' }}>
+                  <p className="sub" style={{ margin: 0, marginBottom: 8 }}>
+                    <strong style={{ fontSize: '18px', color: '#F59E0B' }}>{Math.round(targets.targetCalories)} kcal / gün</strong>
+                  </p>
+                  <p className="sub" style={{ margin: 0, fontSize: '13px' }}>
+                    {targets.macros.protein}g Protein | {targets.macros.carbs}g Karb | {targets.macros.fat}g Yağ
+                  </p>
                 </div>
+                
+                {/* 3-Day Free PRO Trial CTA */}
+                <div style={{ marginBottom: 16, padding: '16px', background: 'rgba(255, 138, 0, 0.15)', borderRadius: '8px', border: '1px solid #FF8A00' }}>
+                  <p className="sub" style={{ margin: 0, marginBottom: 12, color: '#FF8A00', fontWeight: 600 }}>
+                    🎁 3 Günlük Ücretsiz PRO Denemeni Başlat
+                  </p>
+                  <p className="sub" style={{ margin: 0, fontSize: '12px' }}>
+                    Sınırsız sesli günlük, gelişmiş analizler ve Apple Health senkronizasyonu.
+                  </p>
+                </div>
+                
                 <p className="sub">
                   Hedef Hizi: {goalInfo.emoji} {goalInfo.label} ({goalInfo.rate} kg/hafta)
                 </p>

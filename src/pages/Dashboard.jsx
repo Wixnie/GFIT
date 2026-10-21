@@ -18,10 +18,13 @@ import {
 import { todayISO } from '../lib/dates'
 import { suggestFoods, sumLogs } from '../lib/suggestions'
 import { getAICoachAdvice } from '../lib/ai'
+import { updateStreak } from '../lib/streak'
 import DayNav from '../components/DayNav'
 import MacroBars from '../components/MacroBars'
 import NudgeBanner from '../components/NudgeBanner'
-import { Sparkles, Beef, UtensilsCrossed, Wheat, Coffee, Apple, Carrot, Cake, ChefHat, GlassWater, Dumbbell } from 'lucide-react'
+import PersonalizedStats from '../components/PersonalizedStats'
+import WaterTracker from '../components/WaterTracker'
+import { Sparkles, Beef, UtensilsCrossed, Wheat, Coffee, Apple, Carrot, Cake, ChefHat, GlassWater, Dumbbell, Droplets, Zap, Moon, Sun } from 'lucide-react'
 
 export default function Dashboard() {
   const { profile, session } = useAuth()
@@ -63,9 +66,12 @@ export default function Dashboard() {
 
     // Load gamification data
     const savedXp = localStorage.getItem('gfitt_xp')
-    const savedStreak = localStorage.getItem('gfitt_streak')
     setXp(savedXp ? parseInt(savedXp) : 0)
-    setStreak(savedStreak ? parseInt(savedStreak) : 0)
+    
+    // Calculate and update streak based on all food logs
+    const allFoodLogs = await listFood(session.id)
+    const currentStreak = updateStreak(allFoodLogs)
+    setStreak(currentStreak)
 
     // Load fasting data
     const savedFasting = localStorage.getItem('gfitt_fasting')
@@ -214,6 +220,46 @@ export default function Dashboard() {
             <h1>Bugünün özeti</h1>
             <span style={{ fontSize: '20px' }}>🔥 {streak}</span>
           </div>
+          {/* Menstrual Cycle Phase Badge for Female Users */}
+          {p.gender === 'female' && p.cycle_start_date && (() => {
+            const today = new Date()
+            const start = new Date(p.cycle_start_date)
+            const cycleLength = p.cycle_length || 28
+            const daysSinceStart = Math.floor((today - start) / (1000 * 60 * 60 * 24))
+            const dayInCycle = (daysSinceStart % cycleLength) + 1
+            
+            let phaseInfo = { name: '', icon: null, color: '' }
+            if (dayInCycle <= 5) {
+              phaseInfo = { name: 'Menstrüasyon', icon: Droplets, color: '#EF4444' }
+            } else if (dayInCycle <= 13) {
+              phaseInfo = { name: 'Foliküler', icon: Sun, color: '#10B981' }
+            } else if (dayInCycle <= 16) {
+              phaseInfo = { name: 'Ovülasyon', icon: Zap, color: '#F59E0B' }
+            } else {
+              phaseInfo = { name: 'Luteal', icon: Moon, color: '#8B5CF6' }
+            }
+            
+            const PhaseIcon = phaseInfo.icon
+            
+            return (
+              <div style={{ marginTop: '8px' }}>
+                <span 
+                  className="chip" 
+                  style={{ 
+                    background: `${phaseInfo.color}20`, 
+                    color: phaseInfo.color, 
+                    border: `1px solid ${phaseInfo.color}40`,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <PhaseIcon size={14} />
+                  {phaseInfo.name} (Gün {dayInCycle})
+                </span>
+              </div>
+            )
+          })()}
         </div>
         <DayNav date={date} onChange={setDate} />
       </div>
@@ -271,7 +317,64 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+        <div style={{ marginTop: 16, textAlign: 'center', padding: '8px', background: 'rgba(255, 138, 0, 0.1)', borderRadius: '8px' }}>
+          <p className="sub" style={{ margin: 0, color: '#FF8A00', fontWeight: 600 }}>
+            {Math.round(remaining.calories)} kalori kaldı
+          </p>
+        </div>
       </div>
+
+      {/* Today's Food Feed - Timestamped */}
+      {logs.length > 0 && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <h3 style={{ margin: '0 0 12px' }}>Bugünün Yemekleri</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {logs.map((log) => {
+              const food = FOODS.find(f => f.name === log.food_name)
+              const icon = food?.emoji || '🍽️'
+              const time = log.created_at ? new Date(log.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '--:--'
+              
+              return (
+                <div 
+                  key={log.id}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px',
+                    padding: '12px',
+                    background: '#0B101B',
+                    borderRadius: '12px'
+                  }}
+                >
+                  <div style={{ 
+                    width: '40px', 
+                    height: '40px', 
+                    borderRadius: '50%', 
+                    background: '#1E293B',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px'
+                  }}>
+                    {icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <strong>{log.food_name}</strong>
+                    <p className="sub" style={{ margin: '2px 0 0', fontSize: '12px' }}>
+                      {log.amount_g}g · {Math.round(log.calories)} kcal · {Math.round(log.protein)}g protein
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p className="sub" style={{ margin: 0, fontSize: '12px', color: '#8B5CF6' }}>
+                      {time}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Goal-Based Widget */}
       {(() => {
@@ -327,6 +430,61 @@ export default function Dashboard() {
         }
       })()}
 
+      {/* Scientific Protein Range Bar - ISSN Standard */}
+      <div className="card" style={{ marginBottom: 16, background: 'rgba(34, 197, 94, 0.1)', borderColor: '#22C55E' }}>
+        <h3 style={{ margin: '0 0 12px', color: '#22C55E' }}>🧬 Bilimsel Protein Hedefi: 1.6–2.2g / kg</h3>
+        <p className="sub" style={{ marginBottom: 16 }}>
+          ISSN 2017 standardı — Antrenman yapanlar için kilo başına günlük ideal aralık
+        </p>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span className="sub">Min: {Math.round(p.weight_kg * 1.6)}g</span>
+            <span className="sub" style={{ color: '#22C55E', fontWeight: 600 }}>Hedef Aralığı</span>
+            <span className="sub">Max: {Math.round(p.weight_kg * 2.2)}g</span>
+          </div>
+          <div style={{ height: '24px', background: '#0F172A', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
+            {/* Zone indicator */}
+            <div 
+              style={{
+                position: 'absolute',
+                left: `${((p.weight_kg * 1.6) / (p.weight_kg * 2.5)) * 100}%`,
+                width: `${((p.weight_kg * 2.2 - p.weight_kg * 1.6) / (p.weight_kg * 2.5)) * 100}%`,
+                height: '100%',
+                background: 'rgba(34, 197, 94, 0.3)',
+                borderLeft: '2px solid #22C55E',
+                borderRight: '2px solid #22C55E'
+              }}
+            />
+            {/* Current protein */}
+            <div 
+              style={{
+                height: '100%',
+                background: '#22C55E',
+                width: `${Math.min((totals.protein / (p.weight_kg * 2.5)) * 100, 100)}%`,
+                transition: 'width 0.5s ease',
+                borderRadius: '12px'
+              }}
+            />
+          </div>
+        </div>
+        <p className="sub" style={{ margin: 0 }}>
+          {(() => {
+            const minP = p.weight_kg * 1.6
+            const maxP = p.weight_kg * 2.2
+            if (totals.protein >= minP && totals.protein <= maxP) {
+              return <span style={{ color: '#22C55E' }}>✅ İdeal hipertrofi aralığındasın!</span>
+            } else if (totals.protein < minP) {
+              return <span style={{ color: '#F59E0B' }}>⚠️ Hedefine {Math.round(minP - totals.protein)}g protein eksik</span>
+            } else {
+              return <span style={{ color: '#10B981' }}>💪 Hedefin üstündesin — optimum büyüme için iyisin!</span>
+            }
+          })()}
+        </p>
+      </div>
+
+      {/* Personalized Stats - BMR, TDEE, Macros */}
+      <PersonalizedStats profile={p} />
+
       {/* AI Coach Card */}
       <div className="card" style={{ marginBottom: 16, background: 'rgba(255, 138, 0, 0.1)', borderColor: '#FF8A00' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -378,6 +536,34 @@ export default function Dashboard() {
         ) : (
           <p className="sub">Analiz butonuna tıklayarak akşam öğünü önerisi alın.</p>
         )}
+      </div>
+
+      {/* Water Tracker */}
+      <WaterTracker profile={p} />
+
+      {/* Apple Health "Real Balance" 3-Card Layout */}
+      <div className="grid grid-3" style={{ marginBottom: 16 }}>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '32px', marginBottom: 8 }}>👣</div>
+          <h4 style={{ margin: '0 0 4px' }}>Adımlar</h4>
+          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+            Evet, buzdolabına kadar yürüdüğün adımlar bile sayılır.
+          </p>
+        </div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '32px', marginBottom: 8 }}>⚡</div>
+          <h4 style={{ margin: '0 0 4px' }}>Enerji</h4>
+          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+            Akıllı saat takıyorsan gerçek kalori yakımı günlük dengene eklenir.
+          </p>
+        </div>
+        <div className="card" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '32px', marginBottom: 8 }}>😴</div>
+          <h4 style={{ margin: '0 0 4px' }}>Uyku</h4>
+          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+            5 saatlik bir uykunun ertesi gün iştahına ne yaptığı.
+          </p>
+        </div>
       </div>
 
       {/* Intermittent Fasting & Sleep Cards */}
@@ -432,6 +618,19 @@ export default function Dashboard() {
              sleepHours > 10 ? '⚠️ Aşırı uyku / Halsizlik eğilimi' :
              '⚠️ Yeterli ama ideal değil'}
           </p>
+          
+          {/* Sleep-Appetite Alert */}
+          {sleepHours < 6 && (
+            <div style={{ marginTop: 12, padding: '12px', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '8px', border: '1px solid #F59E0B' }}>
+              <p className="sub" style={{ margin: 0, color: '#F59E0B', fontWeight: 600 }}>
+                🚨 İştah & Ghrelin Uyarısı
+              </p>
+              <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>
+                Dün gece az uyudun ({sleepHours} saat). Yetersiz uyku açlık hormonunu tetikler; bugün tatlı krizlerini önlemek için +500ml su iç ve öğününe +20g protein ekle.
+              </p>
+            </div>
+          )}
+          
           {/* Health Data Privacy Notice */}
           <div style={{ marginTop: 12, padding: '8px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '4px' }}>
             <p className="sub" style={{ margin: 0, fontSize: '10px' }}>
@@ -447,29 +646,6 @@ export default function Dashboard() {
         <Stat label="Antrenman" value={workouts.length ? workouts[0].name : 'Yok'} />
         <Stat label="Takviye" value={`${taken.length}/${SUPPLEMENTS.length}`} />
       </div>
-
-      {/* Water Reminder */}
-      {(() => {
-        const waterTarget = p.weight_kg * 35
-        const currentWater = 0 // Would be fetched from logs
-        const waterPercent = (currentWater / waterTarget) * 100
-        if (waterPercent < 80 && waterPercent > 0) {
-          return (
-            <div className="card" style={{ marginBottom: 16, background: 'rgba(59, 130, 246, 0.1)', borderColor: '#3B82F6' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ fontSize: '32px' }}>💧</div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: '0 0 4px', color: '#3B82F6' }}>Su Zamanı!</h4>
-                  <p className="sub" style={{ margin: 0 }}>
-                    Günlük hedefine ulaşmak için su içmelisin. ({Math.round(waterPercent)}% tamamlandı)
-                  </p>
-                </div>
-              </div>
-            </div>
-          )
-        }
-        return null
-      })()}
 
       <div className="grid grid-2" style={{ marginBottom: 16 }}>
         <section className="card">

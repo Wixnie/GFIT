@@ -9,6 +9,7 @@ import MacroBars from '../components/MacroBars'
 import { PERSONAL_DEFAULTS } from '../data/programs'
 import { sumLogs } from '../lib/suggestions'
 import { ScanLine } from 'lucide-react'
+import FoodScannerPanel from '../components/FoodScannerPanel'
 
 export default function Food() {
   const { session, profile } = useAuth()
@@ -32,10 +33,14 @@ export default function Food() {
   const [showVoiceInput, setShowVoiceInput] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [voiceText, setVoiceText] = useState('')
+  const [liveTranscript, setLiveTranscript] = useState('')
   const [showLateNightSnack, setShowLateNightSnack] = useState(false)
   const [loggedModalOpen, setLoggedModalOpen] = useState(false)
   const [loggedFoodName, setLoggedFoodName] = useState('')
   const [loggedCalories, setLoggedCalories] = useState(0)
+  const [loggedItems, setLoggedItems] = useState([])
+  const [editingLoggedItem, setEditingLoggedItem] = useState(null)
+  const [scannerPanelOpen, setScannerPanelOpen] = useState(false)
 
   async function refresh() {
     setLoading(true)
@@ -77,7 +82,7 @@ export default function Food() {
     setLoading(true)
     setError(null)
     try {
-      await addFood(session.id, {
+      const loggedItem = await addFood(session.id, {
         food_name: selected.name,
         amount_g: Number(grams),
         logged_on: date,
@@ -85,6 +90,16 @@ export default function Food() {
       })
       setLoggedFoodName(selected.name)
       setLoggedCalories(preview.calories)
+      setLoggedItems([{
+        id: loggedItem.id,
+        food_name: selected.name,
+        amount_g: Number(grams),
+        calories: preview.calories,
+        protein: preview.protein,
+        carbs: preview.carbs,
+        fat: preview.fat,
+        subtext: `${Number(grams)}g · ${selected.subtext || ''}`
+      }])
       setLoggedModalOpen(true)
       setSelected(null)
       setQ('')
@@ -262,14 +277,14 @@ export default function Food() {
           <h1>Yemek</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Link
-            to="/etiket-okuyucu"
+          <button
+            onClick={() => setScannerPanelOpen(true)}
             className="btn ghost"
             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}
           >
             <ScanLine size={20} />
             <span style={{ fontSize: '14px' }}>Etiket Oku</span>
-          </Link>
+          </button>
           <DayNav date={date} onChange={setDate} />
         </div>
       </div>
@@ -419,8 +434,26 @@ export default function Food() {
       {showVoiceInput && (
         <div className="card" style={{ marginBottom: 16 }}>
           <h3 style={{ marginTop: 0, marginBottom: 12 }}>🎤 Sesli Günlük</h3>
+          
+          {/* Live Speech Bubble */}
+          {isListening && liveTranscript && (
+            <div 
+              style={{ 
+                marginBottom: 16, 
+                padding: '12px 16px', 
+                background: '#FACC15', 
+                color: '#000', 
+                fontWeight: 600, 
+                borderRadius: '16px', 
+                boxShadow: '0 4px 20px rgba(250, 204, 21, 0.4)'
+              }}
+            >
+              "{liveTranscript}"
+            </div>
+          )}
+          
           <p className="sub" style={{ marginBottom: 16 }}>
-            Konuşarak yemek ekleyin: "Tavuk 100 gram"
+            Arkadaşına anlatır gibi söyle, mırıldansan bile anlarız. Yağlardan ve soslardan da bahsetmeyi unutma!
           </p>
           <button 
             className="btn" 
@@ -430,25 +463,100 @@ export default function Food() {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
                 const recognition = new SpeechRecognition()
                 recognition.lang = 'tr-TR'
+                recognition.continuous = true
+                recognition.interimResults = true
+                
                 recognition.onresult = (event) => {
-                  setVoiceText(event.results[0][0].transcript)
-                  setIsListening(false)
+                  let interimTranscript = ''
+                  let finalTranscript = ''
+                  
+                  for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                      finalTranscript += event.results[i][0].transcript
+                    } else {
+                      interimTranscript += event.results[i][0].transcript
+                    }
+                  }
+                  
+                  if (interimTranscript) {
+                    setLiveTranscript(interimTranscript)
+                  }
+                  
+                  if (finalTranscript) {
+                    setVoiceText(finalTranscript)
+                    setLiveTranscript('')
+                    setIsListening(false)
+                  }
                 }
-                recognition.onerror = () => setIsListening(false)
-                recognition.onend = () => setIsListening(false)
+                
+                recognition.onerror = () => {
+                  setIsListening(false)
+                  setLiveTranscript('')
+                }
+                
+                recognition.onend = () => {
+                  if (!voiceText) {
+                    setIsListening(false)
+                    setLiveTranscript('')
+                  }
+                }
+                
                 recognition.start()
                 setIsListening(true)
+                setLiveTranscript('')
               } else {
                 alert('Tarayıcınız sesli girişi desteklemiyor.')
               }
             }}
             disabled={isListening}
           >
-            {isListening ? 'Dinleniyor...' : 'Mikrofonu Aç'}
+            {isListening ? 'Dinliyorum...' : 'Mikrofonu Aç'}
           </button>
           {voiceText && (
             <div style={{ marginTop: 12, padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
               <p className="sub" style={{ margin: 0 }}>Alınan: "{voiceText}"</p>
+              <button 
+                className="btn" 
+                style={{ marginTop: 8, fontSize: '12px' }}
+                onClick={async () => {
+                  // Multi-item parser: split by common separators
+                  const separators = [' ve ', ' ile ', ' plus ', ',', ' ve bir ']
+                  let parts = [voiceText]
+                  
+                  for (const sep of separators) {
+                    if (voiceText.toLowerCase().includes(sep)) {
+                      parts = voiceText.split(new RegExp(sep, 'i'))
+                      break
+                    }
+                  }
+                  
+                  // Try to match each part to foods
+                  for (const part of parts) {
+                    const cleanPart = part.trim().toLowerCase()
+                    if (cleanPart.length < 2) continue
+                    
+                    const matchedFood = FOODS.find(f => 
+                      f.name.toLowerCase().includes(cleanPart) || 
+                      cleanPart.includes(f.name.toLowerCase())
+                    )
+                    
+                    if (matchedFood) {
+                      const macros = macrosForGrams(matchedFood, 100)
+                      await addFood(session.id, {
+                        food_name: matchedFood.name,
+                        amount_g: 100,
+                        logged_on: date,
+                        ...macros,
+                      })
+                    }
+                  }
+                  
+                  setVoiceText('')
+                  await refresh()
+                }}
+              >
+                Kaydet
+              </button>
             </div>
           )}
         </div>
@@ -619,22 +727,135 @@ export default function Food() {
         </>
       )}
 
-      {/* Logged Modal Popup */}
+      {/* Logged Modal Popup - LOGLANDI */}
       {loggedModalOpen && (
         <div className="logged-modal" onClick={() => setLoggedModalOpen(false)}>
           <div className="logged-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="logged-modal-icon">✅</div>
-            <div className="logged-modal-title">Kaydedildi!</div>
+            <div className="logged-modal-title">LOGLANDI</div>
             <div className="logged-modal-text">
-              {loggedFoodName}<br />
-              {Math.round(loggedCalories)} kcal loglandı
+              <strong>{Math.round(loggedCalories)} kal</strong>
             </div>
+            
+            {/* Dynamic coaching sentence */}
+            <p className="sub" style={{ marginTop: 8, marginBottom: 16, textAlign: 'center' }}>
+              {(() => {
+                const remaining = p.calorie_target - (totals.calories + loggedCalories)
+                if (remaining >= 0) {
+                  return `Kaydedildi! Toplam ${Math.round(totals.calories + loggedCalories)} kalori. Hedefine ${Math.round(remaining)} kcal kaldı.`
+                } else {
+                  return `Kaydedildi! Toplam ${Math.round(totals.calories + loggedCalories)} kalori. Bugün hedefin ${Math.abs(remaining)} kcal üzerindesin—yarın daha hafif öğünler düşünebilirsin.`
+                }
+              })()}
+            </p>
+            
+            {/* Logged items with portion edit */}
+            <div style={{ marginBottom: 16 }}>
+              {loggedItems.map((item) => (
+                <div 
+                  key={item.id}
+                  style={{
+                    padding: '12px',
+                    background: '#0B101B',
+                    borderRadius: '8px',
+                    marginBottom: '8px',
+                    cursor: 'pointer',
+                    border: editingLoggedItem === item.id ? '1px solid #FF8A00' : '1px solid transparent'
+                  }}
+                  onClick={() => setEditingLoggedItem(editingLoggedItem === item.id ? null : item.id)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <strong>{item.food_name}</strong>
+                      <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>
+                        {item.subtext || `${item.amount_g}g`}
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <strong>{Math.round(item.calories)} kcal</strong>
+                      <p className="sub" style={{ margin: '4px 0 0', fontSize: '11px' }}>
+                        {Math.round(item.protein)}g P | {Math.round(item.carbs)}g C | {Math.round(item.fat)}g F
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Inline portion edit */}
+                  {editingLoggedItem === item.id && (
+                    <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button 
+                        className="btn ghost"
+                        style={{ padding: '4px 12px', fontSize: '18px' }}
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          const newGrams = Math.max(10, item.amount_g - 10)
+                          const newMacros = macrosForGrams(
+                            { kcal: item.calories / (item.amount_g / 100), p: item.protein / (item.amount_g / 100), c: item.carbs / (item.amount_g / 100), f: item.fat / (item.amount_g / 100) },
+                            newGrams
+                          )
+                          await deleteFood(session.id, item.id)
+                          await addFood(session.id, {
+                            food_name: item.food_name,
+                            amount_g: newGrams,
+                            logged_on: date,
+                            ...newMacros,
+                          })
+                          setLoggedItems(loggedItems.map(li => 
+                            li.id === item.id 
+                              ? { ...li, amount_g: newGrams, ...newMacros, subtext: `${newGrams}g · ${item.subtext?.split('·')[1] || ''}` }
+                              : li
+                          ))
+                          await refresh()
+                        }}
+                      >
+                        -
+                      </button>
+                      <span style={{ minWidth: '60px', textAlign: 'center', fontWeight: 600 }}>{item.amount_g}g</span>
+                      <button 
+                        className="btn ghost"
+                        style={{ padding: '4px 12px', fontSize: '18px' }}
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          const newGrams = item.amount_g + 10
+                          const newMacros = macrosForGrams(
+                            { kcal: item.calories / (item.amount_g / 100), p: item.protein / (item.amount_g / 100), c: item.carbs / (item.amount_g / 100), f: item.fat / (item.amount_g / 100) },
+                            newGrams
+                          )
+                          await deleteFood(session.id, item.id)
+                          await addFood(session.id, {
+                            food_name: item.food_name,
+                            amount_g: newGrams,
+                            logged_on: date,
+                            ...newMacros,
+                          })
+                          setLoggedItems(loggedItems.map(li => 
+                            li.id === item.id 
+                              ? { ...li, amount_g: newGrams, ...newMacros, subtext: `${newGrams}g · ${item.subtext?.split('·')[1] || ''}` }
+                              : li
+                          ))
+                          await refresh()
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <p className="sub" style={{ fontSize: '11px', textAlign: 'center', marginBottom: 12 }}>
+              Porsiyon yanlış mı? Tek tıkla düzelt ↑
+            </p>
+            
             <button className="btn" onClick={() => setLoggedModalOpen(false)} style={{ width: '100%' }}>
               Tamam
             </button>
           </div>
         </div>
       )}
+
+      {/* Food Scanner Side Panel */}
+      <FoodScannerPanel isOpen={scannerPanelOpen} onClose={() => setScannerPanelOpen(false)} />
     </div>
   )
 }

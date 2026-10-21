@@ -2,6 +2,8 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import FeedbackModal from './FeedbackModal'
+import QuickActionSheet from './QuickActionSheet'
+import FoodScannerPanel from './FoodScannerPanel'
 import { LayoutGrid, UtensilsCrossed, Dumbbell, User, Plus, TrendingUp, Users, Ban } from 'lucide-react'
 
 const links = [
@@ -17,6 +19,8 @@ const links = [
 export default function Layout() {
   const { profile, signOut, demo } = useAuth()
   const [showFeedback, setShowFeedback] = useState(false)
+  const [quickActionOpen, setQuickActionOpen] = useState(false)
+  const [scannerPanelOpen, setScannerPanelOpen] = useState(false)
 
   useEffect(() => {
     const handleOpenFeedback = () => setShowFeedback(true)
@@ -95,7 +99,7 @@ export default function Layout() {
         ))}
         <button
           className="fab"
-          onClick={() => window.location.href = '/yemek'}
+          onClick={() => setQuickActionOpen(true)}
           style={{
             position: 'absolute',
             left: '50%',
@@ -127,6 +131,12 @@ export default function Layout() {
         </button>
       </nav>
       <FeedbackModal isOpen={showFeedback} onClose={() => setShowFeedback(false)} />
+      <QuickActionSheet 
+        isOpen={quickActionOpen} 
+        onClose={() => setQuickActionOpen(false)} 
+        onOpenScanner={() => setScannerPanelOpen(true)}
+      />
+      <FoodScannerPanel isOpen={scannerPanelOpen} onClose={() => setScannerPanelOpen(false)} />
     </div>
   )
 }

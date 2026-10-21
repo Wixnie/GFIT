@@ -1,14 +1,14 @@
 // TDEE Hesaplama Motoru - Mifflin-St Jeor Denklemi
 
 export function calculateBMR(weightKg, heightCm, age, gender) {
-  // Mifflin-St Jeor denklemi
-  const weightLbs = weightKg * 2.20462
-  const heightInches = heightCm * 0.393701
+  // Mifflin-St Jeor denklemi (METRIC units)
+  // Erkek: (10 × kg) + (6.25 × cm) - (5 × yaş) + 5
+  // Kadın: (10 × kg) + (6.25 × cm) - (5 × yaş) - 161
   
   if (gender === 'male') {
-    return (10 * weightLbs) + (6.25 * heightInches) - (5 * age) + 5
+    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5
   } else {
-    return (10 * weightLbs) + (6.25 * heightInches) - (5 * age) - 161
+    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161
   }
 }
 
@@ -41,9 +41,22 @@ export function calculateTargetCalories(tdee, goal, gender) {
   return Math.max(target, minCalories)
 }
 
-export function calculateMacros(weightKg, targetCalories) {
-  const protein = Math.round(weightKg * 2) // g/kg
-  const fat = Math.round(weightKg * 0.9) // g/kg
+export function calculateMacros(weightKg, targetCalories, goal = 'maintain') {
+  let protein = Math.round(weightKg * 2) // g/kg baseline
+  let fat = Math.round(weightKg * 0.9) // g/kg baseline
+  
+  // Goal-based adjustments
+  if (goal === 'lose' || goal === 'lose_fast' || goal === 'lose_slow') {
+    // Weight loss: Higher protein to preserve muscle, lower fat
+    protein = Math.round(weightKg * 2.2)
+    fat = Math.round(weightKg * 0.7)
+  } else if (goal === 'gain') {
+    // Muscle gain: Higher protein, moderate fat
+    protein = Math.round(weightKg * 2.4)
+    fat = Math.round(weightKg * 1.0)
+  }
+  // maintain: baseline values
+  
   const fatCalories = fat * 9
   const proteinCalories = protein * 4
   const remainingCalories = targetCalories - fatCalories - proteinCalories

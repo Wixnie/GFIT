@@ -13,7 +13,6 @@ import Progress from './pages/Progress'
 import Profile from './pages/Profile'
 import Habits from './pages/Habits'
 import AICoach from './pages/AICoach'
-import FoodScanner from './pages/FoodScanner'
 import Market from './pages/Market'
 import Kvkk from './pages/Kvkk'
 import GizlilikPolitikasi from './pages/GizlilikPolitikasi'
@@ -73,7 +72,6 @@ export default function App() {
             <Route path="/guc-artisi" element={<Strength />} />
             <Route path="/aliskanliklar" element={<Habits />} />
             <Route path="/ai-koc" element={<AICoach />} />
-            <Route path="/etiket-okuyucu" element={<FoodScanner />} />
             <Route path="/pazar" element={<Market />} />
             <Route path="/sosyal" element={<Social />} />
             <Route path="/profil" element={<Profile />} />

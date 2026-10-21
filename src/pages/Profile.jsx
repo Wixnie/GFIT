@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { updateProfile } from '../lib/api'
 import { supabase } from '../lib/supabase'
 import { PERSONAL_DEFAULTS } from '../data/programs'
+import MenstrualCycleTracker from '../components/MenstrualCycleTracker'
 
 export default function Profile() {
   const { session, profile, setProfile, demo } = useAuth()
@@ -12,6 +13,7 @@ export default function Profile() {
     age: profile?.age || PERSONAL_DEFAULTS.age,
     height_cm: profile?.height_cm || PERSONAL_DEFAULTS.height_cm,
     weight_kg: profile?.weight_kg || PERSONAL_DEFAULTS.weight_kg,
+    gender: profile?.gender || 'male',
     calorie_target: profile?.calorie_target || PERSONAL_DEFAULTS.calorie_target,
     protein_target: profile?.protein_target || PERSONAL_DEFAULTS.protein_target,
     carb_target: profile?.carb_target || PERSONAL_DEFAULTS.carb_target,
@@ -31,6 +33,7 @@ export default function Profile() {
         age: profile.age || PERSONAL_DEFAULTS.age,
         height_cm: profile.height_cm || PERSONAL_DEFAULTS.height_cm,
         weight_kg: profile.weight_kg || PERSONAL_DEFAULTS.weight_kg,
+        gender: profile.gender || 'male',
         calorie_target: profile.calorie_target || PERSONAL_DEFAULTS.calorie_target,
         protein_target: profile.protein_target || PERSONAL_DEFAULTS.protein_target,
         carb_target: profile.carb_target || PERSONAL_DEFAULTS.carb_target,
@@ -105,10 +108,23 @@ export default function Profile() {
             ['age', 'Yaş', 'number'],
             ['height_cm', 'Boy (cm)', 'number'],
             ['weight_kg', 'Kilo (kg)', 'number'],
+            ['gender', 'Cinsiyet', 'select'],
           ].map(([key, label, type]) => (
             <div className="field" key={key}>
               <label>{label}</label>
-              <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
+              {type === 'select' ? (
+                <select
+                  className="input"
+                  value={form[key]}
+                  onChange={(e) => set(key, e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="male">Erkek</option>
+                  <option value="female">Kadın</option>
+                </select>
+              ) : (
+                <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
+              )}
             </div>
           ))}
           <button className="btn" disabled={loading}>
@@ -174,6 +190,21 @@ export default function Profile() {
           lütfen önce bir sağlık uzmanına veya diyetisyene danışın.
         </p>
       </div>
+
+      {/* Menstrual Cycle Tracker - Female Only */}
+      {profile?.gender === 'female' && (
+        <MenstrualCycleTracker 
+          profile={profile}
+          onUpdate={async (data) => {
+            try {
+              const next = await updateProfile(session.id, data)
+              setProfile(next)
+            } catch (err) {
+              console.error('Regl döngüsü güncellenirken hata:', err)
+            }
+          }}
+        />
+      )}
 
       {/* Daha Fazla / Ayarlar Section */}
       <div className="card" style={{ marginTop: 16 }}>
