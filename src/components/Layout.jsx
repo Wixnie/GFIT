@@ -44,9 +44,11 @@ export default function Layout() {
           <button className="btn ghost" onClick={signOut}>Çıkış</button>
         </div>
       </aside>
-      <main className="main">
+      <main className="main" style={{ paddingBottom: '10rem' }}>
         <div className="mobile-top">
-          <div className="brand">G<span>Fitt</span></div>
+          <NavLink to="/dashboard" style={{ textDecoration: 'none' }}>
+            <div className="brand" style={{ cursor: 'pointer' }}>G<span>Fitt</span></div>
+          </NavLink>
           <div className="row">
             {demo && <div className="chip" style={{ marginBottom: 0, marginRight: 8 }}>Demo</div>}
             <NavLink className="chip" to="/profil">Profil</NavLink>
@@ -54,6 +56,9 @@ export default function Layout() {
           </div>
         </div>
         <Outlet />
+        <div className="global-footer">
+          Made by Efehan Çetin · GFitt © 2026
+        </div>
       </main>
       <nav className="bottom-nav" style={{
         position: 'fixed',

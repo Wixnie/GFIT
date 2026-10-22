@@ -5,8 +5,16 @@ import { calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros, 
 
 export default function Onboarding() {
   const navigate = useNavigate()
-  const { signUp } = useAuth()
-  
+  const { signUp, session } = useAuth()
+
+  // Check if onboarding already done
+  useEffect(() => {
+    const onboardingDone = localStorage.getItem('gfitt_onboarding_done')
+    if (onboardingDone === 'true' || session) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate, session])
+
   const [step, setStep] = useState(1)
   const [data, setData] = useState({
     goal: '',
@@ -72,7 +80,7 @@ export default function Onboarding() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!data.kvkkAccepted || !data.healthConsent) {
       setError('Lütfen KVKK ve sağlık verisi onay kutularını işaretleyin.')
       return
@@ -83,11 +91,14 @@ export default function Onboarding() {
 
     try {
       const targets = calculateFinalTargets()
-      
+
       localStorage.setItem('gfitt_onboarding_data', JSON.stringify({
         ...data,
         ...targets
       }))
+
+      // Mark onboarding as complete
+      localStorage.setItem('gfitt_onboarding_done', 'true')
 
       if (data.email && data.password) {
         await signUp(data.email, data.password, data.username, data.phone)
@@ -243,15 +254,25 @@ export default function Onboarding() {
       )}
 
       {step === 3 && (
-        <div className="card onboarding-step">
-          <h2 style={{ margin: '0 0 16px' }}>Mükemmel Olmana Gerek Yok</h2>
-          <p className="sub" style={{ marginBottom: 24 }}>
-            İlk zafer: 2 haftada -4 kg
+        <div className="card onboarding-step" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '24px', width: '100%', maxWidth: '28rem', margin: '0 auto' }}>
+          <h2 style={{ margin: '0 0 8px' }}>Mükemmel Olmana Gerek Yok</h2>
+          <p className="sub" style={{ marginBottom: 16 }}>
+            {(() => {
+              if (data.goal === 'gain') return 'İlk zafer: 4 haftada +1.5 kg temiz kas & güç artışı'
+              if (data.goal === 'lose') return 'İlk zafer: 3 haftada -2 kg sağlıklı yağ yakımı'
+              return 'İlk zafer: 21 gün kesintisiz form koruma'
+            })()}
           </p>
-          <div style={{ textAlign: 'center', padding: '32px', background: '#0F172A', borderRadius: '12px' }}>
-            <div style={{ fontSize: '64px', marginBottom: 16 }}>🏆</div>
-            <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>İlk Zafer Rozeti</h3>
-            <p className="sub">2 haftada -4 kg</p>
+          <div style={{ textAlign: 'center', padding: '24px', background: '#0F172A', borderRadius: '12px' }}>
+            <div style={{ fontSize: '48px', marginBottom: 12 }}>🏆</div>
+            <h3 style={{ color: '#F59E0B', margin: '0 0 8px', fontSize: '18px' }}>İlk Zafer Rozeti</h3>
+            <p className="sub" style={{ fontSize: '14px' }}>
+              {(() => {
+                if (data.goal === 'gain') return '+1.5 kg kas • 4 hafta'
+                if (data.goal === 'lose') return '-2 kg yağ • 3 hafta'
+                return '21 gün form • Stabil'
+              })()}
+            </p>
           </div>
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
             Devam Et
@@ -307,37 +328,97 @@ export default function Onboarding() {
         <div className="card onboarding-step">
           <h2 style={{ margin: '0 0 16px' }}>Vücut Ölçüleri</h2>
           <div className="field">
-            <label>Yaş: {data.age} yaş</label>
+            <label>Yaş</label>
             <input
               className="input"
-              type="range"
+              type="number"
               min="16"
               max="80"
               value={data.age}
-              onChange={(e) => handleFieldChange('age', parseInt(e.target.value))}
+              onChange={(e) => handleFieldChange('age', parseInt(e.target.value) || 25)}
+              style={{ marginBottom: '8px' }}
             />
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {[18, 22, 25, 30, 35, 40, 45, 50].map((age) => (
+                <button
+                  key={age}
+                  type="button"
+                  className="chip"
+                  onClick={() => handleFieldChange('age', age)}
+                  style={{
+                    padding: '4px 12px',
+                    cursor: 'pointer',
+                    background: data.age === age ? '#FF8A00' : 'transparent',
+                    color: data.age === age ? '#111827' : '#94A3B8',
+                    border: data.age === age ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  {age}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="field">
-            <label>Boy: {data.height_cm} cm</label>
+            <label>Boy (cm)</label>
             <input
               className="input"
-              type="range"
+              type="number"
               min="140"
               max="220"
               value={data.height_cm}
-              onChange={(e) => handleFieldChange('height_cm', parseInt(e.target.value))}
+              onChange={(e) => handleFieldChange('height_cm', parseInt(e.target.value) || 175)}
+              style={{ marginBottom: '8px' }}
             />
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {[160, 165, 170, 175, 180, 185, 190].map((height) => (
+                <button
+                  key={height}
+                  type="button"
+                  className="chip"
+                  onClick={() => handleFieldChange('height_cm', height)}
+                  style={{
+                    padding: '4px 12px',
+                    cursor: 'pointer',
+                    background: data.height_cm === height ? '#FF8A00' : 'transparent',
+                    color: data.height_cm === height ? '#111827' : '#94A3B8',
+                    border: data.height_cm === height ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  {height}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="field">
-            <label>Kilo: {data.weight_kg} kg</label>
+            <label>Kilo (kg)</label>
             <input
               className="input"
-              type="range"
+              type="number"
               min="40"
               max="150"
               value={data.weight_kg}
-              onChange={(e) => handleFieldChange('weight_kg', parseInt(e.target.value))}
+              onChange={(e) => handleFieldChange('weight_kg', parseInt(e.target.value) || 75)}
+              style={{ marginBottom: '8px' }}
             />
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {[55, 65, 75, 85, 95, 105, 115].map((weight) => (
+                <button
+                  key={weight}
+                  type="button"
+                  className="chip"
+                  onClick={() => handleFieldChange('weight_kg', weight)}
+                  style={{
+                    padding: '4px 12px',
+                    cursor: 'pointer',
+                    background: data.weight_kg === weight ? '#FF8A00' : 'transparent',
+                    color: data.weight_kg === weight ? '#111827' : '#94A3B8',
+                    border: data.weight_kg === weight ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  {weight}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="field">
             <label>Doğum Tarihi</label>
@@ -365,46 +446,34 @@ export default function Onboarding() {
             Haftalık kilo değişim hedefini seç
           </p>
 
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: '48px', fontWeight: 700, color: '#FF8A00', marginBottom: 8 }}>
-                {data.goal_rate || 0.25}
-              </div>
-              <p className="sub" style={{ fontSize: '18px', color: '#FFFFFF', fontWeight: 500 }}>
-                {(() => {
-                  const rate = parseFloat(data.goal_rate) || 0.25
-                  if (rate < 0.2) return '🐢 Sakin'
-                  if (rate >= 0.2 && rate < 0.4) return '� Dengeli - Önerilen'
-                  return '🐇 Hızlı'
-                })()}
-              </p>
-              <p className="sub" style={{ fontSize: '14px' }}>kg/hafta</p>
-            </div>
-
-            <div style={{ padding: '0 8px' }}>
-              <input
-                className="input"
-                type="range"
-                min="0.1"
-                max="1.0"
-                step="0.05"
-                value={data.goal_rate || 0.25}
-                onChange={(e) => handleFieldChange('goal_rate', parseFloat(e.target.value))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: 24 }}>
+            {[
+              { value: 0.25, label: '🌱 Yavaş & Kas Koruyucu', sub: '0.25 kg / hafta — Minimum açlık, maksimum kas koruma' },
+              { value: 0.5, label: '⚡ İdeal & Dengeli', sub: '0.5 kg / hafta — Önerilen sürdürülebilir hız' },
+              { value: 0.8, label: '🔥 Hızlı & Agresif', sub: '0.8 – 1.0 kg / hafta — Sıkı program' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className="card"
+                onClick={() => handleFieldChange('goal_rate', option.value)}
                 style={{
-                  width: '100%',
-                  height: '8px',
-                  borderRadius: '4px',
-                  background: '#1E293B',
-                  outline: 'none',
-                  WebkitAppearance: 'none',
-                  cursor: 'pointer'
+                  padding: '16px',
+                  cursor: 'pointer',
+                  border: data.goal_rate === option.value ? '2px solid #FF8A00' : '1px solid #1E293B',
+                  background: data.goal_rate === option.value ? 'rgba(255, 138, 0, 0.1)' : 'transparent',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
                 }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-                <span className="sub" style={{ fontSize: '12px' }}>0.1 kg</span>
-                <span className="sub" style={{ fontSize: '12px' }}>1.0 kg</span>
-              </div>
-            </div>
+              >
+                <div style={{ fontSize: '16px', fontWeight: 600, color: '#F1F5F9', marginBottom: '4px' }}>
+                  {option.label}
+                </div>
+                <div className="sub" style={{ fontSize: '13px', color: '#94A3B8' }}>
+                  {option.sub}
+                </div>
+              </button>
+            ))}
           </div>
 
           <button className="btn" onClick={handleNext} style={{ width: '100%' }}>
@@ -526,7 +595,7 @@ export default function Onboarding() {
                 </div>
                 
                 <p className="sub">
-                  Hedef Hizi: {goalInfo.emoji} {goalInfo.label} ({goalInfo.rate} kg/hafta)
+                  Hedef Hızı: {goalInfo.emoji} {goalInfo.label} ({goalInfo.rate} kg/hafta)
                 </p>
               </div>
             )
@@ -608,9 +677,23 @@ export default function Onboarding() {
               </p>
             </div>
 
-            <button className="btn" type="submit" disabled={loading} style={{ width: '100%', padding: '14px 16px', fontSize: '16px' }}>
-              {loading ? 'Kaydediliyor...' : 'Kayıt Ol ve Başla'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', padding: '14px 16px', fontSize: '16px' }}>
+                {loading ? 'Kaydediliyor...' : '🚀 Özete Geç ve Başla'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-orange"
+                disabled={loading}
+                onClick={() => {
+                  localStorage.setItem('gfitt_pro_trial_started', 'true')
+                  handleSubmit({ preventDefault: () => {} })
+                }}
+                style={{ width: '100%', padding: '12px 16px', fontSize: '14px' }}
+              >
+                🎁 3 Günlük Ücretsiz PRO Denemeni Başlat
+              </button>
+            </div>
           </form>
         </div>
       )}

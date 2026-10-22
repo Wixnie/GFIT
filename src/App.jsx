@@ -28,15 +28,20 @@ import Strength from './pages/Strength'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
+  const onboardingDone = localStorage.getItem('gfitt_onboarding_done') === 'true'
+
   if (loading) return <div className="auth-wrap">Yükleniyor…</div>
   if (!session) return <Navigate to="/giris" replace />
+  if (!onboardingDone) return <Navigate to="/onboarding" replace />
   return children
 }
 
 function PublicOnly({ children }) {
   const { session, loading } = useAuth()
+  const onboardingDone = localStorage.getItem('gfitt_onboarding_done') === 'true'
+
   if (loading) return <div className="auth-wrap">Yükleniyor…</div>
-  if (session) return <Navigate to="/dashboard" replace />
+  if (session && onboardingDone) return <Navigate to="/dashboard" replace />
   return children
 }
 

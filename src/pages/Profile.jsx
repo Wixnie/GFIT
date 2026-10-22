@@ -102,7 +102,7 @@ export default function Profile() {
 
       <div className="grid grid-2">
         <form className="card" onSubmit={save}>
-          <h3 style={{ marginTop: 0, marginBottom: 16 }}>Kişisel Bilgiler</h3>
+          <h3 style={{ marginTop: 0, marginBottom: 16, color: 'white' }}>Kişisel Bilgiler</h3>
           {[
             ['display_name', 'Ad', 'text'],
             ['age', 'Yaş', 'number'],
@@ -111,7 +111,7 @@ export default function Profile() {
             ['gender', 'Cinsiyet', 'select'],
           ].map(([key, label, type]) => (
             <div className="field" key={key}>
-              <label>{label}</label>
+              <label style={{ color: '#94A3B8' }}>{label}</label>
               {type === 'select' ? (
                 <select
                   className="input"
@@ -123,14 +123,21 @@ export default function Profile() {
                   <option value="female">Kadın</option>
                 </select>
               ) : (
-                <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
+                <input 
+                  className="input" 
+                  type={type} 
+                  value={form[key]} 
+                  onChange={(e) => set(key, e.target.value)} 
+                  disabled={loading}
+                  style={key === 'display_name' ? { color: 'white', fontWeight: 'bold', fontSize: '1.25rem' } : {}}
+                />
               )}
             </div>
           ))}
           <button className="btn" disabled={loading}>
             {loading ? 'Kaydediliyor...' : 'Kaydet'}
           </button>
-          {saved && <p className="sub">Bilgiler güncellendi.</p>}
+          {saved && <p className="sub" style={{ color: '#22C55E' }}>Bilgiler güncellendi.</p>}
         </form>
 
         <form className="card" onSubmit={save}>
@@ -209,41 +216,121 @@ export default function Profile() {
       {/* Daha Fazla / Ayarlar Section */}
       <div className="card" style={{ marginTop: 16 }}>
         <h3 style={{ marginTop: 0, marginBottom: 16 }}>Daha Fazla</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
           <Link
             to="/gizlilik-politikasi"
-            className="btn ghost"
-            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
           >
             Gizlilik Politikası
+            <span style={{ color: '#64748B' }}>→</span>
           </Link>
           <Link
             to="/kvkk"
-            className="btn ghost"
-            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
           >
             KVKK
+            <span style={{ color: '#64748B' }}>→</span>
           </Link>
           <Link
             to="/kullanim-kosullari"
-            className="btn ghost"
-            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
           >
             Kullanım Şartları
+            <span style={{ color: '#64748B' }}>→</span>
           </Link>
           <Link
             to="/destek"
-            className="btn ghost"
-            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
           >
             Destek
+            <span style={{ color: '#64748B' }}>→</span>
           </Link>
           <button
-            className="btn ghost"
-            style={{ textAlign: 'left', justifyContent: 'flex-start', color: '#F59E0B' }}
+            style={{
+              width: '100%',
+              background: 'rgba(255, 138, 0, 0.15)',
+              color: '#FF8A00',
+              border: '1px solid rgba(255, 138, 0, 0.4)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginTop: '0.25rem',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
             onClick={() => window.dispatchEvent(new CustomEvent('openFeedback'))}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 138, 0, 0.25)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 138, 0, 0.15)'}
           >
-            Hata / Öneri Bildir 🐛
+            Hata / Öneri Bildir
+            <span>🐛</span>
           </button>
         </div>
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
@@ -328,6 +415,10 @@ export default function Profile() {
           </div>
         </>
       )}
+
+      <div className="global-footer">
+        Made by Efehan Çetin · GFitt © 2026
+      </div>
     </div>
   )
 }

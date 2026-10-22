@@ -293,7 +293,7 @@ export default function Dashboard() {
                 strokeWidth="12"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 60}`}
-                strokeDashoffset={`${2 * Math.PI * 60 * (1 - Math.min(totals.calories / p.calorie_target, 1))}`}
+                strokeDashoffset={`${p.calorie_target > 0 ? 2 * Math.PI * 60 * (1 - Math.min(totals.calories / p.calorie_target, 1)) : 2 * Math.PI * 60}`}
                 style={{ transition: 'stroke-dashoffset 0.5s ease' }}
               />
             </svg>
@@ -525,9 +525,16 @@ export default function Dashboard() {
                     key={food.id}
                     className="btn ghost"
                     onClick={() => saveFood(food)}
-                    style={{ fontSize: '0.75rem', textAlign: 'left', padding: '8px 12px' }}
+                    style={{ 
+                      fontSize: '0.75rem', 
+                      textAlign: 'left', 
+                      padding: '8px 12px',
+                      background: '#0B101B',
+                      borderRadius: '8px'
+                    }}
                   >
-                    {food.name} ({food.kcal} kcal)
+                    <span style={{ color: 'white', fontWeight: 600, fontSize: '1rem' }}>{food.name}</span>
+                    <span style={{ color: '#94A3B8', fontSize: '0.75rem', marginLeft: '8px' }}>{food.kcal} kcal</span>
                   </button>
                 ))}
               </div>
@@ -545,22 +552,40 @@ export default function Dashboard() {
       <div className="grid grid-3" style={{ marginBottom: 16 }}>
         <div className="card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '32px', marginBottom: 8 }}>👣</div>
-          <h4 style={{ margin: '0 0 4px' }}>Adımlar</h4>
-          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+          <h4 style={{ margin: '0 0 4px', color: 'white' }}>Adımlar</h4>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white', marginBottom: 4 }}>
+            0 / 10.000
+          </div>
+          <p className="sub" style={{ fontSize: '11px', margin: 0, color: '#94A3B8' }}>
+            adım
+          </p>
+          <p className="sub" style={{ fontSize: '10px', marginTop: 4, color: '#64748B' }}>
             Evet, buzdolabına kadar yürüdüğün adımlar bile sayılır.
           </p>
         </div>
         <div className="card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '32px', marginBottom: 8 }}>⚡</div>
-          <h4 style={{ margin: '0 0 4px' }}>Enerji</h4>
-          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+          <h4 style={{ margin: '0 0 4px', color: 'white' }}>Enerji</h4>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#FB923C', marginBottom: 4 }}>
+            0 kcal
+          </div>
+          <p className="sub" style={{ fontSize: '11px', margin: 0, color: '#94A3B8' }}>
+            yakım
+          </p>
+          <p className="sub" style={{ fontSize: '10px', marginTop: 4, color: '#64748B' }}>
             Akıllı saat takıyorsan gerçek kalori yakımı günlük dengene eklenir.
           </p>
         </div>
         <div className="card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '32px', marginBottom: 8 }}>😴</div>
-          <h4 style={{ margin: '0 0 4px' }}>Uyku</h4>
-          <p className="sub" style={{ fontSize: '11px', margin: 0 }}>
+          <h4 style={{ margin: '0 0 4px', color: 'white' }}>Uyku</h4>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#818CF8', marginBottom: 4 }}>
+            {sleepHours || 0} sa
+          </div>
+          <p className="sub" style={{ fontSize: '11px', margin: 0, color: '#94A3B8' }}>
+            uyku
+          </p>
+          <p className="sub" style={{ fontSize: '10px', marginTop: 4, color: '#64748B' }}>
             5 saatlik bir uykunun ertesi gün iştahına ne yaptığı.
           </p>
         </div>

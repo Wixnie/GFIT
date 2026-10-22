@@ -106,7 +106,6 @@ export function AuthProvider({ children }) {
         if (error) throw error
       },
       async startDemo() {
-        if (isSupabaseConfigured) throw new Error('Supabase bağlıyken demo kapalı.')
         try {
           await hydrate(localAuth.signIn({ email: 'demo@gfitt.local', password: 'demo123' }))
         } catch {

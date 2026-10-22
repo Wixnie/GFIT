@@ -60,11 +60,20 @@
   --shadow-glow: 0 0 25px rgba(255, 138, 0, 0.45);
 }
 
+html, body, #root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: radial-gradient(ellipse at top, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
   background-attachment: fixed;
   color: var(--text-primary);
-  margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -216,6 +225,8 @@ body {
   font-size: 0.875rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+  display: inline-block;
+  text-align: center;
 }
 
 .btn:hover {
@@ -837,4 +848,48 @@ body {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin-bottom: var(--spacing-lg);
+}
+
+/* --- GLOBAL FOOTER SIGNATURE --- */
+.global-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(167, 139, 250, 0.8);
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 2rem;
+}
+
+/* --- BUTTON CONTRAST FIXES --- */
+.btn-primary {
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #6D28D9 0%, #4338CA 100%);
+}
+
+.btn-secondary {
+  background: #221D3B;
+  color: white;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background: #2D264C;
+}
+
+.btn-orange {
+  background: linear-gradient(135deg, #FF8A00 0%, #FF5E00 100%);
+  color: white;
+  font-weight: 700;
+}
+
+.btn-orange:hover {
+  background: linear-gradient(135deg, #FF5E00 0%, #FF8A00 100%);
 }

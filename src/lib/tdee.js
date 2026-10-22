@@ -1,15 +1,24 @@
 // TDEE Hesaplama Motoru - Mifflin-St Jeor Denklemi
 
 export function calculateBMR(weightKg, heightCm, age, gender) {
+  // Sanitize inputs with safe defaults
+  const w = Number(weightKg) > 30 ? Number(weightKg) : 75
+  const h = Number(heightCm) > 100 ? Number(heightCm) : 175
+  const a = Number(age) > 10 ? Number(age) : 22
+  
   // Mifflin-St Jeor denklemi (METRIC units)
   // Erkek: (10 × kg) + (6.25 × cm) - (5 × yaş) + 5
   // Kadın: (10 × kg) + (6.25 × cm) - (5 × yaş) - 161
   
+  let rawBMR
   if (gender === 'male') {
-    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5
+    rawBMR = (10 * w) + (6.25 * h) - (5 * a) + 5
   } else {
-    return (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161
+    rawBMR = (10 * w) + (6.25 * h) - (5 * a) - 161
   }
+  
+  // Strict minimum clamp: never below 1200 kcal
+  return Math.max(Math.round(rawBMR), 1200)
 }
 
 export function calculateTDEE(bmr, activityLevel) {
@@ -20,7 +29,9 @@ export function calculateTDEE(bmr, activityLevel) {
     active: 1.725,
     very_active: 1.9
   }
-  return bmr * (multipliers[activityLevel] || 1.2)
+  const rawTDEE = bmr * (multipliers[activityLevel] || 1.2)
+  // Strict minimum clamp: never below 1550 kcal
+  return Math.max(Math.round(rawTDEE), 1550)
 }
 
 export function calculateTargetCalories(tdee, goal, gender) {
@@ -36,9 +47,8 @@ export function calculateTargetCalories(tdee, goal, gender) {
     target = tdee + 300 // Kas yapma
   }
   
-  // Minimum kalori sınırları
-  const minCalories = gender === 'male' ? 1500 : 1200
-  return Math.max(target, minCalories)
+  // Strict minimum clamp: never below 1200 kcal
+  return Math.max(Math.round(target), 1200)
 }
 
 export function calculateMacros(weightKg, targetCalories, goal = 'maintain') {
