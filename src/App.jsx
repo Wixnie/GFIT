@@ -29,20 +29,31 @@ import Mobility from './pages/Mobility'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
-  const onboardingDone = localStorage.getItem('gfitt_onboarding_done') === 'true'
-
-  if (loading) return <div className="auth-wrap">Yükleniyor…</div>
-  if (!session) return <Navigate to="/giris" replace />
-  if (!onboardingDone) return <Navigate to="/onboarding" replace />
+  
+  if (loading) {
+    return <div className="min-h-screen bg-[#0B0914] text-white flex items-center justify-center text-sm">Yükleniyor…</div>
+  }
+  
+  // Oturum yoksa girişe yönlendir
+  if (!session) {
+    return <Navigate to="/giris" replace />
+  }
+  
   return children
 }
 
 function PublicOnly({ children }) {
   const { session, loading } = useAuth()
-  const onboardingDone = localStorage.getItem('gfitt_onboarding_done') === 'true'
 
-  if (loading) return <div className="auth-wrap">Yükleniyor…</div>
-  if (session && onboardingDone) return <Navigate to="/dashboard" replace />
+  if (loading) {
+    return <div className="min-h-screen bg-[#0B0914] text-white flex items-center justify-center text-sm">Yükleniyor…</div>
+  }
+
+  // Oturum varsa doğrudan panele gönder
+  if (session) {
+    return <Navigate to="/dashboard" replace />
+  }
+  
   return children
 }
 
@@ -51,11 +62,11 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Giriş & Kayıt */}
+          {/* Giriş & Kayıt & Onboarding */}
           <Route path="/giris" element={<PublicOnly><Login /></PublicOnly>} />
-          <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
+          <Route path="/login" element={<Navigate to="/giris" replace />} />
           <Route path="/kayit" element={<PublicOnly><Signup /></PublicOnly>} />
-          <Route path="/signup" element={<PublicOnly><Signup /></PublicOnly>} />
+          <Route path="/signup" element={<Navigate to="/kayit" replace />} />
           <Route path="/onboarding" element={<Onboarding />} />
 
           {/* Tanıtım & Yasal Sayfalar */}
@@ -67,7 +78,7 @@ export default function App() {
           <Route path="/iade-politikasi" element={<IadePolitikasi />} />
           <Route path="/destek" element={<Support />} />
 
-          {/* Giriş Yapılmış Panel (Sidebar + İçerik) */}
+          {/* Giriş Yapılmış Panel (Sidebar + Layout) */}
           <Route element={<Guard><Layout /></Guard>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/yemek" element={<Food />} />
@@ -92,6 +103,7 @@ export default function App() {
             <Route path="/pro" element={<Navigate to="/premium" replace />} />
           </Route>
 
+          {/* Eşleşmeyen tüm rotalar ana sayfaya */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <PwaInstallPrompt />
