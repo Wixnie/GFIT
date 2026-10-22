@@ -1,443 +1,200 @@
-import { useState, useEffect, useRef } from 'react'
-import { Html5QrcodeScanner } from 'html5-qrcode'
-import { useAuth } from '../context/AuthContext'
-import { addFood } from '../lib/api'
-import { todayISO } from '../lib/dates'
+import React, { useState, useEffect } from 'react';
+import { Play, Pause, RotateCcw, CheckCircle2, Sparkles, Clock, Target } from 'lucide-react';
 
-export default function FoodScanner() {
-  const { session, profile } = useAuth()
-  const [scanMode, setScanMode] = useState('barcode') // 'barcode' or 'photo'
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [scanResult, setScanResult] = useState(null)
-  const [scanCount, setScanCount] = useState(0)
-  const [manualBarcode, setManualBarcode] = useState('')
-  const [isScanning, setIsScanning] = useState(false)
-  const scannerRef = useRef(null)
-  const [cameraError, setCameraError] = useState(null)
+export default function Mobility() {
+  const [activeRoutine, setActiveRoutine] = useState(0);
+  const [timerSeconds, setTimerSeconds] = useState(45);
+  const [isRunning, setIsRunning] = useState(false);
+  const [completed, setCompleted] = useState([]);
+
+  const routines = [
+    {
+      id: 'morning',
+      title: '☀️ Sabah 8 Dk Eklem Açma & Enerji',
+      badge: 'Güne Başlarken',
+      desc: 'Omurga, boyun ve kalça eklemlerini uyandırır.',
+      exercises: [
+        { name: 'Kedi - Deve (Cat-Cow)', duration: 45, tip: 'Nefes alırken göğsü aç, nefes verirken sırtı kamburlaştır.' },
+        { name: 'Göğüs Kafesi Rotasyonu', duration: 45, tip: 'Dört ayak üzerinde tek kolu yukarı uzatıp omurgayı çevir.' },
+        { name: 'Derin Squat Bekleme', duration: 45, tip: 'Topuklar yerde, dirseklerle dizleri hafifçe dışa it.' },
+        { name: 'Çocuk Pozu (Child\'s Pose)', duration: 45, tip: 'Kolları öne uzat, derin diyafram nefesi al.' }
+      ]
+    },
+    {
+      id: 'posture',
+      title: '💻 Masa Başı, Boyun & Postür Düzeltme',
+      badge: 'Kamburluk & Boyun Ağrısı',
+      desc: 'Sürekli ekrana bakanlar ve masa başı çalışanlar için.',
+      exercises: [
+        { name: 'Duvarda Melek (Wall Angels)', duration: 45, tip: 'Sırt ve kolları duvara yaslayarak yavaşça yukarı kaydır.' },
+        { name: 'Çene Geriye (Chin Tuck)', duration: 30, tip: 'Başını geriye doğru çift çene yapacak gibi çek.' },
+        { name: 'Kapı Eşiğinde Göğüs Germe', duration: 45, tip: 'Kolunu 90 derece kapı pervazına koyup gövdeni öne kaydır.' },
+        { name: 'Skapular Şınav (Diz Üstü)', duration: 45, tip: 'Kolları bükmeden sadece kürek kemiklerini birbirine yaklaştır.' }
+      ]
+    },
+    {
+      id: 'hips',
+      title: '🍑 Kalça, Pelvis & Alt Bel Rahatlatma',
+      badge: 'Kadın & Erkek Kalça Açıcı',
+      desc: 'Bacak/squat günleri öncesi veya bel ağrısını hafifletmek için.',
+      exercises: [
+        { name: '90/90 Kalça Geçişi (Hip Switch)', duration: 45, tip: 'Yerde oturup dizleri sağa ve sola sırayla devir.' },
+        { name: 'Güvercin Pozu (Pigeon Pose)', duration: 45, tip: 'Öndeki bacağı kır, arkadaki bacağı düz uzatarak kalçayı esnet.' },
+        { name: 'Kurbağa Esnemesi (Frog Stretch)', duration: 45, tip: 'Dizleri iki yana açıp kalçayı geriye doğru it.' },
+        { name: 'Lunge Hip Flexor Germe', duration: 45, tip: 'Öne lunge pozisyonunda arkadaki kalçayı sıkarak öne kaykıl.' }
+      ]
+    },
+    {
+      id: 'night',
+      title: '🌙 Uyku Öncesi Gevşeme & Sinir Sistemi',
+      badge: 'Derin Uyku İçin',
+      desc: 'Kortizolü düşürür, parasempatik sistemi devreye sokar.',
+      exercises: [
+        { name: 'Bacaklar Duvarda (Legs Up Wall)', duration: 60, tip: 'Bacakları duvara dik uzatarak sırt üstü yat.' },
+        { name: 'Yatarak Omurga Bükme (Spinal Twist)', duration: 45, tip: 'Dizleri göğse çekip bir yana devir, başı ters yöne çevir.' },
+        { name: 'Mutlu Bebek Pozu (Happy Baby)', duration: 45, tip: 'Ayak tabanlarından tutup dizleri koltuk altına doğru çek.' },
+        { name: '4-7-8 Diyafram Nefesi', duration: 60, tip: '4 sn burundan al, 7 sn tut, 8 sn ağızdan yavaşça ver.' }
+      ]
+    }
+  ];
+
+  const currentRoutine = routines[activeRoutine];
 
   useEffect(() => {
-    const count = localStorage.getItem('gfitt_scan_count')
-    setScanCount(count ? parseInt(count) : 0)
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(console.error)
-      }
+    let interval = null;
+    if (isRunning && timerSeconds > 0) {
+      interval = setInterval(() => setTimerSeconds(prev => prev - 1), 1000);
+    } else if (timerSeconds === 0) {
+      setIsRunning(false);
     }
-  }, [])
+    return () => clearInterval(interval);
+  }, [isRunning, timerSeconds]);
 
-  const startCamera = async () => {
-    setCameraError(null)
-    setIsScanning(true)
-    
-    try {
-      const html5QrCode = new Html5Qrcode("reader")
-      scannerRef.current = html5QrCode
-      
-      const config = { fps: 10, qrbox: { width: 250, height: 250 } }
-      
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        async (decodedText) => {
-          await handleBarcodeScan(decodedText)
-          await html5QrCode.stop()
-          setIsScanning(false)
-        },
-        (errorMessage) => {
-          // Scan errors are normal, ignore
-        }
-      )
-    } catch (err) {
-      console.error('Kamera başlatma hatası:', err)
-      setCameraError('Kamera izni reddedildi veya kamera bulunamadı.')
-      setIsScanning(false)
-    }
-  }
+  const toggleTimer = () => setIsRunning(!isRunning);
+  const resetTimer = (duration = 45) => {
+    setIsRunning(false);
+    setTimerSeconds(duration);
+  };
 
-  const stopCamera = async () => {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop()
-      } catch (err) {
-        console.error('Kamera durdurma hatası:', err)
-      }
-    }
-    setIsScanning(false)
-  }
-
-  const handleBarcodeScan = async (decodedText) => {
-    if (scanCount >= 3 && !profile?.is_pro) {
-      setError('Ücretsiz kullanıcılar günde 3 barkod tarama hakkına sahiptir. Reklam izleyerek +3 hak kazanabilirsiniz.')
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-    try {
-      // Check Supabase food_cache first
-      const cached = JSON.parse(localStorage.getItem('gfitt_food_cache') || '[]')
-      const cachedProduct = cached.find(item => item.barcode === decodedText)
-      
-      if (cachedProduct) {
-        setScanResult(cachedProduct)
-        return
-      }
-
-      // Fetch from OpenFoodFacts API
-      const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${decodedText}.json`)
-      const data = await response.json()
-      
-      if (data.status === 1 && data.product) {
-        const product = data.product
-        const nutrition = product.nutriments || {}
-        
-        const scanData = {
-          barcode: decodedText,
-          name: product.product_name || 'Ürün',
-          calories: nutrition['energy-kcal_100g'] || nutrition['energy-kcal'] || 0,
-          protein: nutrition.proteins_100g || 0,
-          carbs: nutrition.carbohydrates_100g || 0,
-          fat: nutrition.fat_100g || 0,
-          sugar: nutrition.sugars_100g || 0,
-          sodium: nutrition.sodium_100g || 0,
-          healthScore: nutrition.nutriscore_score ? 100 - nutrition.nutriscore_score * 10 : 70,
-          allergens: product.allergens_tags || []
-        }
-
-        setScanResult(scanData)
-        
-        // Cache the result
-        cached.push({
-          ...scanData,
-          cached_at: new Date().toISOString()
-        })
-        localStorage.setItem('gfitt_food_cache', JSON.stringify(cached))
-        
-        const newCount = scanCount + 1
-        setScanCount(newCount)
-        localStorage.setItem('gfitt_scan_count', newCount.toString())
-      } else {
-        setError('Ürün bulunamadı. Lütfen barkodu kontrol edin veya manuel girin.')
-      }
-    } catch (err) {
-      console.error('Barkod taranırken hata:', err)
-      setError('Barkod taranırken hata oluştu. İnternet bağlantınızı kontrol edin.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleManualBarcode = async (e) => {
-    e.preventDefault()
-    if (!manualBarcode.trim()) return
-    await handleBarcodeScan(manualBarcode.trim())
-  }
-
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    if (scanCount >= 3 && !profile?.is_pro) {
-      setError('Ücretsiz kullanıcılar günde 3 AI tarama hakkına sahiptir. Reklam izleyerek +3 hak kazanabilirsiniz.')
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-    try {
-      // Mock Gemini Vision API call - In production, this would call the real API
-      await new Promise(resolve => setTimeout(resolve, 2000))
-
-      // Mock response - In production, this would be from Gemini
-      const mockData = {
-        name: 'Yemek Analizi (Mock)',
-        calories: 350,
-        protein: 20,
-        carbs: 45,
-        fat: 12,
-        sugar: 8,
-        sodium: 600,
-        healthScore: 68,
-        allergens: ['Gluten', 'Süt']
-      }
-
-      setScanResult(mockData)
-      const newCount = scanCount + 1
-      setScanCount(newCount)
-      localStorage.setItem('gfitt_scan_count', newCount.toString())
-
-      // Cache the result in Supabase food_cache (mock)
-      const cached = JSON.parse(localStorage.getItem('gfitt_food_cache') || '[]')
-      cached.push({
-        id: Date.now().toString(),
-        ...mockData,
-        cached_at: new Date().toISOString()
-      })
-      localStorage.setItem('gfitt_food_cache', JSON.stringify(cached))
-    } catch (err) {
-      console.error('Fotoğraf analiz edilirken hata:', err)
-      setError('Fotoğraf analiz edilirken hata oluştu')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleAddToLog = async () => {
-    if (!scanResult) return
-    setLoading(true)
-    setError(null)
-    try {
-      await addFood(session.id, {
-        food_name: scanResult.name,
-        amount_g: 100,
-        logged_on: todayISO(),
-        calories: scanResult.calories,
-        protein: scanResult.protein,
-        carbs: scanResult.carbs,
-        fat: scanResult.fat
-      })
-      setScanResult(null)
-      alert('Yemek günlüğe eklendi!')
-    } catch (err) {
-      console.error('Yemek eklenirken hata:', err)
-      setError('Yemek eklenirken hata oluştu')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const toggleComplete = (idx) => {
+    setCompleted(prev => 
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    );
+  };
 
   return (
-    <div className="app-container">
-      <div className="page-head">
-        <div>
-          <p className="sub">AI Destekli Analiz</p>
-          <h1>Etiket Okuyucu</h1>
+    <div className="space-y-6 pb-12">
+      {/* Üst Başlık */}
+      <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-900/60 via-[#18152B] to-[#120F20] border border-indigo-500/30">
+        <div className="flex items-center gap-2 text-indigo-400 font-black text-xs uppercase tracking-wider mb-1">
+          <Sparkles className="w-4 h-4" />
+          <span>Evde Ekipmansız</span>
         </div>
-      </div>
+        <h1 className="text-xl font-black text-white">Mobilite & Esneme Rehberi</h1>
+        <p className="text-xs text-slate-300 mt-1">
+          Günde 8-10 dakika ayırarak eklem sağlığını koru, ağrıları gider ve antrenman performansını artır.
+        </p>
 
-      {error && (
-        <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', padding: '12px', borderRadius: '6px' }}>
-          {error}
-        </div>
-      )}
+        {/* Sayaç Kartı */}
+        <div className="mt-4 p-4 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-between">
+          <div>
+            <span className="text-[10px] text-slate-400 block font-semibold">EGZERSİZ SAYACI</span>
+            <span className="text-3xl font-black text-white font-mono">{timerSeconds}s</span>
+          </div>
 
-      {/* Scan Mode Toggle */}
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div className="row">
-          <button
-            className={`btn ${scanMode === 'barcode' ? '' : 'ghost'}`}
-            onClick={() => setScanMode('barcode')}
-            style={{ flex: 1 }}
-          >
-            Barkod Tara
-          </button>
-          <button
-            className={`btn ${scanMode === 'photo' ? '' : 'ghost'}`}
-            onClick={() => setScanMode('photo')}
-            style={{ flex: 1 }}
-          >
-            Fotoğraf Yükle
-          </button>
-        </div>
-      </div>
-
-      {/* Usage Counter */}
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p className="sub">Günlük Kullanım: {scanCount}/3 {profile?.is_pro ? '(PRO: Sınırsız)' : ''}</p>
-          {!profile?.is_pro && scanCount >= 3 && (
-            <button className="btn ghost" style={{ fontSize: '13px' }}>
-              Reklam İzle +3 Hak
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTimer}
+              className={`p-3 rounded-xl font-bold flex items-center justify-center transition-transform active:scale-90 ${
+                isRunning ? 'bg-amber-500 text-slate-950' : 'bg-purple-600 text-white'
+              }`}
+            >
+              {isRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-current" />}
             </button>
-          )}
-        </div>
-      </div>
-
-      {scanMode === 'barcode' ? (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginTop: 0, marginBottom: 16 }}>Barkod Tara</h3>
-          
-          {cameraError && (
-            <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', borderColor: '#EF4444' }}>
-              <p className="sub">{cameraError}</p>
-            </div>
-          )}
-
-          {!isScanning ? (
-            <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
-              <div style={{ fontSize: '48px', marginBottom: 16 }}>📷</div>
-              <p className="sub" style={{ marginBottom: 16 }}>
-                Kamerayı barkoda yönlendirin
-              </p>
-              <button className="btn" onClick={startCamera} disabled={loading}>
-                {loading ? 'Başlatılıyor...' : 'Kamerayı Aç'}
-              </button>
-            </div>
-          ) : (
-            <div style={{ position: 'relative' }}>
-              <div id="reader" style={{ width: '100%', minHeight: '300px', background: '#000', borderRadius: '12px', overflow: 'hidden' }}></div>
-              <button 
-                className="btn danger" 
-                onClick={stopCamera}
-                style={{ marginTop: 16, width: '100%' }}
-              >
-                Durdur
-              </button>
-            </div>
-          )}
-
-          {/* Manual Barcode Input */}
-          <div style={{ marginTop: 16 }}>
-            <p className="sub" style={{ marginBottom: 8 }}>Barkod manuel girin:</p>
-            <form onSubmit={handleManualBarcode} className="row">
-              <input
-                className="input"
-                style={{ flex: 1 }}
-                placeholder="Örn: 8000500206784"
-                value={manualBarcode}
-                onChange={(e) => setManualBarcode(e.target.value)}
-              />
-              <button className="btn" type="submit" disabled={loading}>
-                Ara
-              </button>
-            </form>
-          </div>
-        </div>
-      ) : (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginTop: 0, marginBottom: 16 }}>Fotoğraf Yükle</h3>
-          <div style={{ textAlign: 'center', padding: '32px', background: '#0B101B', borderRadius: '12px' }}>
-            <div style={{ fontSize: '48px', marginBottom: 16 }}>🍽️</div>
-            <p className="sub" style={{ marginBottom: 16 }}>
-              Etiket fotoğrafını yükleyin
-            </p>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoUpload}
-              disabled={loading}
-              style={{ display: 'none' }}
-              id="photo-upload"
-            />
-            <label htmlFor="photo-upload" className="btn" style={{ cursor: 'pointer' }}>
-              {loading ? 'Analiz Ediliyor...' : 'Fotoğraf Seç'}
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* Info Card */}
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Nasıl Çalışır?</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong>Barkod Tarama</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Ürün barkodunu tarayarak OpenFoodFacts veritabanından besin değerlerini alın.</p>
-          </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong>Fotoğraf Analizi</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Etiket fotoğrafını yükleyerek Gemini AI ile otomatik analiz yapın.</p>
-          </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong>Önbellekleme</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Analiz edilen ürünler otomatik olarak önbelleğe alınır, daha hızlı erişim sağlar.</p>
+            <button
+              onClick={() => resetTimer(45)}
+              className="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white active:scale-90"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Scan Result */}
-      {scanResult && (
-        <div className="card" style={{ marginBottom: 16, borderColor: '#F59E0B' }}>
-          <h3 style={{ marginTop: 0, marginBottom: 16 }}>{scanResult.name}</h3>
-
-          {/* Health Score */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span className="sub">Sağlık Skoru</span>
-              <span style={{ fontWeight: 700, color: scanResult.healthScore >= 70 ? '#10B981' : scanResult.healthScore >= 50 ? '#F59E0B' : '#EF4444' }}>
-                {scanResult.healthScore}/100
-              </span>
-            </div>
-            <div style={{ background: '#0B101B', borderRadius: '12px', padding: '8px' }}>
-              <div
-                style={{
-                  height: '24px',
-                  background: scanResult.healthScore >= 70 ? '#10B981' : scanResult.healthScore >= 50 ? '#F59E0B' : '#EF4444',
-                  borderRadius: '8px',
-                  width: `${scanResult.healthScore}%`,
-                  transition: 'width 0.5s ease'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Macro Values */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: 16 }}>
-            <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-              <div className="sub">Kalori</div>
-              <div style={{ fontSize: '20px', fontWeight: 700 }}>{scanResult.calories} kcal</div>
-            </div>
-            <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-              <div className="sub">Protein</div>
-              <div style={{ fontSize: '20px', fontWeight: 700 }}>{scanResult.protein}g</div>
-            </div>
-            <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-              <div className="sub">Karb</div>
-              <div style={{ fontSize: '20px', fontWeight: 700 }}>{scanResult.carbs}g</div>
-            </div>
-            <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-              <div className="sub">Yağ</div>
-              <div style={{ fontSize: '20px', fontWeight: 700 }}>{scanResult.fat}g</div>
-            </div>
-          </div>
-
-          {/* Warnings */}
-          {scanResult.sugar > 50 && (
-            <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', marginBottom: 12 }}>
-              <strong style={{ color: '#EF4444' }}>⚠️ Şeker Uyarısı</strong>
-              <p className="sub">Bu ürün yüksek şeker içeriyor (&gt;50g)</p>
-            </div>
-          )}
-
-          {scanResult.sodium > 600 && (
-            <div style={{ padding: '12px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px', marginBottom: 12 }}>
-              <strong style={{ color: '#F59E0B' }}>⚠️ Sodyum Uyarısı</strong>
-              <p className="sub">Bu ürün yüksek sodyum içeriyor (&gt;600mg)</p>
-            </div>
-          )}
-
-          {scanResult.allergens.length > 0 && (
-            <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', marginBottom: 16 }}>
-              <strong style={{ color: '#EF4444' }}>🚨 Alerjen Uyarısı</strong>
-              <p className="sub">Bu ürün şunları içerebilir: {scanResult.allergens.join(', ')}</p>
-            </div>
-          )}
-
-          <button className="btn" onClick={handleAddToLog} disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'Ekleniyor...' : 'Günlüğe Ekle'}
+      {/* Rutin Seçici Butonları */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {routines.map((r, idx) => (
+          <button
+            key={r.id}
+            onClick={() => {
+              setActiveRoutine(idx);
+              setCompleted([]);
+              resetTimer(r.exercises[0].duration);
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+              activeRoutine === idx 
+                ? 'bg-purple-600 text-white border-purple-500' 
+                : 'bg-[#18152B] text-slate-300 border-white/5 hover:border-white/20'
+            }`}
+          >
+            {r.title.split(' ')[0]} {r.title.split(' ')[1]}
           </button>
-        </div>
-      )}
+        ))}
+      </div>
 
-      {/* Info */}
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Nasıl Çalışır?</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong>Barkod Tarama</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Ürün barkodunu tarayarak OpenFoodFacts veritabanından besin değerlerini alın.</p>
-          </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong>Fotoğraf Analizi</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Etiket fotoğrafını yükleyerek Gemini AI ile otomatik analiz yapın.</p>
-          </div>
-          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-            <strong>Önbellekleme</strong>
-            <p className="sub" style={{ marginTop: 4 }}>Analiz edilen ürünler otomatik olarak önbelleğe alınır, daha hızlı erişim sağlar.</p>
-          </div>
+      {/* Aktif Rutin Kartı */}
+      <div className="bg-[#18152B] border border-white/10 rounded-3xl p-5 space-y-4">
+        <div>
+          <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">
+            {currentRoutine.badge}
+          </span>
+          <h2 className="text-base font-black text-white mt-2">{currentRoutine.title}</h2>
+          <p className="text-xs text-slate-400 mt-0.5">{currentRoutine.desc}</p>
+        </div>
+
+        {/* Egzersiz Listesi */}
+        <div className="space-y-2.5">
+          {currentRoutine.exercises.map((ex, idx) => {
+            const isDone = completed.includes(idx);
+            return (
+              <div
+                key={idx}
+                className={`p-3.5 rounded-2xl border transition-all ${
+                  isDone 
+                    ? 'bg-emerald-500/10 border-emerald-500/30' 
+                    : 'bg-white/5 border-white/5'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className={`text-xs font-bold ${isDone ? 'text-emerald-300 line-through' : 'text-white'}`}>
+                      {ex.name}
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{ex.tip}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-2">
+                    <button
+                      onClick={() => resetTimer(ex.duration)}
+                      className="px-2 py-1 rounded-lg bg-white/10 text-[10px] font-bold text-slate-300 hover:text-white"
+                    >
+                      {ex.duration}s
+                    </button>
+                    <button
+                      onClick={() => toggleComplete(idx)}
+                      className={`w-6 h-6 rounded-full flex items-center justify-center border transition-colors ${
+                        isDone ? 'bg-emerald-500 border-emerald-500 text-slate-950 font-bold' : 'border-white/20 text-slate-400'
+                      }`}
+                    >
+                      {isDone && <CheckCircle2 className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
-  )
+  );
 }

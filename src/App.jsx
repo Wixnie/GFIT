@@ -25,6 +25,7 @@ import Onboarding from './pages/Onboarding'
 import Social from './pages/Social'
 import Support from './pages/Support'
 import Strength from './pages/Strength'
+import Mobility from './pages/Mobility'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
@@ -70,17 +71,25 @@ export default function App() {
           <Route element={<Guard><Layout /></Guard>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/yemek" element={<Food />} />
+            <Route path="/food" element={<Navigate to="/yemek" replace />} />
             <Route path="/antrenman" element={<Workout />} />
+            <Route path="/workouts" element={<Navigate to="/antrenman" replace />} />
             <Route path="/supplement" element={<Supplements />} />
+            <Route path="/supplements" element={<Navigate to="/supplement" replace />} />
             <Route path="/kilo" element={<Weight />} />
             <Route path="/ilerleme" element={<Progress />} />
+            <Route path="/progress" element={<Navigate to="/ilerleme" replace />} />
             <Route path="/guc-artisi" element={<Strength />} />
+            <Route path="/strength" element={<Navigate to="/guc-artisi" replace />} />
+            <Route path="/mobility" element={<Mobility />} />
             <Route path="/aliskanliklar" element={<Habits />} />
             <Route path="/ai-koc" element={<AICoach />} />
             <Route path="/pazar" element={<Market />} />
             <Route path="/sosyal" element={<Social />} />
             <Route path="/profil" element={<Profile />} />
+            <Route path="/profile" element={<Navigate to="/profil" replace />} />
             <Route path="/premium" element={<Paywall />} />
+            <Route path="/pro" element={<Navigate to="/premium" replace />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

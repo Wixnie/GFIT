@@ -8,7 +8,7 @@ import DayNav from '../components/DayNav'
 import MacroBars from '../components/MacroBars'
 import { PERSONAL_DEFAULTS } from '../data/programs'
 import { sumLogs } from '../lib/suggestions'
-import { ScanLine } from 'lucide-react'
+import { ScanLine, Mic, Utensils, Sparkles, Check, Plus, Minus, AlertTriangle } from 'lucide-react'
 import FoodScannerPanel from '../components/FoodScannerPanel'
 
 export default function Food() {
@@ -19,6 +19,7 @@ export default function Food() {
   const [q, setQ] = useState('')
   const [selected, setSelected] = useState(null)
   const [grams, setGrams] = useState(100)
+  const [selectedMealCategory, setSelectedMealCategory] = useState('Öğle Yemeği')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [editingLog, setEditingLog] = useState(null)
@@ -42,7 +43,10 @@ export default function Food() {
   const [editingLoggedItem, setEditingLoggedItem] = useState(null)
   const [scannerPanelOpen, setScannerPanelOpen] = useState(false)
 
+  const mealCategories = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği', 'Ara Öğün', 'Gece Öğünü']
+
   async function refresh() {
+    if (!session?.id) return
     setLoading(true)
     setError(null)
     try {
@@ -61,17 +65,16 @@ export default function Food() {
     const saved = localStorage.getItem('gfitt_saved_meals')
     if (saved) setSavedMeals(JSON.parse(saved))
     
-    // Check if it's late night (after 22:00)
     const hour = new Date().getHours()
     if (hour >= 22) {
       setShowLateNightSnack(true)
     }
-  }, [date, session.id])
+  }, [date, session?.id])
 
   const results = useMemo(() => {
     const s = q.trim().toLocaleLowerCase('tr')
-    if (!s) return FOODS.slice(0, 12)
-    return FOODS.filter((f) => f.name.toLocaleLowerCase('tr').includes(s)).slice(0, 20)
+    if (!s) return FOODS.slice(0, 14)
+    return FOODS.filter((f) => f.name.toLocaleLowerCase('tr').includes(s)).slice(0, 25)
   }, [q])
 
   const totals = sumLogs(logs)
@@ -83,7 +86,7 @@ export default function Food() {
     setError(null)
     try {
       const loggedItem = await addFood(session.id, {
-        food_name: selected.name,
+        food_name: `${selected.name} (${selectedMealCategory})`,
         amount_g: Number(grams),
         logged_on: date,
         ...preview,
@@ -98,7 +101,7 @@ export default function Food() {
         protein: preview.protein,
         carbs: preview.carbs,
         fat: preview.fat,
-        subtext: `${Number(grams)}g · ${selected.subtext || ''}`
+        subtext: `${Number(grams)}g · ${selectedMealCategory}`
       }])
       setLoggedModalOpen(true)
       setSelected(null)
@@ -130,9 +133,8 @@ export default function Food() {
   async function saveFood(food) {
     const macros = macrosForGrams(food, Number(grams) || 100)
     
-    // Blood sugar spike warning for high-carb foods
-    if (macros.c > 50 && macros.cals > 300) {
-      const userConfirmed = confirm('Dikkat: Bu öğün kan şekerini hızla zıplatababilir. Emilimi yavaşlatmak için yanına 2 kaşık yoğurt veya yeşillik ekle.')
+    if (macros.carbs > 50 && macros.calories > 300) {
+      const userConfirmed = confirm('Dikkat: Bu öğün kan şekerini hızlı yükseltebilir. Yanına 2 kaşık yoğurt veya yeşillik ekleyebilirsin.')
       if (!userConfirmed) return
     }
     
@@ -179,7 +181,7 @@ export default function Food() {
     setLoading(true)
     setError(null)
     try {
-      const totals = sumLogs(logs)
+      const currentTotals = sumLogs(logs)
       const template = {
         id: Date.now().toString(),
         meal_name: mealTemplateName,
@@ -192,14 +194,14 @@ export default function Food() {
           carbs: log.carbs,
           fat: log.fat
         })),
-        total_calories: totals.calories,
-        total_protein: totals.protein,
-        total_carbs: totals.carbs,
-        total_fat: totals.fat
+        total_calories: currentTotals.calories,
+        total_protein: currentTotals.protein,
+        total_carbs: currentTotals.carbs,
+        total_fat: currentTotals.fat
       }
       const existing = JSON.parse(localStorage.getItem('gfitt_saved_meals') || '[]')
       if (existing.length >= 2 && !profile?.is_pro) {
-        setError('Ücretsiz kullanıcılar maksimum 2 şablon kaydedebilir.')
+        setError('Ücretsiz planda en fazla 2 şablon kaydedilebilir.')
       } else {
         existing.push(template)
         localStorage.setItem('gfitt_saved_meals', JSON.stringify(existing))
@@ -265,51 +267,45 @@ export default function Food() {
     }
   }
 
-  useEffect(() => {
-    setSavedMeals(JSON.parse(localStorage.getItem('gfitt_saved_meals') || '[]'))
-  }, [])
-
   return (
-    <div className="app-container">
-      <div className="page-head">
+    <div className="space-y-5 pb-16">
+      {/* Başlık ve Üst Butonlar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
         <div>
-          <p className="sub">Türk yemek veritabanı</p>
-          <h1>Yemek</h1>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Beslenme Günlüğü</span>
+          <h1 className="text-2xl font-black text-white">Yemek & Kalori</h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setScannerPanelOpen(true)}
-            className="btn ghost"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1E1B38] hover:bg-[#2A264D] text-white border border-white/10 text-xs font-bold transition-all active:scale-95"
           >
-            <ScanLine size={20} />
-            <span style={{ fontSize: '14px' }}>Etiket Oku</span>
+            <ScanLine className="w-4 h-4 text-purple-400" />
+            <span>Etiket Oku</span>
           </button>
           <DayNav date={date} onChange={setDate} />
         </div>
       </div>
 
       {error && (
-        <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', padding: '12px', borderRadius: '6px' }}>
+        <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
           {error}
         </div>
       )}
 
-      {/* Late Night Snack Popup */}
+      {/* Gece Açlığı Önerisi */}
       {showLateNightSnack && (
-        <div className="card" style={{ marginBottom: 16, background: 'rgba(139, 92, 246, 0.1)', borderColor: '#8B5CF6' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h4 style={{ margin: '0 0 4px', color: '#8B5CF6' }}>🌙 Gece Açlığı mı Vurdu?</h4>
-              <p className="sub" style={{ margin: 0 }}>
-                Uyku melatoninini bozmayacak 100 kcal altı 3 kurtarıcı atıştırmalık
-              </p>
-            </div>
-            <button className="btn ghost" onClick={() => setShowLateNightSnack(false)} style={{ fontSize: '12px' }}>
+        <div className="p-4 rounded-3xl bg-purple-900/20 border border-purple-500/30 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-purple-300">🌙 Gece Açlığı mı Vurdu?</h4>
+            <button onClick={() => setShowLateNightSnack(false)} className="text-slate-400 hover:text-white text-xs">
               ✕
             </button>
           </div>
-          <div style={{ marginTop: 12, display: 'grid', gap: '8px' }}>
+          <p className="text-[11px] text-slate-300">
+            Uyku kaliteni ve melatonin dengeni bozmayacak 100 kcal altı hafif alternatifler:
+          </p>
+          <div className="grid grid-cols-3 gap-2">
             {[
               { name: 'Süzme yoğurt (100g)', kcal: 97, p: 9, c: 4, f: 5 },
               { name: 'Sade ayran (200ml)', kcal: 70, p: 3.4, c: 5, f: 3.6 },
@@ -317,544 +313,407 @@ export default function Food() {
             ].map((snack) => (
               <button
                 key={snack.name}
-                className="btn ghost"
-                style={{ fontSize: '12px', textAlign: 'left', padding: '8px 12px' }}
+                className="p-2.5 rounded-xl bg-[#141124] border border-white/5 hover:border-purple-500/30 text-left transition-all text-xs"
                 onClick={() => {
                   saveFood({ name: snack.name, kcal: snack.kcal, p: snack.p, c: snack.c, f: snack.f })
                   setShowLateNightSnack(false)
                 }}
               >
-                {snack.name} ({snack.kcal} kcal)
+                <p className="font-bold text-white text-[11px] truncate">{snack.name.split('(')[0]}</p>
+                <p className="text-[10px] text-purple-400 font-semibold">{snack.kcal} kcal</p>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* PRO Features */}
-      <div className="row" style={{ marginBottom: 16 }}>
-        <button className="btn ghost" onClick={() => setShowRestaurants(!showRestaurants)} disabled={loading}>
+      {/* Akıllı Araç Hap Butonları */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <button 
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+            showRestaurants ? 'bg-purple-600 text-white border-purple-500' : 'bg-[#18152B] text-slate-300 border-white/10 hover:text-white'
+          }`}
+          onClick={() => setShowRestaurants(!showRestaurants)}
+        >
           🍔 Restoran Menüleri
         </button>
-        <button className="btn ghost" onClick={() => setShowCheatDay(!showCheatDay)} disabled={loading}>
+        <button 
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+            showCheatDay ? 'bg-red-600 text-white border-red-500' : 'bg-[#18152B] text-slate-300 border-white/10 hover:text-white'
+          }`}
+          onClick={() => setShowCheatDay(!showCheatDay)}
+        >
           🎉 Kaçamak Telafisi
         </button>
-        <button className="btn ghost" onClick={() => setShowPlateauBreaker(!showPlateauBreaker)} disabled={loading}>
+        <button 
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+            showPlateauBreaker ? 'bg-amber-600 text-white border-amber-500' : 'bg-[#18152B] text-slate-300 border-white/10 hover:text-white'
+          }`}
+          onClick={() => setShowPlateauBreaker(!showPlateauBreaker)}
+        >
           📈 Plato Kırıcı
         </button>
-        <button className="btn ghost" onClick={() => setShowVoiceInput(!showVoiceInput)} disabled={loading}>
+        <button 
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${
+            showVoiceInput ? 'bg-gradient-to-r from-purple-600 to-[#FF8A00] text-white border-transparent' : 'bg-[#18152B] text-slate-300 border-white/10 hover:text-white'
+          }`}
+          onClick={() => setShowVoiceInput(!showVoiceInput)}
+        >
           🎤 Sesli Günlük
         </button>
       </div>
 
-      {/* Restaurant Menus */}
-      {showRestaurants && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginTop: 0, marginBottom: 12 }}>Dışarıda Ne Yesem?</h3>
-          {!profile?.is_pro && (
-            <div style={{ marginBottom: 12, padding: '12px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px' }}>
-              <p className="sub" style={{ margin: 0 }}>
-                PRO özellik - 1 reklam izle, 24 saat aç
-              </p>
-            </div>
-          )}
-          <div style={{ display: 'grid', gap: '12px' }}>
-            {[
-              { name: 'Köfteci Yusuf', items: ['Köfte (180g) - 450 kcal', 'Pilav - 250 kcal', 'Salata - 80 kcal'], fit: 'Köfte (180g) - 450 kcal', calories: 450 },
-              { name: 'Tavuk Dünyası', items: ['Döner (200g) - 520 kcal', 'Tavuk Burger - 420 kcal', 'Salata - 90 kcal'], fit: 'Grill Tavuk (200g) - 280 kcal', calories: 280 },
-              { name: 'Burger King', items: ['Whopper - 650 kcal', 'Cheeseburger - 550 kcal'], fit: 'Grill Chicken - 350 kcal', calories: 350 },
-              { name: 'Starbucks', items: ['Latte - 190 kcal', 'Frappuccino - 450 kcal'], fit: 'Americano - 15 kcal', calories: 15 },
-              { name: 'McDonalds', items: ['Big Mac - 550 kcal', 'McChicken - 400 kcal'], fit: 'Grill Chicken - 350 kcal', calories: 350 },
-            ].map((restaurant) => (
-              <div key={restaurant.name} className="card" style={{ padding: '12px' }}>
-                <strong>{restaurant.name}</strong>
-                <p className="sub" style={{ fontSize: '11px', marginBottom: 8 }}>
-                  {restaurant.items.join(' · ')}
-                </p>
-                <button 
-                  className="btn" 
-                  style={{ fontSize: '12px', width: '100%' }}
-                  onClick={() => {
-                    if (!profile?.is_pro) {
-                      alert('1 reklam izle, bu restoranı 24 saat aç!')
-                    } else {
-                      saveFood({ name: restaurant.fit, kcal: restaurant.calories, p: 25, c: 0, f: 10 })
-                    }
-                  }}
-                >
-                  Fit Alternatif Ekle ({restaurant.fit})
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Cheat Day Recovery */}
-      {showCheatDay && (
-        <div className="card" style={{ marginBottom: 16, background: 'rgba(239, 68, 68, 0.1)', borderColor: '#EF4444' }}>
-          <h3 style={{ marginTop: 0, marginBottom: 12, color: '#EF4444' }}>🎉 Kaçamak Sonrası Telafi Motoru</h3>
-          <p className="sub" style={{ marginBottom: 16 }}>
-            Dün kaçamak yaptın mı? Ertesi 2 günün su hedefini artır, ödem atıcı besinlerle telafi et.
-          </p>
-          <button 
-            className="btn" 
-            style={{ width: '100%', background: '#EF4444' }}
-            onClick={() => {
-              localStorage.setItem('gfitt_cheat_mode', 'true')
-              localStorage.setItem('gfitt_cheat_date', new Date().toISOString())
-              alert('Telafi modu aktif! Sonraki 2 gun su hedefi +20% arttirildi.')
-            }}
-          >
-            Kaçamak Modunu Başlat
-          </button>
-        </div>
-      )}
-
-      {/* Plateau Breaker */}
-      {showPlateauBreaker && (
-        <div className="card" style={{ marginBottom: 16, background: 'rgba(245, 158, 11, 0.1)', borderColor: '#F59E0B' }}>
-          <h3 style={{ marginTop: 0, marginBottom: 12, color: '#F59E0B' }}>📈 Plato Kırıcı (Refeed)</h3>
-          <p className="sub" style={{ marginBottom: 16 }}>
-            2 hafta kilo değişmedi mi? Yüksek karbahidrat günü metabolizmayı hızlandır.
-          </p>
-          <button 
-            className="btn" 
-            style={{ width: '100%' }}
-            onClick={() => {
-              alert('Refeed günü aktif! Bugun kalori hedefini +500 kcal artir.')
-            }}
-          >
-            Refeed Günü Başlat
-          </button>
-        </div>
-      )}
-
-      {/* Voice Input */}
+      {/* Sesli Günlük Modülü */}
       {showVoiceInput && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ marginTop: 0, marginBottom: 12 }}>🎤 Sesli Günlük</h3>
+        <div className="p-4 rounded-3xl bg-[#161326] border border-purple-500/30 space-y-3">
+          <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
+            <Mic className="w-4 h-4 text-[#FF8A00]" />
+            Sesle Doğal Cümle Söyle
+          </h3>
           
-          {/* Live Speech Bubble */}
           {isListening && liveTranscript && (
-            <div 
-              style={{ 
-                marginBottom: 16, 
-                padding: '12px 16px', 
-                background: '#FACC15', 
-                color: '#000', 
-                fontWeight: 600, 
-                borderRadius: '16px', 
-                boxShadow: '0 4px 20px rgba(250, 204, 21, 0.4)'
-              }}
-            >
+            <div className="p-3 rounded-2xl bg-amber-400 text-slate-950 font-bold text-xs shadow-lg animate-pulse">
               "{liveTranscript}"
             </div>
           )}
-          
-          <p className="sub" style={{ marginBottom: 16 }}>
-            Arkadaşına anlatır gibi söyle, mırıldansan bile anlarız. Yağlardan ve soslardan da bahsetmeyi unutma!
+
+          <p className="text-[11px] text-slate-400">
+            Örn: "Bir tavuk döner dürüm, 2 haşlanmış yumurta ve bir kutu ayran"
           </p>
-          <button 
-            className="btn" 
-            style={{ width: '100%' }}
-            onClick={() => {
-              if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-                const recognition = new SpeechRecognition()
-                recognition.lang = 'tr-TR'
-                recognition.continuous = true
-                recognition.interimResults = true
-                
-                recognition.onresult = (event) => {
-                  let interimTranscript = ''
-                  let finalTranscript = ''
-                  
-                  for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                      finalTranscript += event.results[i][0].transcript
-                    } else {
-                      interimTranscript += event.results[i][0].transcript
+
+          <div className="flex gap-2">
+            <button 
+              className={`flex-1 py-3 rounded-xl font-bold text-xs transition-all active:scale-95 ${
+                isListening ? 'bg-red-500 text-white animate-bounce' : 'bg-gradient-to-r from-purple-600 to-[#FF8A00] text-white'
+              }`}
+              onClick={() => {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+                  const recognition = new SpeechRecognition()
+                  recognition.lang = 'tr-TR'
+                  recognition.continuous = false
+                  recognition.interimResults = true
+
+                  recognition.onresult = (event) => {
+                    let interim = ''
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                      if (event.results[i].isFinal) {
+                        setVoiceText(event.results[i][0].transcript)
+                        setLiveTranscript('')
+                        setIsListening(false)
+                      } else {
+                        interim += event.results[i][0].transcript
+                      }
                     }
+                    if (interim) setLiveTranscript(interim)
                   }
-                  
-                  if (interimTranscript) {
-                    setLiveTranscript(interimTranscript)
-                  }
-                  
-                  if (finalTranscript) {
-                    setVoiceText(finalTranscript)
-                    setLiveTranscript('')
-                    setIsListening(false)
-                  }
-                }
-                
-                recognition.onerror = () => {
-                  setIsListening(false)
-                  setLiveTranscript('')
-                }
-                
-                recognition.onend = () => {
-                  if (!voiceText) {
+
+                  recognition.onerror = () => {
                     setIsListening(false)
                     setLiveTranscript('')
                   }
+
+                  recognition.start()
+                  setIsListening(true)
+                } else {
+                  alert('Tarayıcınız ses tanımayı desteklemiyor. Aşağıdaki kutuya yazabilirsiniz.')
                 }
-                
-                recognition.start()
-                setIsListening(true)
-                setLiveTranscript('')
-              } else {
-                alert('Tarayıcınız sesli girişi desteklemiyor.')
-              }
-            }}
-            disabled={isListening}
-          >
-            {isListening ? 'Dinliyorum...' : 'Mikrofonu Aç'}
-          </button>
-          {voiceText && (
-            <div style={{ marginTop: 12, padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-              <p className="sub" style={{ margin: 0 }}>Alınan: "{voiceText}"</p>
+              }}
+            >
+              {isListening ? 'Dinliyorum… Konuşun' : '🎙️ Mikrofonu Başlat'}
+            </button>
+          </div>
+
+          <div className="pt-2">
+            <input
+              className="w-full bg-[#100D1D] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              placeholder="Veya buraya yazın (Örn: 200g tavuk göğsü, 1 tabak pilav)…"
+              value={voiceText}
+              onChange={(e) => setVoiceText(e.target.value)}
+            />
+            {voiceText && (
               <button 
-                className="btn" 
-                style={{ marginTop: 8, fontSize: '12px' }}
+                className="w-full mt-2 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold"
                 onClick={async () => {
-                  // Multi-item parser: split by common separators
-                  const separators = [' ve ', ' ile ', ' plus ', ',', ' ve bir ']
+                  const separators = [' ve ', ' ile ', ',', ' artı ']
                   let parts = [voiceText]
-                  
                   for (const sep of separators) {
                     if (voiceText.toLowerCase().includes(sep)) {
                       parts = voiceText.split(new RegExp(sep, 'i'))
                       break
                     }
                   }
-                  
-                  // Try to match each part to foods
+
                   for (const part of parts) {
-                    const cleanPart = part.trim().toLowerCase()
-                    if (cleanPart.length < 2) continue
-                    
-                    const matchedFood = FOODS.find(f => 
-                      f.name.toLowerCase().includes(cleanPart) || 
-                      cleanPart.includes(f.name.toLowerCase())
-                    )
-                    
-                    if (matchedFood) {
-                      const macros = macrosForGrams(matchedFood, 100)
+                    const clean = part.trim().toLowerCase()
+                    if (clean.length < 2) continue
+                    const match = FOODS.find(f => f.name.toLowerCase().includes(clean) || clean.includes(f.name.toLowerCase()))
+                    if (match) {
+                      const macros = macrosForGrams(match, 100)
                       await addFood(session.id, {
-                        food_name: matchedFood.name,
+                        food_name: match.name,
                         amount_g: 100,
                         logged_on: date,
                         ...macros,
                       })
                     }
                   }
-                  
                   setVoiceText('')
                   await refresh()
                 }}
               >
-                Kaydet
+                Besinleri Ayrıştır & Kaydet
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
-      <div className="row" style={{ marginBottom: 16 }}>
-        <button className="btn ghost" onClick={() => setShowTemplates(!showTemplates)} disabled={loading}>
+
+      {/* Şablon & Dünü Kopyala Çubuğu */}
+      <div className="flex gap-2">
+        <button 
+          className="flex-1 py-2 rounded-xl bg-[#18152B] hover:bg-[#221D3B] text-slate-300 hover:text-white border border-white/10 text-xs font-semibold"
+          onClick={() => setShowTemplates(!showTemplates)}
+        >
           {showTemplates ? 'Şablonları Gizle' : 'Şablonları Göster'}
         </button>
-        <button className="btn ghost" onClick={handleCopyYesterday} disabled={loading}>
+        <button 
+          className="flex-1 py-2 rounded-xl bg-[#18152B] hover:bg-[#221D3B] text-slate-300 hover:text-white border border-white/10 text-xs font-semibold"
+          onClick={handleCopyYesterday}
+        >
           Dünü Kopyala
         </button>
         {logs.length > 0 && (
-          <button className="btn ghost" onClick={() => setSaveMealModalOpen(true)} disabled={loading}>
-            Şablon Olarak Kaydet
+          <button 
+            className="px-3 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-bold"
+            onClick={() => setSaveMealModalOpen(true)}
+          >
+            Şablon Yap
           </button>
         )}
       </div>
 
-      {/* Şablonlar Listesi */}
+      {/* Şablon Listesi */}
       {showTemplates && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <h3 style={{ margin: '0 0 12px' }}>Kayıtlı Şablonlar</h3>
+        <div className="p-4 rounded-3xl bg-[#161326] border border-white/10 space-y-2">
+          <h3 className="text-xs font-bold text-white">Kayıtlı Öğün Şablonların</h3>
           {savedMeals.length === 0 ? (
-            <p className="sub">Henüz şablon yok.</p>
+            <p className="text-xs text-slate-400">Henüz kayıtlı bir şablonunuz yok.</p>
           ) : (
             savedMeals.map((template) => (
-              <div key={template.id} className="food-item" style={{ cursor: 'pointer' }} onClick={() => loadTemplate(template)}>
+              <div 
+                key={template.id} 
+                className="p-3 rounded-2xl bg-[#100D1D] border border-white/5 flex items-center justify-between cursor-pointer hover:border-purple-500/40"
+                onClick={() => loadTemplate(template)}
+              >
                 <div>
-                  <strong>{template.meal_name}</strong>
-                  <div className="sub">
-                    {Math.round(template.total_calories)} kcal · P{Math.round(template.total_protein)} C{Math.round(template.total_carbs)} F{Math.round(template.total_fat)}
-                  </div>
+                  <p className="text-xs font-bold text-white">{template.meal_name}</p>
+                  <p className="text-[10px] text-slate-400">
+                    {Math.round(template.total_calories)} kcal · P{Math.round(template.total_protein)}g C{Math.round(template.total_carbs)}g F{Math.round(template.total_fat)}g
+                  </p>
                 </div>
-                <button className="btn ghost" style={{ fontSize: '12px' }}>Yükle</button>
+                <span className="text-xs font-bold text-purple-400">Öğüne Ekle +</span>
               </div>
             ))
           )}
         </div>
       )}
 
-      <div className="grid grid-2">
-        <div className="card">
+      {/* Ana Arama ve Günlük Kayıtlar Alanı */}
+      <div className="space-y-4">
+        {/* Öğün Türü Seçici */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {mealCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedMealCategory(cat)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                selectedMealCategory === cat 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-[#18152B] text-slate-400 hover:text-white border border-white/5'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Yemek Arama Kartı */}
+        <div className="p-4 rounded-3xl bg-[#161326] border border-white/10 space-y-3">
           <input
-            className="input"
-            placeholder="Tavuk, pilav, menemen…"
+            className="w-full bg-[#100D1D] border border-white/10 rounded-2xl px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+            placeholder="Tavuk, pilav, menemen ara…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-          <div className="search-list">
+
+          <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1">
             {results.map((f) => (
-              <button key={f.id} onClick={() => setSelected(f)} className="food-card">
-                <span className="food-emoji">{f.emoji || '🍽️'}</span>
-                <div>
-                  <strong>{f.name}</strong>
-                  <div className="sub">{f.kcal} kcal · P{f.p} C{f.c} F{f.f} / 100g</div>
+              <div 
+                key={f.id} 
+                onClick={() => setSelected(f)} 
+                className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                  selected?.id === f.id ? 'bg-purple-600/20 border-purple-500' : 'bg-white/5 border-transparent hover:bg-white/10'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{f.emoji || '🍽️'}</span>
+                  <div>
+                    <strong className="text-xs text-white block">{f.name}</strong>
+                    <span className="text-[10px] text-slate-400">{f.kcal} kcal · P{f.p} C{f.c} F{f.f} (100g)</span>
+                  </div>
                 </div>
-              </button>
+                <span className="text-xs text-purple-400 font-bold">Seç</span>
+              </div>
             ))}
           </div>
+
           {selected && (
-            <div style={{ marginTop: 12 }}>
-              <p><strong>{selected.name}</strong> eklenecek</p>
-              <div className="field">
-                <label>Gram</label>
-                <input className="input" type="number" min="1" value={grams} onChange={(e) => setGrams(e.target.value)} />
+            <div className="p-3.5 rounded-2xl bg-[#100D1D] border border-purple-500/30 space-y-3 mt-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-white">{selected.name}</p>
+                  <span className="text-[10px] text-purple-400 font-semibold">{selectedMealCategory}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">Porsiyon:</span>
+                  <input 
+                    className="w-20 bg-black/40 border border-white/15 rounded-lg px-2 py-1 text-xs text-white text-center font-bold" 
+                    type="number" 
+                    min="1" 
+                    value={grams} 
+                    onChange={(e) => setGrams(e.target.value)} 
+                  />
+                  <span className="text-xs text-slate-400">gram</span>
+                </div>
               </div>
+
               {preview && (
-                <p className="sub">
-                  {preview.calories} kcal · P {preview.protein} · C {preview.carbs} · F {preview.fat}
-                </p>
+                <div className="flex items-center justify-between text-[11px] bg-white/5 p-2 rounded-xl text-slate-300">
+                  <span><strong>{preview.calories}</strong> kcal</span>
+                  <span><strong>{preview.protein}g</strong> Protein</span>
+                  <span><strong>{preview.carbs}g</strong> Karb</span>
+                  <span><strong>{preview.fat}g</strong> Yağ</span>
+                </div>
               )}
-              <button className="btn" onClick={save} disabled={loading}>
-                {loading ? 'Kaydediliyor...' : 'Kaydet'}
+
+              <button 
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs active:scale-95 transition-transform" 
+                onClick={save} 
+                disabled={loading}
+              >
+                {loading ? 'Kaydediliyor…' : 'Öğüne Ekle'}
               </button>
             </div>
           )}
         </div>
 
-        <div className="card">
+        {/* Günün Eklenen Öğünleri */}
+        <div className="p-4 rounded-3xl bg-[#161326] border border-white/10 space-y-3">
           <MacroBars totals={totals} profile={p} />
-          {logs.map((row) => (
-            <div className="food-item" key={row.id}>
-              <div onClick={() => {
-                setEditingLog(row)
-                setEditGrams(row.amount_g)
-              }} style={{ cursor: 'pointer', flex: 1 }}>
-                <strong>{row.food_name}</strong>
-                <div className="sub">
-                  {row.amount_g}g · {Math.round(row.calories)} kcal · P{row.protein} C{row.carbs} F{row.fat}
+
+          <div className="space-y-2 mt-4">
+            {logs.map((row) => (
+              <div key={row.id} className="p-3 rounded-2xl bg-[#100D1D] border border-white/5 flex items-center justify-between">
+                <div 
+                  onClick={() => {
+                    setEditingLog(row)
+                    setEditGrams(row.amount_g)
+                  }} 
+                  className="cursor-pointer flex-1"
+                >
+                  <p className="text-xs font-bold text-white">{row.food_name}</p>
+                  <p className="text-[10px] text-slate-400">
+                    {row.amount_g}g · {Math.round(row.calories)} kcal · P{row.protein}g C{row.carbs}g F{row.fat}g
+                  </p>
                 </div>
+                <button 
+                  className="text-xs text-red-400 hover:text-red-300 font-semibold px-2 py-1"
+                  onClick={() => handleDelete(row.id)} 
+                  disabled={loading}
+                >
+                  Sil
+                </button>
               </div>
-              <button className="btn ghost" onClick={() => handleDelete(row.id)} disabled={loading}>
-                {loading ? 'Siliniyor...' : 'Sil'}
-              </button>
-            </div>
-          ))}
-          {logs.length === 0 && <p className="sub">Bu gün henüz yemek yok.</p>}
+            ))}
+            {logs.length === 0 && <p className="text-xs text-slate-400 text-center py-4">Bu tarihte henüz yemek eklenmedi.</p>}
+          </div>
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Düzenleme Modalı */}
       {editingLog && (
-        <>
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 16
-          }}>
-            <div className="card" style={{ maxWidth: 400 }}>
-              <h3 style={{ marginTop: 0 }}>{editingLog.food_name}</h3>
-              <div className="field">
-                <label>Gram</label>
-                <input className="input" type="number" min="1" value={editGrams} onChange={(e) => setEditGrams(e.target.value)} />
-              </div>
-              <div className="row">
-                <button className="btn ghost" onClick={() => setEditingLog(null)} disabled={loading}>
-                  İptal
-                </button>
-                <button className="btn danger" onClick={() => {
-                  handleDelete(editingLog.id)
-                  setEditingLog(null)
-                }} disabled={loading}>
-                  Sil
-                </button>
-                <button className="btn" onClick={handleUpdateGrams} disabled={loading}>
-                  {loading ? 'Güncelleniyor...' : 'Güncelle'}
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#18152B] border border-white/15 rounded-3xl p-5 w-full max-w-sm space-y-4">
+            <h3 className="text-sm font-bold text-white">{editingLog.food_name}</h3>
+            <div className="space-y-1">
+              <label className="text-[11px] text-slate-400 font-semibold">Yeni Gramajı Girin</label>
+              <input 
+                className="w-full bg-[#100D1D] border border-white/15 rounded-xl px-3 py-2 text-sm text-white"
+                type="number" 
+                min="1" 
+                value={editGrams} 
+                onChange={(e) => setEditGrams(e.target.value)} 
+              />
+            </div>
+            <div className="flex gap-2">
+              <button className="flex-1 py-2 rounded-xl bg-white/10 text-xs font-semibold text-white" onClick={() => setEditingLog(null)}>
+                İptal
+              </button>
+              <button className="flex-1 py-2 rounded-xl bg-purple-600 text-xs font-bold text-white" onClick={handleUpdateGrams}>
+                Güncelle
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Save Template Modal */}
+      {/* Şablon Kaydetme Modalı */}
       {saveMealModalOpen && (
-        <>
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 16
-          }}>
-            <div className="card" style={{ maxWidth: 400 }}>
-              <h3 style={{ marginTop: 0 }}>Öğünü Şablon Olarak Kaydet</h3>
-              <div className="field">
-                <label>Şablon Adı</label>
-                <input className="input" value={mealTemplateName} onChange={(e) => setMealTemplateName(e.target.value)} placeholder="Örn: Sabah kahvaltısı" />
-              </div>
-              <div className="row">
-                <button className="btn ghost" onClick={() => setSaveMealModalOpen(false)} disabled={loading}>
-                  İptal
-                </button>
-                <button className="btn" onClick={handleSaveAsTemplate} disabled={loading}>
-                  {loading ? 'Kaydediliyor...' : 'Kaydet'}
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#18152B] border border-white/15 rounded-3xl p-5 w-full max-w-sm space-y-4">
+            <h3 className="text-sm font-bold text-white">Öğünü Şablon Olarak Kaydet</h3>
+            <input 
+              className="w-full bg-[#100D1D] border border-white/15 rounded-xl px-3 py-2 text-xs text-white"
+              value={mealTemplateName} 
+              onChange={(e) => setMealTemplateName(e.target.value)} 
+              placeholder="Örn: Klasik Sabah Kahvaltısı" 
+            />
+            <div className="flex gap-2">
+              <button className="flex-1 py-2 rounded-xl bg-white/10 text-xs font-semibold text-white" onClick={() => setSaveMealModalOpen(false)}>
+                Vazgeç
+              </button>
+              <button className="flex-1 py-2 rounded-xl bg-purple-600 text-xs font-bold text-white" onClick={handleSaveAsTemplate}>
+                Kaydet
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
 
-      {/* Logged Modal Popup - LOGLANDI */}
+      {/* Loglandı Geri Bildirimi */}
       {loggedModalOpen && (
-        <div className="logged-modal" onClick={() => setLoggedModalOpen(false)}>
-          <div className="logged-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="logged-modal-icon">✅</div>
-            <div className="logged-modal-title">LOGLANDI</div>
-            <div className="logged-modal-text">
-              <strong>{Math.round(loggedCalories)} kal</strong>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setLoggedModalOpen(false)}>
+          <div className="bg-[#18152B] border border-white/15 rounded-3xl p-5 w-full max-w-sm text-center space-y-3" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-xl font-bold">
+              ✓
             </div>
-            
-            {/* Dynamic coaching sentence */}
-            <p className="sub" style={{ marginTop: 8, marginBottom: 16, textAlign: 'center' }}>
-              {(() => {
-                const remaining = p.calorie_target - (totals.calories + loggedCalories)
-                if (remaining >= 0) {
-                  return `Kaydedildi! Toplam ${Math.round(totals.calories + loggedCalories)} kalori. Hedefine ${Math.round(remaining)} kcal kaldı.`
-                } else {
-                  return `Kaydedildi! Toplam ${Math.round(totals.calories + loggedCalories)} kalori. Bugün hedefin ${Math.abs(remaining)} kcal üzerindesin—yarın daha hafif öğünler düşünebilirsin.`
-                }
-              })()}
+            <h3 className="text-base font-black text-white">LOGLANDI</h3>
+            <p className="text-xl font-black text-emerald-400">{Math.round(loggedCalories)} kcal</p>
+            <p className="text-xs text-slate-300">
+              {loggedFoodName} başarıyla günlüğe eklendi.
             </p>
-            
-            {/* Logged items with portion edit */}
-            <div style={{ marginBottom: 16 }}>
-              {loggedItems.map((item) => (
-                <div 
-                  key={item.id}
-                  style={{
-                    padding: '12px',
-                    background: '#0B101B',
-                    borderRadius: '8px',
-                    marginBottom: '8px',
-                    cursor: 'pointer',
-                    border: editingLoggedItem === item.id ? '1px solid #FF8A00' : '1px solid transparent'
-                  }}
-                  onClick={() => setEditingLoggedItem(editingLoggedItem === item.id ? null : item.id)}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <strong>{item.food_name}</strong>
-                      <p className="sub" style={{ margin: '4px 0 0', fontSize: '12px' }}>
-                        {item.subtext || `${item.amount_g}g`}
-                      </p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <strong>{Math.round(item.calories)} kcal</strong>
-                      <p className="sub" style={{ margin: '4px 0 0', fontSize: '11px' }}>
-                        {Math.round(item.protein)}g P | {Math.round(item.carbs)}g C | {Math.round(item.fat)}g F
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Inline portion edit */}
-                  {editingLoggedItem === item.id && (
-                    <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <button 
-                        className="btn ghost"
-                        style={{ padding: '4px 12px', fontSize: '18px' }}
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          const newGrams = Math.max(10, item.amount_g - 10)
-                          const newMacros = macrosForGrams(
-                            { kcal: item.calories / (item.amount_g / 100), p: item.protein / (item.amount_g / 100), c: item.carbs / (item.amount_g / 100), f: item.fat / (item.amount_g / 100) },
-                            newGrams
-                          )
-                          await deleteFood(session.id, item.id)
-                          await addFood(session.id, {
-                            food_name: item.food_name,
-                            amount_g: newGrams,
-                            logged_on: date,
-                            ...newMacros,
-                          })
-                          setLoggedItems(loggedItems.map(li => 
-                            li.id === item.id 
-                              ? { ...li, amount_g: newGrams, ...newMacros, subtext: `${newGrams}g · ${item.subtext?.split('·')[1] || ''}` }
-                              : li
-                          ))
-                          await refresh()
-                        }}
-                      >
-                        -
-                      </button>
-                      <span style={{ minWidth: '60px', textAlign: 'center', fontWeight: 600 }}>{item.amount_g}g</span>
-                      <button 
-                        className="btn ghost"
-                        style={{ padding: '4px 12px', fontSize: '18px' }}
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          const newGrams = item.amount_g + 10
-                          const newMacros = macrosForGrams(
-                            { kcal: item.calories / (item.amount_g / 100), p: item.protein / (item.amount_g / 100), c: item.carbs / (item.amount_g / 100), f: item.fat / (item.amount_g / 100) },
-                            newGrams
-                          )
-                          await deleteFood(session.id, item.id)
-                          await addFood(session.id, {
-                            food_name: item.food_name,
-                            amount_g: newGrams,
-                            logged_on: date,
-                            ...newMacros,
-                          })
-                          setLoggedItems(loggedItems.map(li => 
-                            li.id === item.id 
-                              ? { ...li, amount_g: newGrams, ...newMacros, subtext: `${newGrams}g · ${item.subtext?.split('·')[1] || ''}` }
-                              : li
-                          ))
-                          await refresh()
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <p className="sub" style={{ fontSize: '11px', textAlign: 'center', marginBottom: 12 }}>
-              Porsiyon yanlış mı? Tek tıkla düzelt ↑
-            </p>
-            
-            <button className="btn" onClick={() => setLoggedModalOpen(false)} style={{ width: '100%' }}>
+            <button 
+              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs" 
+              onClick={() => setLoggedModalOpen(false)}
+            >
               Tamam
             </button>
           </div>
         </div>
       )}
 
-      {/* Food Scanner Side Panel */}
+      {/* Barkod & Etiket Tarayıcı Paneli */}
       <FoodScannerPanel isOpen={scannerPanelOpen} onClose={() => setScannerPanelOpen(false)} />
     </div>
   )

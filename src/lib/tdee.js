@@ -1,110 +1,106 @@
-// TDEE Hesaplama Motoru - Mifflin-St Jeor Denklemi
+/**
+ * Bilimsel BMR & TDEE Hesaplayıcı (Mifflin-St Jeor Standardı)
+ * Clamp: BMR asla 1200 kcal altına düşemez.
+ */
+export function calculateBMR(profile = {}) {
+  const weight = Number(profile?.weight_kg || profile?.weight) > 30 ? Number(profile.weight_kg || profile.weight) : 75;
+  const height = Number(profile?.height_cm || profile?.height) > 100 ? Number(profile.height_cm || profile.height) : 175;
+  const age = Number(profile?.age) > 10 ? Number(profile.age) : 22;
+  const gender = profile?.gender || 'male';
 
-export function calculateBMR(weightKg, heightCm, age, gender) {
-  // Sanitize inputs with safe defaults
-  const w = Number(weightKg) > 30 ? Number(weightKg) : 75
-  const h = Number(heightCm) > 100 ? Number(heightCm) : 175
-  const a = Number(age) > 10 ? Number(age) : 22
-  
-  // Mifflin-St Jeor denklemi (METRIC units)
-  // Erkek: (10 × kg) + (6.25 × cm) - (5 × yaş) + 5
-  // Kadın: (10 × kg) + (6.25 × cm) - (5 × yaş) - 161
-  
-  let rawBMR
-  if (gender === 'male') {
-    rawBMR = (10 * w) + (6.25 * h) - (5 * a) + 5
+  // Mifflin-St Jeor Formülü
+  let rawBmr = 10 * weight + 6.25 * height - 5 * age;
+  if (gender === 'female') {
+    rawBmr -= 161;
   } else {
-    rawBMR = (10 * w) + (6.25 * h) - (5 * a) - 161
+    rawBmr += 5;
   }
-  
-  // Strict minimum clamp: never below 1200 kcal
-  return Math.max(Math.round(rawBMR), 1200)
+
+  // Minimum güvenli clamp: BMR asla 1200 kcal altına düşmez
+  return Math.max(Math.round(rawBmr), 1200);
 }
 
-export function calculateTDEE(bmr, activityLevel) {
-  const multipliers = {
-    sedentary: 1.2,
-    light: 1.375,
-    moderate: 1.55,
-    active: 1.725,
-    very_active: 1.9
-  }
-  const rawTDEE = bmr * (multipliers[activityLevel] || 1.2)
-  // Strict minimum clamp: never below 1550 kcal
-  return Math.max(Math.round(rawTDEE), 1550)
+export function calculateTDEE(profile = {}) {
+  const bmr = calculateBMR(profile);
+  const activityMap = {
+    sedentary: 1.2,      // Masa başı / Hareketsiz
+    light: 1.375,        // Haftada 1-3 gün hafif spor
+    moderate: 1.55,      // Haftada 3-5 gün orta spor
+    active: 1.725,       // Haftada 6-7 gün ağır spor
+    very_active: 1.9     // Günde çift idman / beden işi
+  };
+
+  const multiplier = activityMap[profile?.activity_level] || 1.375;
+  const rawTdee = bmr * multiplier;
+
+  return Math.max(Math.round(rawTdee), 1550);
 }
 
-export function calculateTargetCalories(tdee, goal, gender) {
-  let target = tdee
-  
-  if (goal === 'lose') {
-    target = tdee - 500 // Dengeli kilo verme
-  } else if (goal === 'lose_fast') {
-    target = tdee - 750 // Hızlı kilo verme
-  } else if (goal === 'lose_slow') {
-    target = tdee - 250 // Sakin kilo verme
-  } else if (goal === 'gain') {
-    target = tdee + 300 // Kas yapma
+export function calculateTargetCalories(profile = {}) {
+  const tdee = calculateTDEE(profile);
+  const goal = profile?.goal || 'maintain'; // 'lose', 'gain', 'maintain'
+
+  let targetKcal = tdee;
+  if (goal === 'lose' || goal === 'fat_loss') {
+    targetKcal = Math.max(tdee - 450, 1200);
+  } else if (goal === 'gain' || goal === 'muscle_gain') {
+    targetKcal = tdee + 350;
   }
-  
-  // Strict minimum clamp: never below 1200 kcal
-  return Math.max(Math.round(target), 1200)
+
+  return Math.max(Math.round(targetKcal), 1200);
 }
 
-export function calculateMacros(weightKg, targetCalories, goal = 'maintain') {
-  let protein = Math.round(weightKg * 2) // g/kg baseline
-  let fat = Math.round(weightKg * 0.9) // g/kg baseline
-  
-  // Goal-based adjustments
-  if (goal === 'lose' || goal === 'lose_fast' || goal === 'lose_slow') {
-    // Weight loss: Higher protein to preserve muscle, lower fat
-    protein = Math.round(weightKg * 2.2)
-    fat = Math.round(weightKg * 0.7)
-  } else if (goal === 'gain') {
-    // Muscle gain: Higher protein, moderate fat
-    protein = Math.round(weightKg * 2.4)
-    fat = Math.round(weightKg * 1.0)
+export function calculateMacros(calories, profile = {}) {
+  const targetKcal = Number(calories) || calculateTargetCalories(profile);
+  const weight = Number(profile?.weight_kg || profile?.weight) > 30 ? Number(profile.weight_kg || profile.weight) : 75;
+
+  const protein = Math.round(weight * 1.8);
+  const fat = Math.round((targetKcal * 0.25) / 9);
+  const remainingKcal = targetKcal - (protein * 4 + fat * 9);
+  const carbs = Math.max(Math.round(remainingKcal / 4), 50);
+
+  return { protein, carbs, fat };
+}
+
+export function calculateWaterTarget(weight) {
+  const w = Number(weight) > 30 ? Number(weight) : 75;
+  return Math.round(w * 33); // 33ml / kg
+}
+
+export function getGoalRateDisplay(goalSpeed) {
+  switch (goalSpeed) {
+    case 'slow':
+      return '0.25 kg / hafta (Kas Koruyucu)';
+    case 'fast':
+      return '0.8 kg / hafta (Hızlı Sonuç)';
+    case 'moderate':
+    default:
+      return '0.5 kg / hafta (Önerilen & Dengeli)';
   }
-  // maintain: baseline values
-  
-  const fatCalories = fat * 9
-  const proteinCalories = protein * 4
-  const remainingCalories = targetCalories - fatCalories - proteinCalories
-  const carbs = Math.max(0, Math.round(remainingCalories / 4))
-  
+}
+
+export function calculateMacroBudget(profile = {}) {
+  const targetKcal = calculateTargetCalories(profile);
+  const { protein, carbs, fat } = calculateMacros(targetKcal, profile);
+  const fiberGrams = Math.round((targetKcal / 1000) * 14);
+
   return {
-    protein,
-    fat,
-    carbs
-  }
+    targetKcal,
+    bmr: calculateBMR(profile),
+    tdee: calculateTDEE(profile),
+    proteinGrams: protein,
+    carbGrams: carbs,
+    fatGrams: fat,
+    fiberGrams
+  };
 }
 
-export function calculateWaterTarget(weightKg) {
-  return Math.round(weightKg * 35) // ml/kg
-}
-
-export function getGoalRateDisplay(goal) {
-  const rates = {
-    lose_slow: { label: 'Sakin', rate: 0.12, emoji: '🐢' },
-    lose: { label: 'Dengeli', rate: 0.25, emoji: '🚶' },
-    lose_fast: { label: 'Hızlı', rate: 0.5, emoji: '🐇' },
-    maintain: { label: 'Korumak', rate: 0, emoji: '⚖️' },
-    gain: { label: 'Kas Yap', rate: 0.1, emoji: '💪' }
-  }
-  return rates[goal] || rates.maintain
-}
-
-export function calculateProjectedWeight(currentWeight, targetWeight, dailyCalorieDeficit) {
-  if (dailyCalorieDeficit <= 0) return null
-  
-  const kgToLose = currentWeight - targetWeight
-  const caloriesPerKg = 7700
-  const daysNeeded = (kgToLose * caloriesPerKg) / dailyCalorieDeficit
-  const targetDate = new Date()
-  targetDate.setDate(targetDate.getDate() + Math.ceil(daysNeeded))
-  
-  return {
-    daysNeeded: Math.ceil(daysNeeded),
-    targetDate: targetDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
-  }
+export function calculateProjectedWeight(currentWeight, dailyDeficit = 500, weeks = 4) {
+  const w = typeof currentWeight === 'object' 
+    ? Number(currentWeight?.weight_kg || currentWeight?.weight || 75) 
+    : (Number(currentWeight) || 75);
+  const deficit = Number(dailyDeficit) || 500;
+  const numWeeks = Number(weeks) || 4;
+  const weeklyChange = (deficit * 7) / 7700;
+  return Math.max(Math.round((w - (weeklyChange * numWeeks)) * 10) / 10, 35);
 }
