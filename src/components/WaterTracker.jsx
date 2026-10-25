@@ -104,9 +104,9 @@ export default function WaterTracker({ profile }) {
           }}
         >
           <Plus size={16} color="#3B82F6" />
-          +250ml
+          +250 ml
         </button>
-        
+
         <button
           onClick={() => addWater(500)}
           style={{
@@ -134,9 +134,9 @@ export default function WaterTracker({ profile }) {
           }}
         >
           <Plus size={16} color="#3B82F6" />
-          +500ml
+          +500 ml
         </button>
-        
+
         <button
           onClick={() => removeWater(250)}
           style={{
@@ -164,7 +164,7 @@ export default function WaterTracker({ profile }) {
           }}
         >
           <Minus size={16} color="#EF4444" />
-          -250ml
+          -250 ml
         </button>
       </div>
 

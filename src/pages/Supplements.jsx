@@ -37,35 +37,51 @@ export default function Supplements() {
   const storeProducts = [
     {
       brand: 'Proteinocean',
-      name: 'Creatine Monohydrate (300g)',
-      marketPrice: 429,
-      discountPrice: 386,
+      name: 'Whey 1000g',
+      marketPrice: 899,
+      discountPrice: 809,
       link: 'https://proteinocean.com',
       badge: 'En Popüler'
     },
     {
-      brand: 'Supplementler.com',
-      name: 'Whey Protein (1000g)',
-      marketPrice: 899,
-      discountPrice: 809,
-      link: 'https://www.supplementler.com',
-      badge: 'Yüksek BCAA'
+      brand: 'BigJoy',
+      name: 'Creatine 400g',
+      marketPrice: 549,
+      discountPrice: 494,
+      link: 'https://www.bigjoy.com.tr',
+      badge: 'Yüksek Kalite'
     },
     {
       brand: 'HIQ Nutrition',
-      name: 'Smash Pre-Workout (300g)',
+      name: 'Pre-Workout',
       marketPrice: 649,
       discountPrice: 584,
       link: 'https://takehiq.com',
       badge: 'Yüksek Pompalama'
     },
     {
-      brand: 'BigJoy Sports',
-      name: 'ZMA + Magnesium (120 Kapsül)',
-      marketPrice: 389,
-      discountPrice: 350,
-      link: 'https://www.bigjoy.com.tr',
+      brand: 'Hardline',
+      name: 'Omega-3 200 Kapsül',
+      marketPrice: 399,
+      discountPrice: 359,
+      link: 'https://www.hardline.com.tr',
+      badge: 'EPA/DHA'
+    },
+    {
+      brand: 'Mysupplement',
+      name: 'ZMA',
+      marketPrice: 449,
+      discountPrice: 404,
+      link: 'https://www.mysupplement.com.tr',
       badge: 'Derin Uyku'
+    },
+    {
+      brand: 'Supplementler.com',
+      name: 'Vitamin D3K2',
+      marketPrice: 299,
+      discountPrice: 269,
+      link: 'https://www.supplementler.com',
+      badge: 'Bağışıklık'
     }
   ];
 

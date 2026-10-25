@@ -1,93 +1,104 @@
 import { useState, useEffect } from 'react'
-import confetti from 'canvas-confetti'
+import { Play, Crown, Zap } from 'lucide-react'
 
-export default function RewardedAd({ onReward, rewardType = 'scan' }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [countdown, setCountdown] = useState(5)
-  const [rewardClaimed, setRewardClaimed] = useState(false)
+export default function RewardedAd({ onUnlock, featureName }) {
+  const [showModal, setShowModal] = useState(false)
+  const [countdown, setCountdown] = useState(0)
+  const [adWatched, setAdWatched] = useState(false)
 
-  const handleOpen = () => {
-    setIsOpen(true)
+  const today = new Date().toISOString().split('T')[0]
+  const dailyLimit = 3
+  const watchedToday = parseInt(localStorage.getItem(`gfitt_ad_count_${today}`) || '0')
+
+  const canWatchAd = watchedToday < dailyLimit
+
+  const handleWatchAd = () => {
+    if (!canWatchAd) return
+    setShowModal(true)
     setCountdown(5)
-    setRewardClaimed(false)
-  }
+    setAdWatched(false)
 
-  useEffect(() => {
-    let interval
-    if (isOpen && countdown > 0 && !rewardClaimed) {
-      interval = setInterval(() => {
-        setCountdown((prev) => prev - 1)
-      }, 1000)
-    } else if (countdown === 0 && !rewardClaimed) {
-      setRewardClaimed(true)
-      // Trigger confetti
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setAdWatched(true)
+          const newCount = watchedToday + 1
+          localStorage.setItem(`gfitt_ad_count_${today}`, newCount.toString())
+          setTimeout(() => {
+            onUnlock?.()
+            setShowModal(false)
+          }, 1000)
+          return 0
+        }
+        return prev - 1
       })
-    }
-    return () => clearInterval(interval)
-  }, [isOpen, countdown, rewardClaimed])
-
-  const handleClaimReward = () => {
-    if (onReward) {
-      onReward(rewardType)
-    }
-    setIsOpen(false)
+    }, 1000)
   }
 
   return (
     <>
-      <button className="btn ghost" onClick={handleOpen} style={{ fontSize: '13px' }}>
-        🎺 Reklam İzle +Ödül
+      <button
+        onClick={() => setShowModal(true)}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FF8A00] text-slate-950 font-bold text-xs transition-all hover:scale-105 active:scale-95"
+      >
+        <Play className="w-4 h-4" />
+        <span>� Reklam İzle (+1 Hak)</span>
       </button>
 
-      {isOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: 16
-        }}>
-          <div className="card" style={{ maxWidth: 400, textAlign: 'center' }}>
-            <h3 style={{ marginTop: 0 }}>Reklam İzleniyor</h3>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#181528] border border-white/10 rounded-3xl p-6 max-w-sm w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-white">Özellik Kilidi Aç</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
 
-            {!rewardClaimed ? (
-              <>
-                <div style={{
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '50%',
-                  border: '4px solid #F59E0B',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '24px auto',
-                  fontSize: '32px',
-                  fontWeight: 700
-                }}>
-                  {countdown}
-                </div>
-                <p className="sub">
-                  Lütfen bekleyin, reklam tamamlanıyor...
-                </p>
-              </>
+            {!adWatched && countdown > 0 ? (
+              <div className="text-center py-8">
+                <div className="text-6xl font-black text-[#FF8A00] mb-4">{countdown}</div>
+                <p className="text-sm text-slate-400">Reklam izleniyor...</p>
+              </div>
+            ) : adWatched ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">✅</div>
+                <p className="text-sm font-bold text-green-400 mb-2">Reklam tamamlandı!</p>
+                <p className="text-xs text-slate-400">Erişim açıldı ve +25 XP kazandın.</p>
+              </div>
             ) : (
-              <>
-                <div style={{ fontSize: '48px', marginBottom: 16 }}>🎉</div>
-                <h3 style={{ color: '#10B981', marginBottom: 8 }}>Ödül Kazandın!</h3>
-                <p className="sub" style={{ marginBottom: 24 }}>
-                  {rewardType === 'scan' ? '+3 Barkod Tarama Hakkı' : '+1 AI Soru Hakkı'}
-                </p>
-                <button className="btn" onClick={handleClaimReward} style={{ width: '100%' }}>
-                  Ödülü Al
+              <div className="space-y-3">
+                <button
+                  onClick={handleWatchAd}
+                  disabled={!canWatchAd}
+                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
+                    canWatchAd
+                      ? 'bg-[#FF8A00] text-slate-950 hover:scale-105'
+                      : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  🎬 Kısa Reklam İzle (+1 Hak & +25 XP)
                 </button>
-              </>
+                <p className="text-xs text-center text-slate-400">
+                  Günlük Kalan: {dailyLimit - watchedToday}/{dailyLimit}
+                </p>
+
+                <div className="border-t border-white/10 pt-3 mt-3">
+                  <button
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white font-bold text-sm hover:scale-105 transition-all"
+                    onClick={() => {
+                      setShowModal(false)
+                      window.location.href = '/premium'
+                    }}
+                  >
+                    👑 GFitt PRO'ya Geç (3 Gün Ücretsiz Dene)
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

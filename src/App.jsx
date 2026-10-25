@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { LanguageProvider } from './context/LanguageContext'
 import Layout from './components/Layout'
 import PwaInstallPrompt from './components/PwaInstallPrompt'
 import Login from './pages/Login'
@@ -29,16 +30,29 @@ import Mobility from './pages/Mobility'
 
 function Guard({ children }) {
   const { session, loading } = useAuth()
-  
+
   if (loading) {
     return <div className="min-h-screen bg-[#0B0914] text-white flex items-center justify-center text-sm">Yükleniyor…</div>
   }
-  
-  // Oturum yoksa girişe yönlendir
-  if (!session) {
+
+  // Check if onboarding is done
+  const onboardingDone = localStorage.getItem('gfitt_onboarding_done') === 'true'
+
+  // If session exists but onboarding not done, redirect to onboarding
+  if (session && !onboardingDone) {
+    return <Navigate to="/onboarding" replace />
+  }
+
+  // If onboarding done but no session, redirect to login
+  if (!session && onboardingDone) {
     return <Navigate to="/giris" replace />
   }
-  
+
+  // If no session and no onboarding, redirect to landing
+  if (!session && !onboardingDone) {
+    return <Navigate to="/" replace />
+  }
+
   return children
 }
 
@@ -49,65 +63,73 @@ function PublicOnly({ children }) {
     return <div className="min-h-screen bg-[#0B0914] text-white flex items-center justify-center text-sm">Yükleniyor…</div>
   }
 
-  // Oturum varsa doğrudan panele gönder
-  if (session) {
+  // Oturum varsa ve onboarding yapıldıysa panele gönder
+  const onboardingDone = localStorage.getItem('gfitt_onboarding_done') === 'true'
+  if (session && onboardingDone) {
     return <Navigate to="/dashboard" replace />
   }
-  
+
+  // Oturum varsa ama onboarding yapılmadıysa onboarding'e gönder
+  if (session && !onboardingDone) {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return children
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Giriş & Kayıt & Onboarding */}
-          <Route path="/giris" element={<PublicOnly><Login /></PublicOnly>} />
-          <Route path="/login" element={<Navigate to="/giris" replace />} />
-          <Route path="/kayit" element={<PublicOnly><Signup /></PublicOnly>} />
-          <Route path="/signup" element={<Navigate to="/kayit" replace />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Giriş & Kayıt & Onboarding */}
+            <Route path="/giris" element={<PublicOnly><Login /></PublicOnly>} />
+            <Route path="/login" element={<Navigate to="/giris" replace />} />
+            <Route path="/kayit" element={<PublicOnly><Signup /></PublicOnly>} />
+            <Route path="/signup" element={<Navigate to="/kayit" replace />} />
+            <Route path="/onboarding" element={<Onboarding />} />
 
-          {/* Tanıtım & Yasal Sayfalar */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/kvkk" element={<Kvkk />} />
-          <Route path="/gizlilik-politikasi" element={<GizlilikPolitikasi />} />
-          <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />
-          <Route path="/mesafeli-satis-sozlesmesi" element={<MesafeliSatisSozlesmesi />} />
-          <Route path="/iade-politikasi" element={<IadePolitikasi />} />
-          <Route path="/destek" element={<Support />} />
+            {/* Tanıtım & Yasal Sayfalar */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/kvkk" element={<Kvkk />} />
+            <Route path="/gizlilik-politikasi" element={<GizlilikPolitikasi />} />
+            <Route path="/kullanim-kosullari" element={<KullanimKosullari />} />
+            <Route path="/mesafeli-satis-sozlesmesi" element={<MesafeliSatisSozlesmesi />} />
+            <Route path="/iade-politikasi" element={<IadePolitikasi />} />
+            <Route path="/destek" element={<Support />} />
 
-          {/* Giriş Yapılmış Panel (Sidebar + Layout) */}
-          <Route element={<Guard><Layout /></Guard>}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/yemek" element={<Food />} />
-            <Route path="/food" element={<Navigate to="/yemek" replace />} />
-            <Route path="/antrenman" element={<Workout />} />
-            <Route path="/workouts" element={<Navigate to="/antrenman" replace />} />
-            <Route path="/supplement" element={<Supplements />} />
-            <Route path="/supplements" element={<Navigate to="/supplement" replace />} />
-            <Route path="/kilo" element={<Weight />} />
-            <Route path="/ilerleme" element={<Progress />} />
-            <Route path="/progress" element={<Navigate to="/ilerleme" replace />} />
-            <Route path="/guc-artisi" element={<Strength />} />
-            <Route path="/strength" element={<Navigate to="/guc-artisi" replace />} />
-            <Route path="/mobility" element={<Mobility />} />
-            <Route path="/aliskanliklar" element={<Habits />} />
-            <Route path="/ai-koc" element={<AICoach />} />
-            <Route path="/pazar" element={<Market />} />
-            <Route path="/sosyal" element={<Social />} />
-            <Route path="/profil" element={<Profile />} />
-            <Route path="/profile" element={<Navigate to="/profil" replace />} />
-            <Route path="/premium" element={<Paywall />} />
-            <Route path="/pro" element={<Navigate to="/premium" replace />} />
-          </Route>
+            {/* Giriş Yapılmış Panel (Sidebar + Layout) */}
+            <Route element={<Guard><Layout /></Guard>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/yemek" element={<Food />} />
+              <Route path="/food" element={<Navigate to="/yemek" replace />} />
+              <Route path="/antrenman" element={<Workout />} />
+              <Route path="/workouts" element={<Navigate to="/antrenman" replace />} />
+              <Route path="/supplement" element={<Supplements />} />
+              <Route path="/supplements" element={<Navigate to="/supplement" replace />} />
+              <Route path="/kilo" element={<Weight />} />
+              <Route path="/ilerleme" element={<Progress />} />
+              <Route path="/progress" element={<Navigate to="/ilerleme" replace />} />
+              <Route path="/guc-artisi" element={<Strength />} />
+              <Route path="/strength" element={<Navigate to="/guc-artisi" replace />} />
+              <Route path="/mobility" element={<Mobility />} />
+              <Route path="/aliskanliklar" element={<Habits />} />
+              <Route path="/ai-koc" element={<AICoach />} />
+              <Route path="/pazar" element={<Market />} />
+              <Route path="/sosyal" element={<Social />} />
+              <Route path="/profil" element={<Profile />} />
+              <Route path="/profile" element={<Navigate to="/profil" replace />} />
+              <Route path="/premium" element={<Paywall />} />
+              <Route path="/pro" element={<Navigate to="/premium" replace />} />
+            </Route>
 
-          {/* Eşleşmeyen tüm rotalar ana sayfaya */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <PwaInstallPrompt />
-      </BrowserRouter>
+            {/* Eşleşmeyen tüm rotalar ana sayfaya */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <PwaInstallPrompt />
+        </BrowserRouter>
+      </LanguageProvider>
     </AuthProvider>
   )
 }

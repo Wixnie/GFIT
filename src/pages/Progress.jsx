@@ -159,44 +159,39 @@ export default function Progress() {
         })()}
       </div>
 
-      {/* Sunday "Missing Protein" Detective Card */}
-      {(() => {
-        const today = new Date()
-        const isSunday = today.getDay() === 0
-        
-        if (!isSunday) return null
-        
-        // Analyze last 7 days of protein intake
-        const last7Days = byDay.slice(-7)
-        if (last7Days.length === 0) return null
-        
-        const avgProtein = last7Days.reduce((sum, day) => sum + day.protein, 0) / last7Days.length
-        const targetProtein = profile?.protein_target || 170
-        const proteinGap = targetProtein - avgProtein
-        
-        let detectiveMessage = ''
-        if (proteinGap > 30) {
-          detectiveMessage = `Her öğündeki proteini saydık! Bu hafta özellikle kahvaltı ve öğle öğünlerinde hedefin ortalama ${Math.round(proteinGap)}g altında kaldın. Eksik tavuğu/proteini tamamlamak için sabahlarına +2 yumurta ekleyebilirsin.`
-        } else if (proteinGap > 10) {
-          detectiveMessage = `Protein takibi yaptık! Bu hafta hafif protein eksikliği var (${Math.round(proteinGap)}g ortalama). Öğle yemeklerine biraz daha tavuk veya hindi ekleyerek kapatabilirsin.`
-        } else {
-          detectiveMessage = `Mükemmel protein takibi! Bu hafta hedeflerinin oldukça üstündesin. Bu disiplin kas büyümesi için altın değer. 💪`
-        }
-        
-        return (
-          <div className="card" style={{ marginTop: 20, background: 'rgba(139, 92, 246, 0.1)', borderColor: '#8B5CF6' }}>
-            <h3 style={{ margin: '0 0 12px', color: '#8B5CF6' }}>🕵️ Pazar Günü Protein Dedektifi</h3>
-            <p className="sub" style={{ marginBottom: 12, lineHeight: 1.6 }}>
-              {detectiveMessage}
-            </p>
-            <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
-              <p className="sub" style={{ margin: 0 }}>
-                Haftalık ortalama: <strong>{Math.round(avgProtein)}g</strong> / Hedef: <strong>{targetProtein}g</strong>
-              </p>
-            </div>
-          </div>
-        )
-      })()}
+      {/* Sunday "Missing Protein" Detective Card - Always Visible */}
+      <div className="card" style={{ marginTop: 20, background: 'rgba(139, 92, 246, 0.1)', borderColor: '#8B5CF6' }}>
+        <h3 style={{ margin: '0 0 12px', color: '#8B5CF6' }}>
+          {(() => {
+            const today = new Date()
+            const isSunday = today.getDay() === 0
+            return isSunday ? '🕵️ Haftalık Protein Denetimi' : '📅 Protein Dedektifi'
+          })()}
+        </h3>
+        <p className="sub" style={{ marginBottom: 12, lineHeight: 1.6 }}>
+          {(() => {
+            const last7Days = byDay.slice(-7)
+            if (last7Days.length === 0) return 'Veri bekleniyor...'
+            
+            const avgProtein = last7Days.reduce((sum, day) => sum + day.protein, 0) / last7Days.length
+            const targetProtein = profile?.protein_target || 170
+            const proteinGap = targetProtein - avgProtein
+            
+            if (proteinGap > 30) {
+              return `Bu hafta özellikle kahvaltı ve öğle öğünlerinde hedefin ortalama ${Math.round(proteinGap)}g altında kaldın. Eksik tavuğu/proteini tamamlamak için sabahlarına +2 yumurta ekleyebilirsin.`
+            } else if (proteinGap > 10) {
+              return `Bu hafta hafif protein eksikliği var (${Math.round(proteinGap)}g ortalama). Öğle yemeklerine biraz daha tavuk veya hindi ekleyerek kapatabilirsin.`
+            } else {
+              return `Mükemmel protein takibi! Bu hafta hedeflerinin oldukça üstündesin. Bu disiplin kas büyümesi için altın değer. 💪`
+            }
+          })()}
+        </p>
+        <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px' }}>
+          <p className="sub" style={{ margin: 0 }}>
+            Haftalık ortalama: <strong>{byDay.length > 0 ? Math.round(byDay.slice(-7).reduce((sum, day) => sum + day.protein, 0) / Math.min(byDay.slice(-7).length, 7)) : 0}g</strong> / Hedef: <strong>{profile?.protein_target || 170}g</strong>
+          </p>
+        </div>
+      </div>
 
       <div className="card" style={{ marginTop: 20 }}>
         <h3 style={{ margin: '0 0 12px' }}>Diyetisyene Özel Sağlık Raporu</h3>

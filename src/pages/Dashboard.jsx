@@ -289,17 +289,17 @@ export default function Dashboard() {
                 cy="70"
                 r="60"
                 fill="none"
-                stroke="url(#rainbow)"
+                stroke={totals.calories > 0 ? 'url(#rainbow)' : '#1E1B38'}
                 strokeWidth="12"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 60}`}
-                strokeDashoffset={`${p.calorie_target > 0 ? 2 * Math.PI * 60 * (1 - Math.min(totals.calories / p.calorie_target, 1)) : 2 * Math.PI * 60}`}
+                strokeDashoffset={`${p.calorie_target > 0 && totals.calories > 0 ? 2 * Math.PI * 60 * (1 - Math.min(totals.calories / p.calorie_target, 1)) : 2 * Math.PI * 60}`}
                 style={{ transition: 'stroke-dashoffset 0.5s ease' }}
               />
             </svg>
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
               <div style={{ fontSize: '32px', fontWeight: 800, color: '#FF8A00' }}>{Math.round(totals.calories)}</div>
-              <div className="sub" style={{ fontSize: '12px' }}>/ {p.calorie_target} kcal</div>
+              <div className="sub" style={{ fontSize: '12px' }}>Kalori: {p.calorie_target.toLocaleString('tr-TR')} kcal</div>
             </div>
           </div>
           <div style={{ flex: 1, marginLeft: 24 }}>
@@ -444,7 +444,7 @@ export default function Dashboard() {
           </div>
           <div style={{ height: '24px', background: '#0F172A', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
             {/* Zone indicator */}
-            <div 
+            <div
               style={{
                 position: 'absolute',
                 left: `${((p.weight_kg * 1.6) / (p.weight_kg * 2.5)) * 100}%`,
@@ -456,11 +456,11 @@ export default function Dashboard() {
               }}
             />
             {/* Current protein */}
-            <div 
+            <div
               style={{
                 height: '100%',
-                background: '#22C55E',
-                width: `${Math.min((totals.protein / (p.weight_kg * 2.5)) * 100, 100)}%`,
+                background: totals.protein > 0 ? '#22C55E' : '#1E1B38',
+                width: `${totals.protein > 0 ? Math.min((totals.protein / (p.weight_kg * 2.5)) * 100, 100) : 0}%`,
                 transition: 'width 0.5s ease',
                 borderRadius: '12px'
               }}
@@ -471,7 +471,9 @@ export default function Dashboard() {
           {(() => {
             const minP = p.weight_kg * 1.6
             const maxP = p.weight_kg * 2.2
-            if (totals.protein >= minP && totals.protein <= maxP) {
+            if (totals.protein === 0) {
+              return <span style={{ color: '#94A3B8' }}>Henüz protein girilmedi — ilk öğününü ekle</span>
+            } else if (totals.protein >= minP && totals.protein <= maxP) {
               return <span style={{ color: '#22C55E' }}>✅ İdeal hipertrofi aralığındasın!</span>
             } else if (totals.protein < minP) {
               return <span style={{ color: '#F59E0B' }}>⚠️ Hedefine {Math.round(minP - totals.protein)}g protein eksik</span>

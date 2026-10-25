@@ -9,15 +9,15 @@ import MenstrualCycleTracker from '../components/MenstrualCycleTracker'
 export default function Profile() {
   const { session, profile, setProfile, demo } = useAuth()
   const [form, setForm] = useState({
-    display_name: profile?.display_name || PERSONAL_DEFAULTS.display_name,
-    age: profile?.age || PERSONAL_DEFAULTS.age,
-    height_cm: profile?.height_cm || PERSONAL_DEFAULTS.height_cm,
-    weight_kg: profile?.weight_kg || PERSONAL_DEFAULTS.weight_kg,
+    display_name: profile?.display_name || '',
+    age: profile?.age || '',
+    height_cm: profile?.height_cm || '',
+    weight_kg: profile?.weight_kg || '',
     gender: profile?.gender || 'male',
-    calorie_target: profile?.calorie_target || PERSONAL_DEFAULTS.calorie_target,
-    protein_target: profile?.protein_target || PERSONAL_DEFAULTS.protein_target,
-    carb_target: profile?.carb_target || PERSONAL_DEFAULTS.carb_target,
-    fat_target: profile?.fat_target || PERSONAL_DEFAULTS.fat_target,
+    calorie_target: profile?.calorie_target || '',
+    protein_target: profile?.protein_target || '',
+    carb_target: profile?.carb_target || '',
+    fat_target: profile?.fat_target || '',
   })
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -25,19 +25,23 @@ export default function Profile() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [sleepHours, setSleepHours] = useState(() => {
+    const saved = localStorage.getItem('gfitt_sleep')
+    return saved ? parseFloat(saved) : 0
+  })
 
   useEffect(() => {
     if (profile) {
       setForm({
-        display_name: profile.display_name || PERSONAL_DEFAULTS.display_name,
-        age: profile.age || PERSONAL_DEFAULTS.age,
-        height_cm: profile.height_cm || PERSONAL_DEFAULTS.height_cm,
-        weight_kg: profile.weight_kg || PERSONAL_DEFAULTS.weight_kg,
+        display_name: profile.display_name || '',
+        age: profile.age || '',
+        height_cm: profile.height_cm || '',
+        weight_kg: profile.weight_kg || '',
         gender: profile.gender || 'male',
-        calorie_target: profile.calorie_target || PERSONAL_DEFAULTS.calorie_target,
-        protein_target: profile.protein_target || PERSONAL_DEFAULTS.protein_target,
-        carb_target: profile.carb_target || PERSONAL_DEFAULTS.carb_target,
-        fat_target: profile.fat_target || PERSONAL_DEFAULTS.fat_target,
+        calorie_target: profile.calorie_target || '',
+        protein_target: profile.protein_target || '',
+        carb_target: profile.carb_target || '',
+        fat_target: profile.fat_target || '',
       })
     }
   }, [profile])
@@ -123,18 +127,18 @@ export default function Profile() {
                   <option value="female">Kadın</option>
                 </select>
               ) : (
-                <input 
-                  className="input" 
-                  type={type} 
-                  value={form[key]} 
-                  onChange={(e) => set(key, e.target.value)} 
+                <input
+                  className="input"
+                  type={type}
+                  value={form[key]}
+                  onChange={(e) => set(key, e.target.value)}
                   disabled={loading}
                   style={key === 'display_name' ? { color: 'white', fontWeight: 'bold', fontSize: '1.25rem' } : {}}
                 />
               )}
             </div>
           ))}
-          <button className="btn" disabled={loading}>
+          <button className="btn-primary" disabled={loading}>
             {loading ? 'Kaydediliyor...' : 'Kaydet'}
           </button>
           {saved && <p className="sub" style={{ color: '#22C55E' }}>Bilgiler güncellendi.</p>}
@@ -153,10 +157,33 @@ export default function Profile() {
               <input className="input" type={type} value={form[key]} onChange={(e) => set(key, e.target.value)} disabled={loading} />
             </div>
           ))}
-          <button className="btn" disabled={loading}>
+          <button className="btn-primary" disabled={loading}>
             {loading ? 'Kaydediliyor...' : 'Hedefleri Kaydet'}
           </button>
         </form>
+      </div>
+
+      {/* Quick Stats Tiles */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 16 }}>📊 Hızlı İstatistikler</h3>
+        <div className="grid grid-2">
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px', textAlign: 'center' }}>
+            <p className="sub" style={{ margin: 0, fontSize: '11px' }}>🍴 Alınan kcal</p>
+            <strong style={{ fontSize: '18px', color: '#FF8A00' }}>{profile?.calorie_target || 0}</strong>
+          </div>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px', textAlign: 'center' }}>
+            <p className="sub" style={{ margin: 0, fontSize: '11px' }}>🏃 Yakılan kcal</p>
+            <strong style={{ fontSize: '18px', color: '#3B82F6' }}>0</strong>
+          </div>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px', textAlign: 'center' }}>
+            <p className="sub" style={{ margin: 0, fontSize: '11px' }}>⚖️ Kilo Değişimi</p>
+            <strong style={{ fontSize: '18px', color: '#10B981' }}>0 kg</strong>
+          </div>
+          <div style={{ padding: '12px', background: '#0B101B', borderRadius: '8px', textAlign: 'center' }}>
+            <p className="sub" style={{ margin: 0, fontSize: '11px' }}>✏️ Not Sayısı</p>
+            <strong style={{ fontSize: '18px', color: '#8B5CF6' }}>0</strong>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-2">
@@ -213,6 +240,110 @@ export default function Profile() {
         />
       )}
 
+      {/* Sleep Tracker with Scientific Validation */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 16 }}>🌙 Uyku Takibi</h3>
+        <div className="field">
+          <label>Dün Gece Kaç Saat Uydun?</label>
+          <input
+            className="input"
+            type="number"
+            min="0"
+            max="24"
+            step="0.5"
+            value={sleepHours}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value)
+              if (val >= 0 && val <= 24) {
+                setSleepHours(val)
+                localStorage.setItem('gfitt_sleep', val.toString())
+              }
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {[5, 6, 7, 8].map((hours) => (
+            <button
+              key={hours}
+              type="button"
+              className="chip"
+              onClick={() => {
+                setSleepHours(hours)
+                localStorage.setItem('gfitt_sleep', hours.toString())
+              }}
+              style={{
+                padding: '6px 16px',
+                cursor: 'pointer',
+                background: sleepHours === hours ? '#FF8A00' : 'transparent',
+                color: sleepHours === hours ? '#111827' : '#94A3B8',
+                border: sleepHours === hours ? 'none' : '1px solid rgba(255,255,255,0.1)'
+              }}
+            >
+              {hours} sa
+            </button>
+          ))}
+        </div>
+        <p className="sub" style={{ margin: 0, fontSize: '12px' }}>
+          {(() => {
+            if (sleepHours === 0) {
+              return <span style={{ color: '#94A3B8' }}>Uyku analizi için dün gece kaç saat uyuduğunu gir</span>
+            } else if (sleepHours < 6) {
+              return <span style={{ color: '#EF4444' }}>⚠️ Yetersiz uyku: Toparlanma ve kas onarımı için riskli</span>
+            } else if (sleepHours >= 7 && sleepHours <= 9) {
+              return <span style={{ color: '#22C55E' }}>✅ İdeal uyku süresi: Optimum anabolik yenilenme</span>
+            } else if (sleepHours > 10) {
+              return <span style={{ color: '#F59E0B' }}>⚠️ Aşırı uyku / Halsizlik eğilimi</span>
+            } else {
+              return <span style={{ color: '#94A3B8' }}>Uyku süresi kaydedildi</span>
+            }
+          })()}
+        </p>
+      </div>
+
+      {/* Device Permissions */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 16 }}>📱 Cihaz İzinleri</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <button
+            className="btn-secondary-pill"
+            onClick={async () => {
+              const permission = await Notification.requestPermission()
+              if (permission === 'granted') {
+                new Notification('GFitt bildirimleri aktif! Su ve öğün saatlerinde yanındayız.')
+              }
+            }}
+          >
+            🔔 Bildirim İzni İste
+          </button>
+          <button
+            className="btn-secondary-pill"
+            onClick={async () => {
+              try {
+                await navigator.mediaDevices.getUserMedia({ video: true })
+                alert('Kamera izni verildi')
+              } catch (err) {
+                alert('Kamera izni reddedildi')
+              }
+            }}
+          >
+            📷 Kamera İzni İste
+          </button>
+          <button
+            className="btn-secondary-pill"
+            onClick={async () => {
+              try {
+                await navigator.mediaDevices.getUserMedia({ audio: true })
+                alert('Mikrofon izni verildi')
+              } catch (err) {
+                alert('Mikrofon izni reddedildi')
+              }
+            }}
+          >
+            🎤 Mikrofon İzni İste
+          </button>
+        </div>
+      </div>
+
       {/* Daha Fazla / Ayarlar Section */}
       <div className="card" style={{ marginTop: 16 }}>
         <h3 style={{ marginTop: 0, marginBottom: 16 }}>Daha Fazla</h3>
@@ -240,6 +371,98 @@ export default function Profile() {
             Gizlilik Politikası
             <span style={{ color: '#64748B' }}>→</span>
           </Link>
+          <Link
+            to="/kvkk"
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
+          >
+            KVKK
+            <span style={{ color: '#64748B' }}>→</span>
+          </Link>
+          <Link
+            to="/kullanim-kosullari"
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
+          >
+            Kullanım Şartları
+            <span style={{ color: '#64748B' }}>→</span>
+          </Link>
+          <Link
+            to="/destek"
+            style={{
+              width: '100%',
+              background: '#181528',
+              textDecoration: 'none',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
+          >
+            Destek
+            <span style={{ color: '#64748B' }}>→</span>
+          </Link>
+          <button
+            style={{
+              width: '100%',
+              background: '#181528',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1rem',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'background 0.2s ease',
+              marginBottom: '0.625rem',
+              fontWeight: 500,
+              cursor: 'pointer'
+            }}
+            onClick={() => window.dispatchEvent(new CustomEvent('openFeedback'))}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#201C35'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#181528'}
+          >
+            Hata / Öneri Bildir
+            <span>🐛</span>
+          </button>
           <Link
             to="/kvkk"
             style={{

@@ -549,31 +549,30 @@ export default function Onboarding() {
       )}
 
       {step === 9 && (
-        <div className="card onboarding-step">
+        <div className="card onboarding-step" style={{ maxWidth: '28rem', margin: '0 auto', padding: '24px' }}>
           <h2 style={{ margin: '0 0 16px' }}>Planın Hazır</h2>
-          
+
           {(() => {
             const targets = calculateFinalTargets()
-            const goalInfo = getGoalRateDisplay(data.goal)
-            
+
             // Calculate target date based on goal and rate
             const targetDate = new Date()
-            const weeksToGoal = Math.abs((data.goal === 'lose' ? -5 : data.goal === 'gain' ? 5 : 0) / (data.goal_rate || 0.25))
+            const weeksToGoal = data.goal === 'lose' ? 8 : data.goal === 'gain' ? 12 : 0
             targetDate.setDate(targetDate.getDate() + (weeksToGoal * 7))
             const formattedDate = targetDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
-            
+
             return (
               <div style={{ textAlign: 'center', padding: '24px', background: '#0F172A', borderRadius: '12px', marginBottom: 24 }}>
                 <div style={{ fontSize: '48px', marginBottom: 16 }}>📊</div>
                 <h3 style={{ color: '#F59E0B', margin: '0 0 8px' }}>PLANIN HAZIR</h3>
-                
+
                 {/* Goal & Target Date */}
                 <div style={{ marginBottom: 16, padding: '16px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px' }}>
                   <p className="sub" style={{ margin: 0, fontSize: '14px' }}>
-                    {data.goal === 'lose' ? `${Math.abs(5)} kg Ver` : data.goal === 'gain' ? '5 kg Al' : 'Form Koru'} — {formattedDate} tarihine kadar
+                    {data.goal === 'lose' ? 'Kilo Verme' : data.goal === 'gain' ? 'Kas Yapma' : 'Form Koruma'} — {formattedDate} tarihine kadar
                   </p>
                 </div>
-                
+
                 {/* Daily Budget Box */}
                 <div style={{ marginBottom: 16, padding: '16px', background: '#0B101B', borderRadius: '8px' }}>
                   <p className="sub" style={{ margin: 0, marginBottom: 8 }}>
@@ -583,7 +582,7 @@ export default function Onboarding() {
                     {targets.macros.protein}g Protein | {targets.macros.carbs}g Karb | {targets.macros.fat}g Yağ
                   </p>
                 </div>
-                
+
                 {/* 3-Day Free PRO Trial CTA */}
                 <div style={{ marginBottom: 16, padding: '16px', background: 'rgba(255, 138, 0, 0.15)', borderRadius: '8px', border: '1px solid #FF8A00' }}>
                   <p className="sub" style={{ margin: 0, marginBottom: 12, color: '#FF8A00', fontWeight: 600 }}>
@@ -593,9 +592,9 @@ export default function Onboarding() {
                     Sınırsız sesli günlük, gelişmiş analizler ve Apple Health senkronizasyonu.
                   </p>
                 </div>
-                
+
                 <p className="sub">
-                  Hedef Hızı: {goalInfo.emoji} {goalInfo.label} ({goalInfo.rate} kg/hafta)
+                  Hedef Hızı: {data.goal_rate === 0.25 ? '🌱 Yavaş & Kas Koruyucu (0.25 kg/hafta)' : data.goal_rate === 0.5 ? '⚡ İdeal & Dengeli (0.5 kg/hafta)' : '🔥 Hızlı & Agresif (0.8 kg/hafta)'}
                 </p>
               </div>
             )

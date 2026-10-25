@@ -105,6 +105,45 @@ export const PROGRAMS = [
       { name: 'Calf Raise', sets: 4, reps: '12-15' },
     ],
   },
+  {
+    id: 'fullbody-home',
+    name: 'Evde Ekipmansız Başlangıç',
+    split: 'Full Body',
+    day: 'Pazartesi',
+    exercises: [
+      { name: 'Bodyweight Squat', sets: 3, reps: '15-20' },
+      { name: 'Diz Üstü Şınav', sets: 3, reps: '10-15' },
+      { name: 'Glute Bridge', sets: 3, reps: '15' },
+      { name: 'Plank', sets: 3, reps: '30-60 sn' },
+      { name: 'Bird-Dog', sets: 3, reps: '10/her bacak' },
+    ],
+  },
+  {
+    id: 'fat-loss-hiit',
+    name: 'Evde Yağ Yakımı & HIIT Core',
+    split: 'Full Body',
+    day: 'Pazartesi',
+    exercises: [
+      { name: 'Jumping Jacks', sets: 3, reps: '30 sn' },
+      { name: 'Mountain Climbers', sets: 3, reps: '20 sn' },
+      { name: 'Burpees', sets: 3, reps: '10' },
+      { name: 'Bicycle Crunches', sets: 3, reps: '20' },
+      { name: 'High Knees', sets: 3, reps: '30 sn' },
+    ],
+  },
+  {
+    id: 'glute-lower',
+    name: 'Kalça & Alt Vücut Şekillendirme',
+    split: 'Lower Body',
+    day: 'Pazartesi',
+    exercises: [
+      { name: 'Hip Thrust', sets: 4, reps: '12-15' },
+      { name: 'Romanian Deadlift', sets: 3, reps: '10-12' },
+      { name: 'Bulgarian Split Squat', sets: 3, reps: '10/bacak' },
+      { name: 'Cable Kickback', sets: 3, reps: '12/bacak' },
+      { name: 'Clamshell', sets: 3, reps: '15/bacak' },
+    ],
+  },
 ]
 
 export const PERSONAL_DEFAULTS = {
