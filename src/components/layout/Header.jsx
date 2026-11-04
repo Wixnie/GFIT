@@ -21,7 +21,7 @@ export default function Header({ onMenuClick }) {
               <Menu size={22} />
             </button>
             <Link to="/" className="flex items-center gap-2 text-xl font-black tracking-tight text-white">
-              <span className="bg-gradient-to-r from-[#7C3AED] to-[#FF8A00] bg-clip-text text-transparent">GFitt</span>
+              <span className="text-[#FFE500]">GFIT</span><span className="text-white/80">App</span>
             </Link>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
@@ -32,9 +32,9 @@ export default function Header({ onMenuClick }) {
               <Bell size={20} />
               {unreadCount > 0 && <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#FF8A00] px-1 text-[9px] font-bold text-white">{unreadCount}</span>}
             </button>
-            <button type="button" className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] px-3 py-2 text-xs font-bold text-white shadow-lg shadow-purple-950/30">
+            <Link to="/pro" className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] px-3 py-2 text-xs font-bold text-slate-950 shadow-lg shadow-yellow-950/30">
               <Crown size={14} /> PRO
-            </button>
+            </Link>
             <Link to={user ? '/profile' : '/login'} className="hidden max-w-28 truncate text-sm text-white/70 lg:block">{user?.email || (guestMode ? 'Demo' : 'Giriş yap')}</Link>
           </div>
         </div>
