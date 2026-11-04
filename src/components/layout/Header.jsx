@@ -10,7 +10,10 @@ export default function Header({ onMenuClick }) {
   const { user, guestMode } = useAuth();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadCount] = useState(2);
-  const languages = ['tr', 'en', 'de'];
+  const languages = [
+    { code: 'tr', label: 'TR', name: 'Türkçe' },
+    { code: 'en', label: 'EN', name: 'English' },
+  ];
 
   return (
     <>
@@ -25,8 +28,8 @@ export default function Header({ onMenuClick }) {
             </Link>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden items-center gap-1 rounded-full border border-white/10 bg-black/10 p-1 sm:flex">
-              {languages.map((item) => <button key={item} type="button" onClick={() => setLanguage(item)} className={`rounded-full px-2 py-1 text-[11px] font-bold uppercase transition ${language === item ? 'bg-[#7C3AED] text-white' : 'text-white/50 hover:text-white'}`}>{item}</button>)}
+            <div className="flex items-center gap-1 rounded-full border border-white/10 bg-black/10 p-1" aria-label="Dil seçimi">
+              {languages.map((item) => <button key={item.code} type="button" aria-pressed={language === item.code} title={item.name} onClick={() => setLanguage(item.code)} className={`rounded-full px-3 py-1.5 text-[11px] font-bold uppercase transition ${language === item.code ? 'bg-[#7C3AED] text-slate-950' : 'text-white/50 hover:text-white'}`}>{item.label}</button>)}
             </div>
             <button type="button" onClick={() => setNotificationsOpen(true)} aria-label="Bildirimler" className="relative rounded-xl p-2 text-white/80 transition hover:bg-white/10">
               <Bell size={20} />

@@ -1,15 +1,19 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { translations } from '../utils/gfitt_lang';
 
 const LanguageContext = createContext(null);
 const STORAGE_KEY = 'gfitt_lang';
-const supportedLanguages = ['tr', 'en', 'de'];
+const supportedLanguages = ['tr', 'en'];
 
 export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return supportedLanguages.includes(saved) ? saved : 'tr';
   });
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const setLanguage = (nextLanguage) => {
     const next = supportedLanguages.includes(nextLanguage) ? nextLanguage : 'tr';
