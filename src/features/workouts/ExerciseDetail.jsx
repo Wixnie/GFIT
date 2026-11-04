@@ -1,0 +1,6 @@
+import { Flame, Trophy } from 'lucide-react';
+
+export default function ExerciseDetail({ exercise, isNewPR = false, onStartRest }) {
+  if (!exercise) return null;
+  return <article className="rounded-2xl border border-white/10 bg-[#161326] p-4"><div className="flex items-start justify-between gap-3"><div><h3 className="font-bold text-white">{exercise.name_tr}</h3><span className="mt-2 inline-block rounded-full bg-[#4F46E5]/20 px-2 py-1 text-[10px] text-indigo-200">{exercise.target_muscle}</span></div>{isNewPR && <span className="flex items-center gap-1 rounded-full bg-[#FF8A00]/15 px-2 py-1 text-[10px] font-bold text-orange-200"><Trophy size={12} />🏆 Yeni PR!</span>}</div><div className="mt-4 flex items-center gap-4 text-sm"><span className="font-semibold text-white">{exercise.sets} × {exercise.reps}</span><span className="text-white/45">{exercise.rest_seconds}s dinlenme</span><span className="ml-auto flex items-center gap-1 text-orange-300"><Flame size={14} />{exercise.kcal_estimate} kcal</span></div><p className="mt-3 text-xs leading-5 text-white/55">{exercise.form_tip_tr}</p><button type="button" onClick={() => onStartRest?.(exercise.rest_seconds)} className="mt-4 rounded-xl bg-white/5 px-3 py-2 text-xs text-white/65 hover:bg-white/10">Dinlenme başlat</button></article>;
+}

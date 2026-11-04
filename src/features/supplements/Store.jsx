@@ -1,0 +1,11 @@
+import { Copy, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import Toast from '../../components/common/Toast';
+
+const products = [{ id: 'whey', name: 'Whey Protein', emoji: '🥛', original: '₺1.899', price: '₺1.499' }, { id: 'creatine', name: 'Kreatin Monohidrat', emoji: '💪', original: '₺999', price: '₺799' }, { id: 'omega', name: 'Omega-3', emoji: '🐟', original: '₺649', price: '₺519' }, { id: 'multivitamin', name: 'Multivitamin', emoji: '💊', original: '₺549', price: '₺439' }, { id: 'shaker', name: 'GFitt Shaker', emoji: '🥤', original: '₺299', price: '₺239' }];
+
+export default function Store() {
+  const [toast, setToast] = useState('');
+  const copy = async () => { try { await navigator.clipboard.writeText('GFIT10'); } catch { const input = document.createElement('textarea'); input.value = 'GFIT10'; document.body.appendChild(input); input.select(); document.execCommand('copy'); input.remove(); } setToast('GFIT10 indirim kodu kopyalandı!'); };
+  return <section className="rounded-2xl border border-white/10 bg-[#161326] p-5"><div className="flex items-center justify-between"><div><h2 className="text-lg font-bold text-white">GFitt Store</h2><p className="mt-1 text-xs text-white/45">GFIT10 koduyla ekstra indirim</p></div><button type="button" onClick={copy} className="flex items-center gap-1 rounded-lg bg-[#FF8A00] px-3 py-2 text-xs font-bold text-slate-950"><Copy size={14} />GFIT10</button></div><div className="mt-5 grid gap-3 sm:grid-cols-2">{products.map((product) => <article key={product.id} className="rounded-xl bg-white/5 p-3"><div className="flex items-center gap-3"><span className="text-2xl">{product.emoji}</span><div className="min-w-0 flex-1"><h3 className="truncate text-sm font-semibold text-white">{product.name}</h3><div className="mt-1 flex items-center gap-2"><span className="text-xs text-white/35 line-through">{product.original}</span><span className="text-sm font-bold text-[#FF8A00]">{product.price}</span></div></div></div><a href="https://gfitt.app/store" target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-1 rounded-lg border border-white/10 py-2 text-xs text-white/60">Sitede İncele <ExternalLink size={13} /></a></article>)}</div>{toast && <Toast message={toast} variant="success" onDismiss={() => setToast('')} />}</section>;
+}

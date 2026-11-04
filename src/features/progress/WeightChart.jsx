@@ -1,0 +1,7 @@
+import { useMemo } from 'react';
+
+export default function WeightChart({ entries = [] }) {
+  const values = useMemo(() => { let source = entries; if (!source.length) { try { source = JSON.parse(localStorage.getItem('gfitt_measurements') || '[]'); } catch { source = []; } } return source.slice(-30).map((entry) => Number(entry.weight)).filter((value) => Number.isFinite(value) && value > 0); }, [entries]);
+  const points = values.length ? values : [0]; const max = Math.max(...points, 1); const min = Math.min(...points.filter(Boolean), max); const range = Math.max(1, max - min); const path = points.map((value, index) => `${(index / Math.max(1, points.length - 1)) * 100},${92 - ((value - min) / range) * 75}`).join(' ');
+  return <section className="rounded-2xl border border-white/10 bg-[#161326] p-5"><h2 className="font-bold text-white">Son 30 gün kilo</h2>{values.length ? <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="mt-5 h-40 w-full overflow-visible"><polyline fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" points={path} />{points.map((value, index) => <circle key={`${value}-${index}`} cx={(index / Math.max(1, points.length - 1)) * 100} cy={92 - ((value - min) / range) * 75} r="1.5" fill="#FF8A00" />)}</svg> : <p className="mt-8 text-center text-sm text-white/45">Kilo kaydı eklediğinde grafiğin burada görünecek.</p>}</section>;
+}

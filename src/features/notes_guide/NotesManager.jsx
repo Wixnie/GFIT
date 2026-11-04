@@ -1,0 +1,23 @@
+import { Pin, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../services/supabaseClient';
+
+const KEY = 'gfitt_notes';
+const tags = ['Antrenman', 'Öğün', 'Hissiyat', 'Alışveriş'];
+
+export default function NotesManager() {
+  const { user } = useAuth();
+  const [notes, setNotes] = useState(() => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } });
+  const [query, setQuery] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [draft, setDraft] = useState({ title: '', body: '', tag: tags[0], pinned: false });
+  useEffect(() => { localStorage.setItem(KEY, JSON.stringify(notes)); }, [notes]);
+  useEffect(() => { if (!user) return; supabase.from('notes').select('*').eq('user_id', user.id).order('pinned', { ascending: false }).then(({ data }) => { if (data?.length) setNotes(data); }); }, [user]);
+  const visible = useMemo(() => notes.filter((note) => `${note.title} ${note.body} ${note.tag}`.toLocaleLowerCase('tr-TR').includes(query.toLocaleLowerCase('tr-TR'))).sort((a, b) => Number(b.pinned) - Number(a.pinned)), [notes, query]);
+  const persist = async (next) => { setNotes(next); if (user) await supabase.from('notes').upsert(next.map((note) => ({ ...note, user_id: user.id }))); };
+  const save = async () => { if (!draft.title.trim() && !draft.body.trim()) return; const note = { ...draft, id: editing || crypto.randomUUID(), updated_at: new Date().toISOString() }; const next = editing ? notes.map((item) => item.id === editing ? note : item) : [note, ...notes]; await persist(next); setDraft({ title: '', body: '', tag: tags[0], pinned: false }); setEditing(null); };
+  const edit = (note) => { setEditing(note.id); setDraft(note); };
+  const remove = async (id) => { const next = notes.filter((note) => note.id !== id); await persist(next); if (user) await supabase.from('notes').delete().eq('id', id); };
+  return <section className="rounded-2xl border border-white/10 bg-[#161326] p-5"><div className="flex items-center justify-between"><h2 className="text-xl font-bold text-white">Notlarım</h2><button type="button" onClick={() => { setEditing(''); setDraft({ title: '', body: '', tag: tags[0], pinned: false }); }} className="flex items-center gap-1 rounded-xl bg-[#7C3AED] px-3 py-2 text-xs font-bold text-white"><Plus size={14} />Yeni not</button></div><label className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white/45"><Search size={17} /><input aria-label="Notlarda ara" value={query} onChange={(event) => setQuery(event.target.value)} className="w-full bg-transparent text-sm text-white outline-none" /></label>{editing !== null && <div className="mt-4 space-y-3 rounded-xl bg-white/5 p-4"><input aria-label="Not başlığı" value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} className="w-full rounded-lg border border-white/10 bg-black/20 p-2 text-sm text-white" /><textarea aria-label="Not içeriği" value={draft.body} onChange={(event) => setDraft({ ...draft, body: event.target.value })} className="h-24 w-full rounded-lg border border-white/10 bg-black/20 p-2 text-sm text-white" /><div className="flex gap-2"><select value={draft.tag} onChange={(event) => setDraft({ ...draft, tag: event.target.value })} className="rounded-lg bg-black/20 p-2 text-xs text-white">{tags.map((tag) => <option key={tag}>{tag}</option>)}</select><button type="button" onClick={save} className="rounded-lg bg-[#7C3AED] px-3 text-xs font-bold">Kaydet</button><button type="button" onClick={() => setEditing(null)} className="rounded-lg border border-white/10 px-3 text-xs">Vazgeç</button></div></div>}<div className="mt-5 space-y-3">{visible.map((note) => <article key={note.id} className="rounded-xl border border-white/10 bg-white/5 p-4"><div className="flex items-start gap-3"><div className="flex-1"><div className="flex items-center gap-2"><h3 className="font-semibold text-white">{note.title}</h3><span className="rounded-full bg-[#7C3AED]/20 px-2 py-0.5 text-[10px] text-[#C4B5FD]">{note.tag}</span></div><p className="mt-2 whitespace-pre-wrap text-sm text-white/60">{note.body}</p></div>{note.pinned && <Pin size={15} className="text-[#FF8A00]" />}<button type="button" onClick={() => edit(note)} aria-label="Notu düzenle" className="text-xs text-white/45">Düzenle</button><button type="button" onClick={() => remove(note.id)} aria-label="Notu sil" className="text-red-300"><Trash2 size={15} /></button></div></article>)}</div></section>;
+}

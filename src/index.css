@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  background: #080B14;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html,
+body,
+#root {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background: #080B14;
+  color: #F7F8FC;
+}
+
+html {
+  min-height: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* The product palette follows the supplied mobile references. */
+[class*="bg-[#0F0C1A]"] { background-color: #080B14 !important; }
+[class*="bg-[#161326]"] { background-color: #171B29 !important; }
+[class*="bg-[#2A2438]"] { background-color: #2A3042 !important; }
+[class*="bg-[#7C3AED]"] { background-color: #FFE500 !important; color: #080B14 !important; }
+[class*="text-[#7C3AED]"],
+[class*="text-[#A78BFA]"],
+[class*="text-[#C4B5FD]"] { color: #FFE500 !important; }
+[class*="border-[#7C3AED]"] { border-color: #FFE500 !important; }
+[class*="from-[#7C3AED]"] { --tw-gradient-from: #FFE500 var(--tw-gradient-from-position) !important; }
+[class*="to-[#FF8A00]"] { --tw-gradient-to: #FFE500 var(--tw-gradient-to-position) !important; }
+button[class*="from-[#7C3AED]"],
+button[class*="bg-[#FF8A00]"] { color: #080B14 !important; }
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}

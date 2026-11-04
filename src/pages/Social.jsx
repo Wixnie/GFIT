@@ -1,0 +1,5 @@
+import { useState } from 'react';
+import CollageUploader from '../features/social/CollageUploader';
+import Feed from '../features/social/Feed';
+
+export default function Social() { const [tab, setTab] = useState('Arkadaşlar'); const [posts, setPosts] = useState([]); const tabs = ['Arkadaşlar', 'Mesajlar', 'Keşfet', 'Takip Ediliyor']; return <div className="mx-auto max-w-2xl p-4 pb-24 pt-20 md:ml-64 md:p-8 md:pt-24"><div className="flex items-end justify-between"><div><p className="text-sm text-white/50">Birlikte daha güçlüyüz</p><h1 className="mt-1 text-3xl font-black text-white">Topluluk</h1></div><CollageUploader onPosted={(post) => setPosts((current) => [post, ...current])} /></div><div className="mt-6 flex gap-2 overflow-x-auto rounded-xl border border-indigo-500/30 bg-[#1E1B38] p-1">{tabs.map((item) => <button type="button" key={item} onClick={() => setTab(item)} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs ${tab === item ? 'bg-[#7C3AED] text-white' : 'text-white/55'}`}>{item}</button>)}</div><div className="mt-5"><Feed posts={posts.length ? posts : undefined} /></div></div>; }

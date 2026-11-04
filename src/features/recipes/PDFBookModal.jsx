@@ -1,0 +1,5 @@
+import { useState } from 'react';
+import Modal from '../../components/common/Modal';
+import Toast from '../../components/common/Toast';
+
+export default function PDFBookModal({ open = false, onClose }) { const [toast, setToast] = useState(''); return <Modal open={open} onClose={onClose} title="📘 GFitt 50+ Fit Tarif Kitabı — 100 ₺"><p className="text-sm text-white/60">Pratik, protein odaklı ve Türk mutfağına uyarlanmış tarifleri keşfet.</p><div className="mt-5 grid grid-cols-3 gap-2">{['Izgara Bowl', 'Protein Sufle', 'Iced Coffee'].map((name) => <div key={name} className="overflow-hidden rounded-xl bg-white/5 blur-sm"><div className="flex h-24 items-center justify-center text-4xl">🍽️</div><p className="p-2 text-center text-[10px] text-white/60">{name}</p></div>)}</div><button type="button" onClick={() => setToast('Ödeme simülasyonu başarılı! Tarif kitabın hazır.')} className="mt-6 w-full rounded-xl bg-[#FF8A00] py-3 font-bold text-slate-950">Satın Al 100₺</button>{toast && <Toast message={toast} variant="success" onDismiss={() => setToast('')} />}</Modal>; }

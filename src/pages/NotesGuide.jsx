@@ -1,0 +1,5 @@
+import { useState } from 'react';
+import NotesManager from '../features/notes_guide/NotesManager';
+import ScientificGuide from '../features/notes_guide/ScientificGuide';
+
+export default function NotesGuide() { const [tab, setTab] = useState('notes'); return <div className="mx-auto max-w-4xl space-y-5 p-4 pb-24 pt-20 md:ml-64 md:p-8 md:pt-24"><div><p className="text-sm text-white/50">Kendine ait bilgi alanın</p><h1 className="mt-1 text-3xl font-black text-white">Notlar & Rehber</h1></div><div className="flex rounded-xl border border-white/10 bg-[#161326] p-1"><button type="button" onClick={() => setTab('notes')} className={`flex-1 rounded-lg py-2 text-sm ${tab === 'notes' ? 'bg-[#7C3AED] text-white' : 'text-white/55'}`}>Notlarım</button><button type="button" onClick={() => setTab('guide')} className={`flex-1 rounded-lg py-2 text-sm ${tab === 'guide' ? 'bg-[#7C3AED] text-white' : 'text-white/55'}`}>Bilimsel Rehber</button></div>{tab === 'notes' ? <NotesManager /> : <ScientificGuide />}</div>; }

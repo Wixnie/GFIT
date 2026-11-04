@@ -1,0 +1,5 @@
+const macroConfig = [['protein', 'Protein', '#22C55E', 150], ['carbs', 'Karbonhidrat', '#818CF8', 250], ['fat', 'Yağ', '#FB923C', 70], ['fiber', 'Lif', '#A855F7', 30]];
+
+export default function MacroBars({ macros = {}, targets = {} }) {
+  return <div className="space-y-4">{macroConfig.map(([key, label, color, fallbackTarget]) => { const value = Number(macros[key] ?? macros[key === 'carbs' ? 'carbohydrates' : key]) || 0; const target = Number(targets[key]) > 0 ? Number(targets[key]) : fallbackTarget; const percent = Math.min(100, Math.max(0, (value / target) * 100)); return <div key={key}><div className="mb-1 flex items-center justify-between text-xs"><span className="text-white/70">{label}</span><span className="text-white/55">{Math.round(value)}g / {Math.round(target)}g</span></div><div className="h-2 overflow-hidden rounded-full bg-[#2A2438]"><div className="h-full rounded-full transition-all" style={{ width: `${percent}%`, backgroundColor: percent === 0 ? '#2A2438' : color }} /></div></div>; })}</div>;
+}
